@@ -1,0 +1,57 @@
+{
+    "name": "@openharmony/devicesecuritylevel",
+    "version": "3.0.0",
+    "description": "openharmony's device security level management",
+    "publishAs": "code-segment",
+    "scripts": {
+        "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/devicesecuritylevel && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
+    },
+    "author": {},
+    "repository": "",
+    "license": "Apache License 2.0",
+    "component": {
+        "name": "devicesecuritylevel",
+        "subsystem": "security",
+        "adapted_system_type": [
+            "standard"
+        ],
+        "deps": {
+            "components": [
+                "device_auth",
+                "dsoftbus",
+                "huks",
+                "ipc_core",
+                "libhilog",
+                "samgr_proxy",
+                "system_ability_fwk",
+                "utils_base"
+            ],
+            "third_party": [
+                "boringssl",
+                "cJSON"
+            ]
+        },
+        "build": {
+            "sub_component": [
+                "//base/security/devicesecuritylevel/interfaces:dslm_sdk",
+                "//base/security/devicesecuritylevel/oem_property/ohos:dslm_service",
+                "//base/security/devicesecuritylevel/profile:dslm_service.rc"
+            ],
+            "inner_kits": [
+                {
+                    "name": "//base/security/devicesecuritylevel/interfaces:dslm_sdk",
+                    "header": {
+                        "header_files": [
+                            "device_security_info.h",
+                            "device_security_defines.h"
+                        ],
+                        "header_base": "//base/security/devicesecuritylevel/interfaces/include"
+                    }
+                }
+            ],
+            "test": [
+                "//base/security/devicesecuritylevel/test:dslm_test"
+            ]
+        }
+    }
+}
