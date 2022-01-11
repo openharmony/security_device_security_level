@@ -1,0 +1,58 @@
+# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+config("devicesecuritylevel_sdk_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("dslm_sdk") {
+  sources = [
+    "src/standard/device_security_info.cpp",
+    "src/standard/device_security_level_callback_helper.cpp",
+    "src/standard/device_security_level_callback_stub.cpp",
+    "src/standard/device_security_level_proxy.cpp",
+  ]
+
+  include_dirs = [
+    "//base/security/devicesecuritylevel/service/include",
+    "//base/security/devicesecuritylevel/common/include",
+  ]
+
+  public_configs = [ ":devicesecuritylevel_sdk_config" ]
+
+  deps = []
+
+  external_deps = [
+    "ipc:ipc_core",
+    "utils_base:utils",
+  ]
+
+  if (is_standard_system) {
+    external_deps += [
+      "hilog_native:libhilog",
+      "samgr_standard:samgr_proxy",
+    ]
+  }
+
+  if (is_large_system) {
+    external_deps += [
+      "hilog:libhilog",
+      "samgr:samgr_proxy",
+    ]
+  }
+
+  part_name = "devicesecuritylevel"
+  subsystem_name = "security"
+}
