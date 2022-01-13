@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#define DEFAULT_OPTION NULL
-
 typedef struct DeviceSecurityInfo DeviceSecurityInfo;
 
 /**

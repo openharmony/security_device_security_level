@@ -1,34 +1,43 @@
 {
-    "name": "@openharmony/devicesecuritylevel",
-    "version": "3.0.0",
+    "name": "@ohos/devicesecuritylevel",
     "description": "openharmony's device security level management",
+    "version": "3.0.0",
+    "license": "Apache License 2.0",
     "publishAs": "code-segment",
+    "segment": {
+        "destpath": "base/security/devicesecuritylevel"
+    },
+    "dirs": {},
     "scripts": {
         "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/devicesecuritylevel && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
     "repository": "",
-    "license": "Apache License 2.0",
     "component": {
         "name": "devicesecuritylevel",
         "subsystem": "security",
+        "syscap": [
+            ""
+        ],
+        "features": [
+            "devicesecuritylevel_dslm"
+        ],
         "adapted_system_type": [
             "standard"
         ],
+        "rom": "200KB",
+        "ram": "2500KB",
         "deps": {
             "components": [
-                "device_auth",
-                "dsoftbus",
-                "huks",
                 "ipc_core",
                 "libhilog",
                 "samgr_proxy",
-                "system_ability_fwk",
-                "utils_base"
+                "softbus_client",
+                "utils"
             ],
             "third_party": [
-                "boringssl",
-                "cJSON"
+                "cjson_static",
+                "libcrypto"
             ]
         },
         "build": {
