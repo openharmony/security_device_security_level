@@ -124,7 +124,7 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
     }
     ListNode *node = NULL;
     ListNode *temp = NULL;
-
+    SECURITY_LOG_DEBUG("ProcessSendDeviceInfoCallback for device %{public}x.", info->machine.machineId);
     FOREACH_LIST_NODE_SAFE (node, &info->notifyList, temp) {
         DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
         uint32_t result;
@@ -251,6 +251,10 @@ static bool SdkTimeoutCheker(const DslmDeviceInfo *devInfo, const DslmNotifyList
     if (node->start + node->keep > curr) {
         return false;
     }
+
+    SECURITY_LOG_INFO("SdkTimeoutCheker active, device is %{public}x, cookie is %{public}u, keep is %{public}u",
+        devInfo->machine.machineId, node->cookie, node->keep);
+
     *result = ERR_TIMEOUT;
     cbInfo->level = 0;
     cbInfo->extraLen = 0;
