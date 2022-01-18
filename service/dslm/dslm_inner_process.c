@@ -41,8 +41,8 @@ int32_t CheckAndGenerateChallenge(DslmDeviceInfo *device)
 
     uint64_t curr = GetMillisecondSinceBoot();
     if ((curr <= device->nonceTimeStamp) || (curr - device->nonceTimeStamp > NONCE_ALIVE_TIME) || device->nonce == 0) {
-        SECURITY_LOG_INFO("update nonce for device %x", device->machine.machineId);
-        RandomValue rand = { 0 };
+        SECURITY_LOG_INFO("update nonce for device %{public}x", device->machine.machineId);
+        RandomValue rand = {0};
         GenerateRandom(&rand, RAMDOM_MAX_LEN);
         device->nonce = *(uint64_t *)&rand.value[0];
         device->nonceTimeStamp = curr;

@@ -17,6 +17,7 @@
 
 #include "securec.h"
 #include "session.h"
+#include "softbus_bus_center.h"
 
 #include "utils_list.h"
 #include "utils_log.h"
@@ -157,9 +158,17 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
         SECURITY_LOG_INFO("GetDeviceIdentityFromSessionId %{public}d failed, result is %{public}d", sessionId, ret);
         return false;
     }
-    *maskId = MaskDeviceIdentity(deviceName, DEVICE_ID_MAX_LEN);
+
+    char udid[UDID_BUF_LEN] = {0};
+    DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
+    if (GetNodeKeyInfo(instance->pkgName, deviceName, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
+        SECURITY_LOG_ERROR("MessengerGetSelfDeviceIdentify GetNodeKeyInfo error.");
+        return false;
+    }
+
+    *maskId = MaskDeviceIdentity(udid, DEVICE_ID_MAX_LEN);
     identity->length = DEVICE_ID_MAX_LEN;
-    memcpy_s(&identity->identity, DEVICE_ID_MAX_LEN, deviceName, DEVICE_ID_MAX_LEN);
+    memcpy_s(&identity->identity, DEVICE_ID_MAX_LEN, udid, DEVICE_ID_MAX_LEN);
     return true;
 }
 
@@ -202,9 +211,9 @@ static int MessengerOnSessionOpened(int sessionId, int result)
     FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
         PendingMsgData *MsgData = LIST_ENTRY(node, PendingMsgData, link);
         RemoveListNode(node);
-        int ret = SendMessage(sessionId, MsgData->msgdata, MsgData->msgLen);
+        int ret = SendBytes(sessionId, MsgData->msgdata, MsgData->msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendMessage error code = %{publc}d", ret);
+            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{publc}d", ret);
         }
         FREE(MsgData);
     }
@@ -350,7 +359,7 @@ static bool GetOpenedSessionId(const DeviceIdentify *devId, int32_t *sessionId)
         }
     }
     UnlockMutex(&instance->mutex);
-    SECURITY_LOG_DEBUG("GetOpenedSessionId for device %{public}x %{public}s", mask, find ? "succ" : "failed");
+    SECURITY_LOG_DEBUG("GetOpenedSessionId for device %{public}x %{public}s", mask, find ? "exist" : "no exist");
     return find;
 }
 
@@ -375,19 +384,22 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
 {
     uint32_t mask = MaskDeviceIdentity((const char *)&devId->identity[0], devId->length);
     char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    memcpy_s(deviceName, DEVICE_ID_MAX_LEN, devId->identity, DEVICE_ID_MAX_LEN);
+    bool succ = MessengerGetDeviceNetworkId(devId, deviceName, DEVICE_ID_MAX_LEN + 1);
+    if (!succ) {
+        SECURITY_LOG_ERROR("CreateNewDeviceSession get network id error");
+        return;
+    }
 
     const SessionAttribute attr = {
         .dataType = TYPE_MESSAGE,
     };
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     int ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
-    if (ret != 0) {
+    if (ret <= 0) {
+        // open failed, need to try again.
         ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
     }
     SECURITY_LOG_INFO("CreateNewDeviceSession for device %{public}x ret is %{public}d", mask, ret);
-    if (ret != 0) {
-    }
 }
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
@@ -410,9 +422,9 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     int32_t sessionId;
     bool find = GetOpenedSessionId(devId, &sessionId);
     if (find) {
-        int ret = SendMessage(sessionId, msg, msgLen);
+        int ret = SendBytes(sessionId, msg, msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendMessage error code = %{publc}d", ret);
+            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{publc}d", ret);
         }
     } else {
         PushMsgDataToPendingList(transNo, devId, msg, msgLen);
