@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-config("devicesecuritylevel_sdk_config") {
+config("device_security_level_sdk_config") {
   include_dirs = [ "include" ]
 }
 
@@ -26,11 +26,11 @@ ohos_shared_library("dslm_sdk") {
   ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/service/include",
-    "//base/security/devicesecuritylevel/common/include",
+    "//base/security/device_security_level/service/include",
+    "//base/security/device_security_level/common/include",
   ]
 
-  public_configs = [ ":devicesecuritylevel_sdk_config" ]
+  public_configs = [ ":device_security_level_sdk_config" ]
 
   deps = []
 
@@ -53,6 +53,6 @@ ohos_shared_library("dslm_sdk") {
     ]
   }
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }

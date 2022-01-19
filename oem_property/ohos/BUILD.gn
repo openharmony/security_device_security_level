@@ -18,14 +18,14 @@ ohos_shared_library("dslm_service") {
   sources = [ "dslm_ohos_credential.c" ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/common/include",
-    "//base/security/devicesecuritylevel/interfaces/include",
+    "//base/security/device_security_level/common/include",
+    "//base/security/device_security_level/interfaces/include",
   ]
 
   deps = [
     ":dslm_ohos_cread_obj",
-    "//base/security/devicesecuritylevel/baselib/utils:utils_static",
-    "//base/security/devicesecuritylevel/service/sa:service_sa_static",
+    "//base/security/device_security_level/baselib/utils:utils_static",
+    "//base/security/device_security_level/service/sa:service_sa_static",
   ]
 
   external_deps = [
@@ -33,7 +33,7 @@ ohos_shared_library("dslm_service") {
     "utils_base:utils",
   ]
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }
 
@@ -44,17 +44,17 @@ ohos_source_set("dslm_ohos_cread_obj") {
   ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/common/include",
-    "//base/security/devicesecuritylevel/interfaces/include",
+    "//base/security/device_security_level/common/include",
+    "//base/security/device_security_level/interfaces/include",
   ]
 
-  deps = [ "//base/security/devicesecuritylevel/baselib/utils:utils_static" ]
+  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
 
   external_deps = [
     "hilog_native:libhilog",
     "utils_base:utils",
   ]
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }
