@@ -13,20 +13,15 @@
 
 import("//build/ohos.gni")
 
-ohos_sa_profile("devicesecuritylevel_profile") {
+ohos_sa_profile("device_security_level_profile") {
   sources = [ "dslm_service.xml" ]
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
 }
 
 ohos_prebuilt_etc("dslm_service.rc") {
-  if (use_musl) {
-    source = "dslm_service.cfg"
-  } else {
-    source = "dslm_service.rc"
-  }
-
-  deps = [ ":devicesecuritylevel_profile" ]
+  source = "dslm_service.cfg"
+  deps = [ ":device_security_level_profile" ]
   relative_install_dir = "init"
   subsystem_name = "security"
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
 }

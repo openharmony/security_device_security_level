@@ -23,18 +23,18 @@ ohos_static_library("service_sa_static") {
   ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/common/include",
-    "//base/security/devicesecuritylevel/interfaces/include",
-    "//base/security/devicesecuritylevel/service/include",
-    "//base/security/devicesecuritylevel/service/sa/common",
+    "//base/security/device_security_level/common/include",
+    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/service/include",
+    "//base/security/device_security_level/service/sa/common",
   ]
 
   deps = [
-    "//base/security/devicesecuritylevel/baselib/utils:utils_static",
-    "//base/security/devicesecuritylevel/service/bigdata:service_bigdata_obj",
-    "//base/security/devicesecuritylevel/service/common:service_common_obj",
-    "//base/security/devicesecuritylevel/service/dslm:service_dslm_obj",
-    "//base/security/devicesecuritylevel/service/msg:service_msg_obj",
+    "//base/security/device_security_level/baselib/utils:utils_static",
+    "//base/security/device_security_level/service/bigdata:service_bigdata_obj",
+    "//base/security/device_security_level/service/common:service_common_obj",
+    "//base/security/device_security_level/service/dslm:service_dslm_obj",
+    "//base/security/device_security_level/service/msg:service_msg_obj",
   ]
 
   external_deps = [
@@ -57,6 +57,6 @@ ohos_static_library("service_sa_static") {
     ]
   }
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }
