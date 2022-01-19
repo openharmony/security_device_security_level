@@ -64,6 +64,7 @@ typedef struct PendingMsgData {
 typedef struct SessionInfo {
     ListNode link;
     int32_t sessionId;
+    uint32_t maskId;
     DeviceIdentify identity;
 } SessionInfo;
 
@@ -175,21 +176,21 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
 static int MessengerOnSessionOpened(int sessionId, int result)
 {
     int side = GetSessionSide(sessionId);
-    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
-    uint32_t maskId;
-    bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
-    if (ret == false) {
-        SECURITY_LOG_ERROR("MessengerOnSessionOpened GetDeviceIdentityFromSessionId failed");
-        return 0;
-    }
-
-    SECURITY_LOG_INFO("MessengerOnSessionOpened device=%{public}x, ret=%{public}s, side=%{public}s", maskId,
-        (result == 0) ? "succ" : "failed", (side == IS_SERVER) ? "server" : "client");
+    SECURITY_LOG_INFO("MessengerOnSessionOpened id=%{public}d, side=%{public}s, result=%{public}d", sessionId,
+        (side == IS_SERVER) ? "server" : "client", result);
 
     if (side == IS_SERVER) {
         return 0;
     }
     if (result != 0) {
+        return 0;
+    }
+
+    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
+    uint32_t maskId;
+    bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
+    if (ret == false) {
+        SECURITY_LOG_ERROR("MessengerOnSessionOpened GetDeviceIdentityFromSessionId failed");
         return 0;
     }
 
@@ -199,6 +200,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
         return 0;
     }
     sessionInfo->sessionId = sessionId;
+    sessionInfo->maskId = maskId;
     memcpy_s(&sessionInfo->identity, sizeof(DeviceIdentify), &identity, sizeof(DeviceIdentify));
 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
@@ -210,6 +212,10 @@ static int MessengerOnSessionOpened(int sessionId, int result)
 
     FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
         PendingMsgData *MsgData = LIST_ENTRY(node, PendingMsgData, link);
+        if (!IsSameDevice(&MsgData->destIdentity, &identity)) {
+            continue;
+        }
+
         RemoveListNode(node);
         int ret = SendBytes(sessionId, MsgData->msgdata, MsgData->msgLen);
         if (ret != 0) {
@@ -225,15 +231,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
 static void MessengerOnSessionClosed(int sessionId)
 {
     int side = GetSessionSide(sessionId);
-    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
-    uint32_t maskId;
-    bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
-    if (ret == false) {
-        SECURITY_LOG_ERROR("MessengerOnSessionClosed GetDeviceIdentityFromSessionId failed");
-        return;
-    }
-
-    SECURITY_LOG_INFO("MessengerOnSessionClosed device=%{public}x, side=%{public}s", maskId,
+    SECURITY_LOG_INFO("MessengerOnSessionClosed id=%{public}d, side=%{public}s", sessionId,
         (side == IS_SERVER) ? "server" : "client");
 
     if (side == IS_SERVER) {
@@ -247,6 +245,7 @@ static void MessengerOnSessionClosed(int sessionId)
     FOREACH_LIST_NODE_SAFE (node, &instance->opendSessionList, temp) {
         SessionInfo *info = LIST_ENTRY(node, SessionInfo, link);
         if (info->sessionId == sessionId) {
+            SECURITY_LOG_INFO("MessengerOnSessionClosed device=%{public}x", info->maskId);
             RemoveListNode(node);
             FREE(info);
         }
