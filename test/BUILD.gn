@@ -24,7 +24,7 @@ ohos_unittest("dslm_test") {
 
   sources = [
     "//base/security/device_security_level/oem_property/ohos/dslm_ohos_credential.c",
-    "//base/security/device_security_level/service/sa/common/dslm_rpc_process.c",
+    "//base/security/device_security_level/services/sa/common/dslm_rpc_process.c",
     "dslm_msg_interface_mock.cpp",
     "dslm_request_callback_mock.cpp",
     "dslm_test.cpp",
@@ -32,20 +32,20 @@ ohos_unittest("dslm_test") {
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/include",
-    "//base/security/device_security_level/service/include",
-    "//base/security/device_security_level/service/dslm",
-    "//base/security/device_security_level/service/sa/common",
+    "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/services/include",
+    "//base/security/device_security_level/services/dslm",
+    "//base/security/device_security_level/services/sa/common",
     "//base/security/device_security_level/baselib/msglib/include/",
   ]
 
   deps = [
     "//base/security/device_security_level/baselib/utils:utils_static",
     "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cread_obj",
-    "//base/security/device_security_level/service/bigdata:service_bigdata_obj",
-    "//base/security/device_security_level/service/common:service_common_obj",
-    "//base/security/device_security_level/service/dslm:service_dslm_test_obj",
-    "//base/security/device_security_level/service/msg:service_msg_obj",
+    "//base/security/device_security_level/services/bigdata:service_bigdata_obj",
+    "//base/security/device_security_level/services/common:service_common_obj",
+    "//base/security/device_security_level/services/dslm:service_dslm_test_obj",
+    "//base/security/device_security_level/services/msg:service_msg_obj",
     "//third_party/googletest:gmock",
   ]
 
