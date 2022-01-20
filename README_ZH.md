@@ -36,14 +36,14 @@ OpenHarmony系统安全架构如下图所示：
 
 当“超级虚拟终端”内的各个设备有了自己的“设备安全等级”，这个“超级虚拟终端”的内部，各类用户数据的处理或流转便有了决策依据。
 
-关于数据和设备安全等级之间的关系，可参考[数据分级保护](https://gitee.com/openharmony/security_dataclassification)。
+关于数据风险等级和设备安全等级之间的关系，可参考[数据分级保护](https://gitee.com/openharmony/security_dataclassification)。
 
 ## 目录
 
 设备安全等级管理模块的代码目录结构如下：
 
 ```undefined
-//base/security/devicesecuritylevel
+//base/security/device_security_level
 .
 ├── baselib        # 基础库
 ├── common         # 公共头文件
@@ -81,7 +81,7 @@ OpenHarmony系统安全架构如下图所示：
 1. 编译依赖添加
 
     ```undefined
-    external_deps += [ "devicesecuritylevel:dslm_sdk" ]
+    external_deps += [ "device_security_level:dslm_sdk" ]
     ```
 
 2. 头文件依赖添加
@@ -175,7 +175,7 @@ OpenHarmony系统安全架构如下图所示：
 
 [数据分级保护](https://gitee.com/openharmony/security_dataclassification)
 
-[**设备安全等级管理**](https://gitee.com/openharmony/security_devicesecuritylevel)
+[**设备安全等级管理**](https://gitee.com/openharmony/security_device_security_level/)
 
 [HUKS](https://gitee.com/openharmony/security_huks)
 
