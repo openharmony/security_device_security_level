@@ -13,47 +13,32 @@
 
 import("//build/ohos.gni")
 
-# sa lib
-ohos_shared_library("dslm_service") {
-  sources = [ "dslm_ohos_credential.c" ]
-
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-  ]
-
-  deps = [
-    ":dslm_ohos_cread_obj",
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/services/sa:service_sa_static",
-  ]
-
-  external_deps = [
-    "hilog_native:libhilog",
-    "utils_base:utils",
-  ]
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
-}
-
-ohos_source_set("dslm_ohos_cread_obj") {
+# service_common object
+ohos_source_set("service_common_obj") {
   sources = [
-    "impl/dslm_ohos_request.c",
-    "impl/dslm_ohos_verify.c",
+    "dslm_crypto.c",
+    "dslm_msg_serialize.c",
   ]
 
   include_dirs = [
-    "//base/security/device_security_level/common/include",
     "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/services/include",
   ]
 
   deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
+  if (is_standard_system) {
+    deps += [ "//third_party/boringssl:crypto" ]
+  }
 
   external_deps = [
     "hilog_native:libhilog",
+    "ipc:ipc_core",
     "utils_base:utils",
   ]
+
+  if (is_large_system) {
+    aosp_deps = [ "shared_library:libcrypto" ]
+  }
 
   part_name = "device_security_level"
   subsystem_name = "security"
