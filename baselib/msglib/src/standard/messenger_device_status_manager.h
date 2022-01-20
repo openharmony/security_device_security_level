@@ -30,6 +30,8 @@ bool DeInitDeviceStatusManager();
 
 bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
 
+bool MessengerGetDeviceNetworkId(const DeviceIdentify *devId, char *networkId, uint32_t len);
+
 bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType);
 
 void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para);

@@ -42,6 +42,6 @@ ohos_static_library("utils_static") {
     "utils_base:utils",
   ]
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }

@@ -110,6 +110,7 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device)
     AddListNode(&info->linkNode, GetDeviceList());
     InitListHead(&info->notifyList);
     UnlockMutex(GetDeviceListMutex());
+    SECURITY_LOG_INFO("Create new DslmDeviceInfo %{public}x", info->machine.machineId);
     return info;
 }
 

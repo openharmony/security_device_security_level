@@ -18,39 +18,39 @@ import("//build/test.gni")
 ohos_unittest("dslm_test") {
   install_enable = true
   testonly = true
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
   module_out_path = "${root_out_dir}/${subsystem_name}/${part_name}"
 
   sources = [
-    "//base/security/devicesecuritylevel/oem_property/ohos/dslm_ohos_credential.c",
-    "//base/security/devicesecuritylevel/service/sa/common/dslm_rpc_process.c",
+    "//base/security/device_security_level/oem_property/ohos/dslm_ohos_credential.c",
+    "//base/security/device_security_level/service/sa/common/dslm_rpc_process.c",
     "dslm_msg_interface_mock.cpp",
     "dslm_request_callback_mock.cpp",
     "dslm_test.cpp",
   ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/common/include",
-    "//base/security/devicesecuritylevel/interfaces/include",
-    "//base/security/devicesecuritylevel/service/include",
-    "//base/security/devicesecuritylevel/service/dslm",
-    "//base/security/devicesecuritylevel/service/sa/common",
-    "//base/security/devicesecuritylevel/baselib/msglib/include/",
+    "//base/security/device_security_level/common/include",
+    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/service/include",
+    "//base/security/device_security_level/service/dslm",
+    "//base/security/device_security_level/service/sa/common",
+    "//base/security/device_security_level/baselib/msglib/include/",
   ]
 
   deps = [
-    "//base/security/devicesecuritylevel/baselib/utils:utils_static",
-    "//base/security/devicesecuritylevel/oem_property/ohos:dslm_ohos_cread_obj",
-    "//base/security/devicesecuritylevel/service/bigdata:service_bigdata_obj",
-    "//base/security/devicesecuritylevel/service/common:service_common_obj",
-    "//base/security/devicesecuritylevel/service/dslm:service_dslm_test_obj",
-    "//base/security/devicesecuritylevel/service/msg:service_msg_obj",
+    "//base/security/device_security_level/baselib/utils:utils_static",
+    "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cread_obj",
+    "//base/security/device_security_level/service/bigdata:service_bigdata_obj",
+    "//base/security/device_security_level/service/common:service_common_obj",
+    "//base/security/device_security_level/service/dslm:service_dslm_test_obj",
+    "//base/security/device_security_level/service/msg:service_msg_obj",
     "//third_party/googletest:gmock",
   ]
 
   external_deps = [
-    "devicesecuritylevel:dslm_sdk",
+    "device_security_level:dslm_sdk",
     "utils_base:utils",
   ]
 
