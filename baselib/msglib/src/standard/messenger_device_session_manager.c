@@ -68,7 +68,7 @@ typedef struct SessionInfo {
     DeviceIdentify identity;
 } SessionInfo;
 
-static inline DeviceSessionManager *GetDeviceSessionManagerInstance()
+static inline DeviceSessionManager *GetDeviceSessionManagerInstance(void)
 {
     static DeviceSessionManager manager = {
         {
