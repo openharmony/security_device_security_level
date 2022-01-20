@@ -57,7 +57,7 @@ typedef struct DslmDeviceInfo {
     ListHead notifyList;
 } DslmDeviceInfo;
 
-static inline uint32_t GetCurrentVersion()
+static inline uint32_t GetCurrentVersion(void)
 {
     // shift major 16 bit, shift minor 8 bit
     return (VERSION_MAJOR << 16) + (VERSION_MINOR << 8) + VERSION_PATCH;

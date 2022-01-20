@@ -81,7 +81,6 @@ int32_t OnPeerMsgResponseInfoReceived(const DeviceIdentify *deviceId, const uint
     }
     SECURITY_LOG_DEBUG("OnPeerMsgResponseInfoReceived msg is %s", (char *)msg);
 
-    // find the device;
     DslmDeviceInfo *deviceInfo = GetDslmDeviceInfo(deviceId);
     if (deviceInfo == NULL) {
         SECURITY_LOG_ERROR("OnPeerMsgResponseInfoReceived no existed device");

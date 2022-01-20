@@ -77,7 +77,6 @@ int32_t DeviceSecurityLevelProxy::RequestDeviceSecurityLevel(const DeviceIdentif
 
     return SUCCESS;
 }
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS

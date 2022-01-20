@@ -101,14 +101,14 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
 
 static void FreeDeviceSecurityInfoImpl(DeviceSecurityInfo *info)
 {
-    if (info != NULL && info->magicNum == SECURITY_MAGIC) {
+    if (info != nullptr && info->magicNum == SECURITY_MAGIC) {
         delete info;
     }
 }
 
 static int32_t GetDeviceSecurityLevelValueImpl(const DeviceSecurityInfo *info, int32_t *level)
 {
-    if (info == NULL || level == nullptr) {
+    if (info == nullptr || level == nullptr) {
         return ERR_INVALID_PARA;
     }
     if (info->magicNum != SECURITY_MAGIC) {

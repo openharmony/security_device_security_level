@@ -51,9 +51,8 @@ private:
 
     int32_t DslmSetResponseToParcel(MessageParcel &reply, int32_t status);
 };
-
-} // DeviceSecurityLevel
-} // Security
-} // OHOS
+} // namespace DeviceSecurityLevel
+} // namespace Security
+} // namespace OHOS
 
 #endif // DSLM_IPC_PROCESS_H
