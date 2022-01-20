@@ -14,46 +14,48 @@
 import("//build/ohos.gni")
 
 # sa lib
-ohos_shared_library("dslm_service") {
-  sources = [ "dslm_ohos_credential.c" ]
+ohos_static_library("service_sa_static") {
+  sources = [
+    "common/dslm_rpc_process.c",
+    "standard/dslm_callback_proxy.cpp",
+    "standard/dslm_ipc_process.cpp",
+    "standard/dslm_service.cpp",
+  ]
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
     "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/services/include",
+    "//base/security/device_security_level/services/sa/common",
   ]
 
   deps = [
-    ":dslm_ohos_cread_obj",
     "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/services/sa:service_sa_static",
+    "//base/security/device_security_level/services/bigdata:service_bigdata_obj",
+    "//base/security/device_security_level/services/common:service_common_obj",
+    "//base/security/device_security_level/services/dslm:service_dslm_obj",
+    "//base/security/device_security_level/services/msg:service_msg_obj",
   ]
 
   external_deps = [
-    "hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
     "utils_base:utils",
   ]
 
-  part_name = "device_security_level"
-  subsystem_name = "security"
-}
+  if (is_large_system) {
+    external_deps += [
+      "hilog:libhilog",
+      "samgr:samgr_proxy",
+    ]
+  }
 
-ohos_source_set("dslm_ohos_cread_obj") {
-  sources = [
-    "impl/dslm_ohos_request.c",
-    "impl/dslm_ohos_verify.c",
-  ]
-
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-  ]
-
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
-
-  external_deps = [
-    "hilog_native:libhilog",
-    "utils_base:utils",
-  ]
+  if (is_standard_system) {
+    external_deps += [
+      "hilog_native:libhilog",
+      "samgr_standard:samgr_proxy",
+    ]
+  }
 
   part_name = "device_security_level"
   subsystem_name = "security"

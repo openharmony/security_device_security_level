@@ -40,19 +40,19 @@
         },
         "build": {
             "sub_component": [
-                "//base/security/device_security_level/interfaces:dslm_sdk",
+                "//base/security/device_security_level/interfaces/inner_api:dslm_sdk",
                 "//base/security/device_security_level/oem_property/ohos:dslm_service",
                 "//base/security/device_security_level/profile:dslm_service.rc"
             ],
             "inner_kits": [
                 {
-                    "name": "//base/security/device_security_level/interfaces:dslm_sdk",
+                    "name": "//base/security/device_security_level/interfaces/inner_api:dslm_sdk",
                     "header": {
                         "header_files": [
                             "device_security_info.h",
                             "device_security_defines.h"
                         ],
-                        "header_base": "//base/security/device_security_level/interfaces/include"
+                        "header_base": "//base/security/device_security_level/interfaces/inner_api/include"
                     }
                 }
             ],
