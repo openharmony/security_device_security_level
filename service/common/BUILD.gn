@@ -21,11 +21,11 @@ ohos_source_set("service_common_obj") {
   ]
 
   include_dirs = [
-    "//base/security/devicesecuritylevel/interfaces/include",
-    "//base/security/devicesecuritylevel/service/include",
+    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/service/include",
   ]
 
-  deps = [ "//base/security/devicesecuritylevel/baselib/utils:utils_static" ]
+  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
   if (is_standard_system) {
     deps += [ "//third_party/boringssl:crypto" ]
   }
@@ -40,6 +40,6 @@ ohos_source_set("service_common_obj") {
     aosp_deps = [ "shared_library:libcrypto" ]
   }
 
-  part_name = "devicesecuritylevel"
+  part_name = "device_security_level"
   subsystem_name = "security"
 }

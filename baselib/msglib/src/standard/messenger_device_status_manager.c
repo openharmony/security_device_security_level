@@ -224,9 +224,9 @@ static bool MessengerConvertNodeToIdentity(const NodeBasicInfo *node, DeviceIden
     return true;
 }
 
-bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType)
+bool MessengerGetDeviceNodeBasicInfo(const DeviceIdentify *devId, NodeBasicInfo *info)
 {
-    if (devId == NULL) {
+    if (devId == NULL || info == NULL) {
         return false;
     }
     DeviceStatusManager *instance = GetDeviceManagerInstance();
@@ -251,6 +251,7 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devTy
 
         if (IsSameDevice(devId, &curr)) {
             find = true;
+            memcpy_s(info, sizeof(NodeBasicInfo), node, sizeof(NodeBasicInfo));
             break;
         }
     }
@@ -259,6 +260,38 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devTy
         FreeNodeInfo(infoList);
     }
     return find;
+}
+
+bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType)
+{
+    if (devId == NULL) {
+        return false;
+    }
+    NodeBasicInfo info = {0};
+    bool result = MessengerGetDeviceNodeBasicInfo(devId, &info);
+    if (result == true && devType != NULL) {
+        *devType = info.deviceTypeId;
+    }
+    return result;
+}
+
+bool MessengerGetDeviceNetworkId(const DeviceIdentify *devId, char *networkId, uint32_t len)
+{
+    if (devId == NULL || networkId == NULL || len == 0) {
+        return false;
+    }
+    NodeBasicInfo info = {0};
+    bool result = MessengerGetDeviceNodeBasicInfo(devId, &info);
+    if (result != true) {
+        return false;
+    }
+
+    int32_t ret = memcpy_s(networkId, len, info.networkId, NETWORK_ID_BUF_LEN);
+    if (ret != EOK) {
+        SECURITY_LOG_ERROR("MessengerGetDeviceNetworkId memcpy error");
+        return false;
+    }
+    return true;
 }
 
 bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType)
