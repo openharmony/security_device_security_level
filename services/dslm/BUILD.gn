@@ -26,8 +26,8 @@ service_dslm_sources = [
 
 service_dslm_include_dirs = [
   "//base/security/device_security_level/common/include",
-  "//base/security/device_security_level/interfaces/include",
-  "//base/security/device_security_level/service/include",
+  "//base/security/device_security_level/interfaces/inner_api/include",
+  "//base/security/device_security_level/services/include",
 ]
 
 # service_dslm object

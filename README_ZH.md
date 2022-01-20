@@ -47,10 +47,10 @@ OpenHarmony系统安全架构如下图所示：
 .
 ├── baselib        # 基础库
 ├── common         # 公共头文件
-├── interfaces     # innerkits接口
+├── interfaces     # inner api接口
 ├── oem_property   # OEM厂家适配层
 ├── profile        # 组件配置文件
-├── service        # 服务代码
+├── services       # 服务框架代码
 └── test           # 测试代码
 ```
 

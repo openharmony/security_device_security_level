@@ -13,31 +13,44 @@
 
 import("//build/ohos.gni")
 
-# service_common object
-ohos_source_set("service_common_obj") {
+config("device_security_level_sdk_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("dslm_sdk") {
   sources = [
-    "dslm_crypto.c",
-    "dslm_msg_serialize.c",
+    "src/standard/device_security_info.cpp",
+    "src/standard/device_security_level_callback_helper.cpp",
+    "src/standard/device_security_level_callback_stub.cpp",
+    "src/standard/device_security_level_proxy.cpp",
   ]
 
   include_dirs = [
-    "//base/security/device_security_level/interfaces/include",
-    "//base/security/device_security_level/service/include",
+    "//base/security/device_security_level/services/include",
+    "//base/security/device_security_level/common/include",
   ]
 
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
-  if (is_standard_system) {
-    deps += [ "//third_party/boringssl:crypto" ]
-  }
+  public_configs = [ ":device_security_level_sdk_config" ]
+
+  deps = []
 
   external_deps = [
-    "hilog_native:libhilog",
     "ipc:ipc_core",
     "utils_base:utils",
   ]
 
+  if (is_standard_system) {
+    external_deps += [
+      "hilog_native:libhilog",
+      "samgr_standard:samgr_proxy",
+    ]
+  }
+
   if (is_large_system) {
-    aosp_deps = [ "shared_library:libcrypto" ]
+    external_deps += [
+      "hilog:libhilog",
+      "samgr:samgr_proxy",
+    ]
   }
 
   part_name = "device_security_level"

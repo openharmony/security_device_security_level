@@ -19,13 +19,13 @@ ohos_shared_library("dslm_service") {
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/interfaces/inner_api/include",
   ]
 
   deps = [
     ":dslm_ohos_cread_obj",
     "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/service/sa:service_sa_static",
+    "//base/security/device_security_level/services/sa:service_sa_static",
   ]
 
   external_deps = [
@@ -45,7 +45,7 @@ ohos_source_set("dslm_ohos_cread_obj") {
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/interfaces/inner_api/include",
   ]
 
   deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]

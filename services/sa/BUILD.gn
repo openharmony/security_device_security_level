@@ -17,24 +17,24 @@ import("//build/ohos.gni")
 ohos_static_library("service_sa_static") {
   sources = [
     "common/dslm_rpc_process.c",
-    "full/dslm_callback_proxy.cpp",
-    "full/dslm_ipc_process.cpp",
-    "full/dslm_service.cpp",
+    "standard/dslm_callback_proxy.cpp",
+    "standard/dslm_ipc_process.cpp",
+    "standard/dslm_service.cpp",
   ]
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/include",
-    "//base/security/device_security_level/service/include",
-    "//base/security/device_security_level/service/sa/common",
+    "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/services/include",
+    "//base/security/device_security_level/services/sa/common",
   ]
 
   deps = [
     "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/service/bigdata:service_bigdata_obj",
-    "//base/security/device_security_level/service/common:service_common_obj",
-    "//base/security/device_security_level/service/dslm:service_dslm_obj",
-    "//base/security/device_security_level/service/msg:service_msg_obj",
+    "//base/security/device_security_level/services/bigdata:service_bigdata_obj",
+    "//base/security/device_security_level/services/common:service_common_obj",
+    "//base/security/device_security_level/services/dslm:service_dslm_obj",
+    "//base/security/device_security_level/services/msg:service_msg_obj",
   ]
 
   external_deps = [
