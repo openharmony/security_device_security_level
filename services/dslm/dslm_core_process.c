@@ -181,7 +181,7 @@ int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, ui
     return SUCCESS;
 }
 
-bool InitSelfDeviceSecureLevel()
+bool InitSelfDeviceSecureLevel(void)
 {
     uint32_t devType = 0;
     const DeviceIdentify *device = GetSelfDevice(&devType);
@@ -212,7 +212,7 @@ bool InitSelfDeviceSecureLevel()
     return true;
 }
 
-bool InitDslmProcess()
+bool InitDslmProcess(void)
 {
     static bool isInited = false;
     static Mutex initMutex = INITED_MUTEX;
@@ -234,7 +234,7 @@ bool InitDslmProcess()
     return isInited;
 }
 
-bool DeinitDslmProcess()
+bool DeinitDslmProcess(void)
 {
     return true;
 }

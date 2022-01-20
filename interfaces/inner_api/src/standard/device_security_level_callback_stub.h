@@ -16,15 +16,15 @@
 #ifndef DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 #define DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 
-#include "iremote_stub.h"
-#include "nocopyable.h"
 #include <functional>
 #include <mutex>
 
-#include "idevice_security_level.h"
+#include "iremote_stub.h"
+#include "nocopyable.h"
 
 #include "device_security_defines.h"
 #include "device_security_level_defines.h"
+#include "idevice_security_level.h"
 
 namespace OHOS {
 namespace Security {

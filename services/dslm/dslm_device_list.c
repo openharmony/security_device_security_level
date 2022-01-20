@@ -30,19 +30,19 @@
 
 #define MAX_DEVICE_CNT 128
 
-static inline Mutex *GetDeviceListMutex()
+static inline Mutex *GetDeviceListMutex(void)
 {
     static Mutex mutex = INITED_MUTEX;
     return &mutex;
 }
 
-static ListHead *GetDeviceList()
+static ListHead *GetDeviceList(void)
 {
     static ListHead list = INIT_LIST(list);
     return &list;
 }
 
-static int32_t GetDeviceListSize()
+static int32_t GetDeviceListSize(void)
 {
     int32_t size = 0;
     ListNode *node = NULL;

@@ -28,10 +28,10 @@
 using namespace OHOS::HiviewDFX;
 using namespace OHOS::Security::DeviceSecurityLevel;
 
-int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
+static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
     ResultCallback callback)
 {
-    if (identify == NULL || callback == NULL) {
+    if (identify == nullptr || callback == nullptr) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo input error.");
         return ERR_INVALID_PARA;
     }
@@ -39,7 +39,7 @@ int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const
     constexpr uint32_t DEAFULT_KEEP_LEN = 45;
     constexpr uint32_t MAX_KEEP_LEN = 300;
     static RequestOption defaultOption = {0, DEAFULT_KEEP_LEN, 0};
-    if (option == NULL) {
+    if (option == nullptr) {
         option = &defaultOption;
     }
     if (option->timeout > MAX_KEEP_LEN) {
@@ -81,7 +81,7 @@ int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const
     return success;
 }
 
-int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
+static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info)
 {
     std::promise<DeviceSecurityInfo *> promise;
@@ -99,14 +99,14 @@ int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const Requ
     return SUCCESS;
 }
 
-void FreeDeviceSecurityInfoImpl(DeviceSecurityInfo *info)
+static void FreeDeviceSecurityInfoImpl(DeviceSecurityInfo *info)
 {
     if (info != NULL && info->magicNum == SECURITY_MAGIC) {
         delete info;
     }
 }
 
-int32_t GetDeviceSecurityLevelValueImpl(const DeviceSecurityInfo *info, int32_t *level)
+static int32_t GetDeviceSecurityLevelValueImpl(const DeviceSecurityInfo *info, int32_t *level)
 {
     if (info == NULL || level == nullptr) {
         return ERR_INVALID_PARA;

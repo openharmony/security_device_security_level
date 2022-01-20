@@ -23,9 +23,9 @@
 extern "C" {
 #endif
 
-uint32_t InitService();
+uint32_t InitService(void);
 
-void UnInitService();
+void UnInitService(void);
 
 #ifdef __cplusplus
 }

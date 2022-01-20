@@ -32,10 +32,7 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
         return ERR_INVALID_PARA;
     }
 
-    const MessageBuff buff = {
-        .buff = (uint8_t *)msg,
-        .length = len
-    };
+    const MessageBuff buff = {.buff = (uint8_t *)msg, .length = len};
     int32_t ret = SUCCESS;
     MessagePacket *packet = ParseMessage(&buff);
     if (packet == NULL) {
@@ -70,7 +67,7 @@ int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint
     return OnMsgSendResultNotifier(devId, transNo, result);
 }
 
-uint32_t InitService()
+uint32_t InitService(void)
 {
     uint32_t times = 0;
     uint32_t ret = InitMessenger(OnPeerMsgReceived, OnPeerStatusReceiver, OnSendResultNotifier);
@@ -95,7 +92,7 @@ uint32_t InitService()
     return SUCCESS;
 }
 
-void UnInitService()
+void UnInitService(void)
 {
     DeinitDslmProcess();
     DeinitMessenger();

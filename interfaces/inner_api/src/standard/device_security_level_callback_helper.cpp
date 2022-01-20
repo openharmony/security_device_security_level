@@ -15,9 +15,6 @@
 
 #include "device_security_level_callback_helper.h"
 
-#include <functional>
-#include <iostream>
-
 #include "timer.h"
 
 #include "hilog/log.h"
