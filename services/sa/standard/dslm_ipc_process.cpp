@@ -28,12 +28,11 @@ constexpr uint32_t DFT_TIMEOUT = 45;
 constexpr uint32_t MAX_TIMEOUT = 60;
 constexpr uint32_t MIN_TIMEOUT = 1;
 constexpr uint32_t WARAING_GATE = 64;
-}
+} // namespace
 
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-
 static void ProcessCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
 {
     if ((cookie == 0) || (info == nullptr)) {
@@ -171,7 +170,6 @@ const sptr<IRemoteObject> DslmIpcProcess::RemoteHolder::Pop(uint32_t cookie)
     map_.erase(iter);
     return obj;
 }
-
-} // DeviceSecurityLevel
-} // Security
-} // OHOS
+} // namespace DeviceSecurityLevel
+} // namespace Security
+} // namespace OHOS

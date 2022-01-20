@@ -83,7 +83,6 @@ int32_t DslmService::ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageP
 {
     return Singleton<DslmIpcProcess>::GetInstance().DslmProcessGetDeviceSecurityLevel(data, reply);
 }
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS

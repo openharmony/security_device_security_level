@@ -50,7 +50,6 @@ int32_t DslmCallbackProxy::ResponseDeviceSecurityLevel(uint32_t cookie, const Re
     MessageOption ipcOption = {MessageOption::TF_ASYNC};
     return Remote()->SendRequest(CMD_SET_DEVICE_SECURITY_LEVEL, data, reply, ipcOption);
 }
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS

@@ -157,7 +157,6 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t
     map_.erase(iter);
     return true;
 }
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS

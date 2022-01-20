@@ -43,7 +43,6 @@ public:
 private:
     static inline BrokerDelegator<DslmCallbackProxy> delegator_;
 };
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS
