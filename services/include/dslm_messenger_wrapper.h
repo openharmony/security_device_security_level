@@ -41,9 +41,9 @@ void SendMsgToDevice(uint64_t transNo, const DeviceIdentify *devId, const uint8_
 uint32_t InitMessenger(const MessageReceiver messageReceiver, const StatusReceiver statusReceiver,
     const SendResultNotifier notifier);
 
-uint32_t DeinitMessenger();
+uint32_t DeinitMessenger(void);
 
-bool GetMessengerStatus();
+bool GetMessengerStatus(void);
 
 bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
 

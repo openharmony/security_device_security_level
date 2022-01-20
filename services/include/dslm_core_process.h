@@ -38,11 +38,11 @@ int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo
 
 int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, uint32_t devType);
 
-bool InitDslmProcess();
+bool InitDslmProcess(void);
 
-bool DeinitDslmProcess();
+bool DeinitDslmProcess(void);
 
-bool InitSelfDeviceSecureLevel();
+bool InitSelfDeviceSecureLevel(void);
 
 #ifdef __cplusplus
 }

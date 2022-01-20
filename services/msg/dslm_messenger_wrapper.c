@@ -46,7 +46,7 @@ uint32_t InitMessenger(const MessageReceiver messageReceiver, const StatusReceiv
     return SUCCESS;
 }
 
-uint32_t DeinitMessenger()
+uint32_t DeinitMessenger(void)
 {
     LockMutex(&g_mutex);
     if (g_messenger == NULL) {
@@ -58,7 +58,7 @@ uint32_t DeinitMessenger()
     return SUCCESS;
 }
 
-bool GetMessengerStatus()
+bool GetMessengerStatus(void)
 {
     LockMutex(&g_mutex);
     if (g_messenger == NULL) {
@@ -102,7 +102,7 @@ const DeviceIdentify *GetSelfDevice(uint32_t *devType)
 {
     LockMutex(&g_mutex);
     static uint32_t type = 0;
-    static DeviceIdentify deviceId = { 0, { 0 } };
+    static DeviceIdentify deviceId = {0, {0}};
     if (deviceId.length == 0 || deviceId.identity[0] == 0) {
         if (g_messenger != NULL) {
             GetSelfDeviceIdentify(g_messenger, &deviceId, &type);
