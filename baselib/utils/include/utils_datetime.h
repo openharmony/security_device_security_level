@@ -33,9 +33,9 @@ typedef struct DateTime {
     uint16_t day;
 } DateTime;
 
-uint64_t GetMillisecondSinceBoot();
+uint64_t GetMillisecondSinceBoot(void);
 
-uint64_t GetMillisecondSince1970();
+uint64_t GetMillisecondSince1970(void);
 
 bool GetDateTimeByMillisecondSince1970(uint64_t input, DateTime *datetime);
 

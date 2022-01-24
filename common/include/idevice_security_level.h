@@ -25,7 +25,6 @@
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-
 constexpr int32_t SA_ID_DEVICE_SECURITY_MANAGER_SERVICE = 3511;
 
 class IDeviceSecurityLevel : public IRemoteBroker {
@@ -43,7 +42,6 @@ public:
         CMD_SET_DEVICE_SECURITY_LEVEL = 1,
     };
 };
-
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS
