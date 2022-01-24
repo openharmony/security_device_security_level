@@ -60,7 +60,6 @@ public:
     void MakeDeviceOffline(const DeviceIdentify *devId) const;
     void MakeMsgReceivedFrom(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen) const;
 };
-
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS

@@ -15,9 +15,10 @@
 
 #include "dslm_ohos_request.h"
 
-#include "utils_log.h"
-#include <securec.h>
 #include <string.h>
+
+#include "securec.h"
+#include "utils_log.h"
 
 #include "utils_mem.h"
 
