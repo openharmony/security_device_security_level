@@ -47,7 +47,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Security {
 namespace DslmUnitTest {
-#ifdef GTEST_INCLUDE_GTEST_GTEST_H_
 void DslmTest::SetUpTestCase()
 {
 }
@@ -567,7 +566,6 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level1)
 
 HWTEST_F(DslmTest, InnerKitsTest_case1, TestSize.Level1)
 {
-
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
     DeviceSecurityInfo *info = NULL;
@@ -598,7 +596,6 @@ void TestDeviceSecurityInfoCallback(const DeviceIdentify *identify, struct Devic
 
 HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level1)
 {
-
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
     g_cnt = 0;
@@ -615,8 +612,6 @@ HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level1)
     g_cv.wait_for(lck, std::chrono::milliseconds(2000), []() { return (g_cnt == 3); });
     EXPECT_EQ(g_cnt, 3);
 }
-
-#endif
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS
