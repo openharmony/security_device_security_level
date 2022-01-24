@@ -15,10 +15,10 @@
 
 #include "dslm_ohos_verify.h"
 
-#include "utils_log.h"
-#include <securec.h>
 #include <string.h>
 
+#include "securec.h"
+#include "utils_log.h"
 #include "utils_mem.h"
 
 #define OHOS_DEFAULT_LEVEL 1

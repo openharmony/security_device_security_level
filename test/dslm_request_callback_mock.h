@@ -26,7 +26,6 @@
 namespace OHOS {
 namespace Security {
 namespace DslmUnitTest {
-
 class DslmRequestCallback {
 public:
     DslmRequestCallback() {};
@@ -37,7 +36,7 @@ public:
 class DslmRequestCallbackMock : public DslmRequestCallback {
 public:
     DslmRequestCallbackMock();
-    virtual ~DslmRequestCallbackMock() override;
+    ~DslmRequestCallbackMock() override;
     MOCK_METHOD3(RequestCallback, void(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info));
 
     static void MockedCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
@@ -46,7 +45,6 @@ private:
     static DslmRequestCallback *obj_;
     static std::mutex mutex_;
 };
-
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS

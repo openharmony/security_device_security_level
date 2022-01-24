@@ -40,7 +40,7 @@ typedef struct QueueStatusData {
     uint32_t devType;
 } QueueStatusData;
 
-static inline DeviceStatusManager *GetDeviceManagerInstance()
+static DeviceStatusManager *GetDeviceManagerInstance(void)
 {
     static DeviceStatusManager manager = {
         {

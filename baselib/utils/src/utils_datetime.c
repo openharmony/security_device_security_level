@@ -28,14 +28,14 @@ extern "C" {
 #define MILLISEC_TO_USEC 1000
 #define MICROSEC_TO_NANOSEC 1000
 
-uint64_t GetMillisecondSinceBoot()
+uint64_t GetMillisecondSinceBoot(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec * SEC_TO_MILLISEC + ts.tv_nsec / MILLISEC_TO_NANOSEC);
 }
 
-uint64_t GetMillisecondSince1970()
+uint64_t GetMillisecondSince1970(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);

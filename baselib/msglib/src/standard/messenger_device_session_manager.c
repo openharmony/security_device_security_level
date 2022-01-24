@@ -68,7 +68,7 @@ typedef struct SessionInfo {
     DeviceIdentify identity;
 } SessionInfo;
 
-static inline DeviceSessionManager *GetDeviceSessionManagerInstance(void)
+static DeviceSessionManager *GetDeviceSessionManagerInstance(void)
 {
     static DeviceSessionManager manager = {
         {
@@ -108,7 +108,7 @@ static void ProcessSessionMessageReceived(const uint8_t *data, uint32_t len)
     FREE(queueData);
 }
 
-static inline void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
+static void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
 {
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     WorkQueue *queue = instance->queue;
