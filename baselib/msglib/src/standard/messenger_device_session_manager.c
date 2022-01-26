@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "messenger_device_status_manager.h"
+#include "messenger_device_session_manager.h"
 
 #include <stdlib.h>
 
@@ -24,7 +24,7 @@
 #include "utils_mem.h"
 #include "utils_mutex.h"
 
-#include "messenger_device_session_manager.h"
+#include "messenger_device_status_manager.h"
 #include "messenger_utils.h"
 
 #define IS_SERVER 0
