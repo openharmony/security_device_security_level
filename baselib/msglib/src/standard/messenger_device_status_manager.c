@@ -77,7 +77,7 @@ static void ProcessDeviceStatusReceived(const uint8_t *data, uint32_t len)
     FREE(queueData);
 }
 
-static inline void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, uint32_t devType)
+static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, uint32_t devType)
 {
     DeviceStatusManager *instance = GetDeviceManagerInstance();
 
