@@ -113,10 +113,10 @@ static int32_t Base64Decode(const uint8_t *from, uint8_t *to, uint32_t toCheckLe
     }
 
     uint32_t toLen = fromLen / 4 * 3; /* Base64 decode size */
-    if (from[fromLen - 1] == '=') {   /* if last bit is null,  make it "=" */
+    if (from[fromLen - 1] == '=') {   /* if last 1-bit is null,  make it "=" */
         toLen--;
     }
-    if (from[fromLen - 2] == '=') { /* if Second-to-last bit is null, make it "=" */
+    if (from[fromLen - 2] == '=') { /* if last 2-bit is null, make it "=" */
         toLen--;
     }
     if (toCheckLen < toLen) {
@@ -141,10 +141,10 @@ static int32_t Base64Decode(const uint8_t *from, uint8_t *to, uint32_t toCheckLe
             (((a << 18) & 0x00FC0000) | ((b << 12) & 0x0003F000) | ((c << 6) & 0x00000FC0) | ((d << 0) & 0x0000003F));
 
         if (j < toLen) {
-            to[j++] = (byte >> 16) & 0xFF;
+            to[j++] = (byte >> 16) & 0xFF; // 16, the 3rd 8-bit
         }
         if (j < toLen) {
-            to[j++] = (byte >> 8) & 0xFF;
+            to[j++] = (byte >> 8) & 0xFF; // 8, the 2nd 8-bit
         }
         if (j < toLen) {
             to[j++] = (byte >> 0) & 0xFF;
