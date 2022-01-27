@@ -15,7 +15,7 @@
         "name": "device_security_level",
         "subsystem": "security",
         "syscap": [
-            "SystemCapability.security.device_security_level.dslm"
+            "SystemCapability.Security.SeviceSecurityLevel"
         ],
         "features": [
             "device_security_level_dslm"
