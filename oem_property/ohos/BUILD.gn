@@ -13,6 +13,27 @@
 
 import("//build/ohos.gni")
 
+# generate dlsm's cred
+action("gen_ohos_dslm_cred_file") {
+  file_name = "dslm_finger.cfg"
+
+  script = rebase_path("dslm_cred_tool.py")
+  outputs = [ "$target_gen_dir/$file_name" ]
+
+  out_dir = rebase_path("$target_gen_dir")
+  args = [
+    "create",
+    "--artifacts-dir=$out_dir/artifacts",
+    "--field-manufacture=ohos",
+    "--field-brand=$device_name",
+    "--field-model=$product_name",
+    "--field-software-version=3.0.0",
+    "--field-security-level=SL1",
+    "--cred-file=$out_dir/$file_name",
+    "--strict=true",
+  ]
+}
+
 # sa lib
 ohos_shared_library("dslm_service") {
   sources = [ "dslm_ohos_credential.c" ]
@@ -60,26 +81,6 @@ ohos_source_set("dslm_ohos_cred_obj") {
 
   part_name = "device_security_level"
   subsystem_name = "security"
-}
-
-action("gen_ohos_dslm_cred_file") {
-  file_name = "dslm.cred"
-
-  script = rebase_path("dslm_cred_tool.py")
-  outputs = [ "$target_gen_dir/$file_name" ]
-
-  out_dir = rebase_path("$target_gen_dir")
-  args = [
-    "create",
-    "--artifacts-dir=$out_dir/artifacts",
-    "--field-manufacture=ohos",
-    "--field-brand=$device_name",
-    "--field-model=$product_name",
-    "--field-software-version=3.0.0",
-    "--field-security-level=SL1",
-    "--cred-file=$out_dir/$file_name",
-    "--strict=true",
-  ]
 }
 
 ohos_prebuilt_etc("dslm_ohos_cred_file") {
