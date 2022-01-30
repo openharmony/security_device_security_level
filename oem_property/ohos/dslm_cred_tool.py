@@ -21,6 +21,7 @@ import base64
 import errno
 import json
 import os
+import sys
 import shutil
 import subprocess
 import tempfile
@@ -30,6 +31,19 @@ from datetime import datetime
 CRED_VERSION = '1.0.1'
 ATTESTATION_KEY_USERPUBLICKEY = 'userPublicKey'
 ATTESTATION_KEY_SIGNATURE = 'signature'
+
+
+def _message(message, file):
+    if message and file:
+        file.write(str(message) + os.linesep)
+
+
+def _error_message(message, file=sys.stderr):
+    _message(message, file)
+
+
+def _info_message(message, file=sys.stdout):
+    _message(message, file)
 
 
 def run_command(command, input_data=None):
@@ -122,7 +136,9 @@ class OpenSslWrapper:
                 if code != 0:
                     raise OpenSslWrapperException('ec failed, err: {}'.format(err.decode('utf8')))
             with open(pk_file) as fp:
-                pem_str = fp.read().replace(OpenSslWrapper.PEM_PERFIX, '').replace(OpenSslWrapper.PEM_SUFFIX, '').replace(os.linesep, '')
+                pem_str = fp.read().replace(OpenSslWrapper.PEM_PERFIX, '')
+                pem_str = pem_str.replace(OpenSslWrapper.PEM_SUFFIX, '')
+                pem_str = pem_str.replace(os.linesep, '')
                 return base64.b64decode(pem_str)
 
         except OpenSslWrapperException as ex:
@@ -146,14 +162,14 @@ class OpenSslWrapper:
 
         return res
 
-    def digest_verify_with_key_alias(self, key_alias: str, content: bytes, signature: bytes, digest: str = '-sha384') -> bool:
+    def digest_verify_with_key_alias(self, key_alias: str, content: bytes, sig: bytes, digest: str = '-sha384') -> bool:
         pk_file = os.path.join(self.store_dir, '{}.pub.pem'.format(key_alias))
 
         if not os.path.isfile(pk_file):
             raise OpenSslWrapperException('path not exists')
         try:
             with tempfile.NamedTemporaryFile('wb', dir=self.store_dir, delete=False) as signature_file:
-                signature_file.write(signature)
+                signature_file.write(sig)
                 signature_file.close()
 
             code, res, err = run_command(
@@ -163,7 +179,7 @@ class OpenSslWrapper:
             os.remove(signature_file.name)
         return True if code == 0 else False
 
-    def digest_verify_with_pub_key(self, pub_key: bytes, content: bytes, signature: bytes, digest: str = '-sha384') -> bool:
+    def digest_verify_with_pub_key(self, pub_key: bytes, content: bytes, sig: bytes, digest: str = '-sha384') -> bool:
         try:
             with tempfile.NamedTemporaryFile('wb+', dir=self.store_dir, delete=False) as pubkey_file:
                 # create an temp pubkey pem file
@@ -179,7 +195,7 @@ class OpenSslWrapper:
 
             with tempfile.NamedTemporaryFile('wb', dir=self.store_dir, delete=False) as signature_file:
                 # create an temp signature file
-                signature_file.write(signature)
+                signature_file.write(sig)
                 signature_file.close()
 
             code, res, err = run_command(
@@ -220,10 +236,8 @@ class CredInitialization:
                 raise CredInitializationException('generate_ecc_key_pair device error')
 
         except CredInitializationException:
-            print('cred init failed')
+            _error_message('cred init failed')
             return
-
-        print('cred init success')
 
 
 class CredCreatationException(Exception):
@@ -242,7 +256,9 @@ class CredCreatation:
         head = {"typ": "DSL"}
         return base64.b64encode(json.dumps(head, ensure_ascii=True).encode('utf8')).decode('utf8')
 
-    def _gene_atteastation(self, root_pk, root_sign, oem_pk, _oem_sign, device_pk, device_sign):
+    def _gene_atteastation(self, root_pk: str, root_sign: str,
+                           oem_pk: str, oem_sign: str,
+                           device_pk: str, device_sign: str):
         data = [
             {
                 ATTESTATION_KEY_USERPUBLICKEY: device_pk,
@@ -250,7 +266,7 @@ class CredCreatation:
             },
             {
                 ATTESTATION_KEY_USERPUBLICKEY: oem_pk,
-                ATTESTATION_KEY_SIGNATURE: _oem_sign
+                ATTESTATION_KEY_SIGNATURE: oem_sign
             },
             {
                 ATTESTATION_KEY_USERPUBLICKEY: root_pk,
@@ -300,12 +316,11 @@ class CredCreatation:
             head_payload_signed_string = base64.b64encode(head_payload_signed_bytes).decode('utf8')
             cred = '{}.{}.{}'.format(head_payload, head_payload_signed_string, attestation)
         except (CredCreatationException, OpenSslWrapperException):
-            print('cred create failed, please init first')
+            _error_message('cred create failed, please init first')
             return
 
         with open(self.file, 'w') as fp:
             fp.write(cred)
-        print('cred create success')
 
 
 class CredVerificationException(Exception):
@@ -328,25 +343,25 @@ class CredVerification:
             self._check_signature(signature)
             self._check_attestation(attestation, '{}.{}'.format(head, payload), signature)
         except CredVerificationException as ex:
-            print(ex)
+            _error_message(ex)
             return
 
-        print('verify success!')
+        _info_message('verify success!')
 
-    def _check_head(self, header):
+    def _check_head(self, header: str):
         header_str = self._base64decode(header).decode('utf8')
         header_obj = ast.literal_eval(header_str)
         if header_obj['typ'] != 'DSL':
             raise CredVerificationException('head error')
-        print('head:')
-        print(json.dumps(header_obj, indent=2))
+        _info_message('head:')
+        _info_message(json.dumps(header_obj, indent=2))
 
-    def _check_payload(self, payload):
+    def _check_payload(self, payload: str):
         payload_str = self._base64decode(payload).decode('utf8')
-        print('payload:')
-        print(json.dumps(json.loads(payload_str), indent=2))
+        _info_message('payload:')
+        _info_message(json.dumps(json.loads(payload_str), indent=2))
 
-    def _check_signature(self, signature):
+    def _check_signature(self, signature: str):
         self._base64decode(signature)
 
     def _check_attestation(self, attestation, payload, payload_sign):
@@ -385,46 +400,46 @@ class CredVerification:
             if not verify:
                 raise CredVerificationException('payload verify error')
 
-    def _split_file(self, cred_file_name):
+    def _split_file(self, cred_file_name: str):
         out = self._get_file_content(cred_file_name).split('.')
         CRED_PARA_LEN = 4
         if (len(out) != CRED_PARA_LEN):
             raise CredVerificationException("cred para error")
         return out
 
-    def _get_file_content(self, file_path):
+    def _get_file_content(self, file_path: str):
         if not os.path.isfile(file_path):
             raise CredVerificationException('file {} is not existed'.format(file_path))
 
         with open(file_path, 'r') as fp:
             return fp.read().strip()
 
-    def _base64decode(self, content):
+    def _base64decode(self, content: str):
         return base64.urlsafe_b64decode(content + '=' * (4 - len(content) % 4))
 
 
-def init_creds(args):
-    aciton = CredInitialization(args.dir)
+def init_creds(input_args: argparse.Namespace):
+    aciton = CredInitialization(input_args.dir)
     aciton.process()
 
 
-def create_creds(args):
-    payload = {k: v for k, v in args.__dict__.items() if k not in ['dir', 'cred', 'process', 'strict'] and v}
-    if args.strict:
-        init_creds(args)
-    aciton = CredCreatation(args.dir, args.cred, payload)
+def create_creds(input_args):
+    payload = {k: v for k, v in input_args.__dict__.items() if k not in ['dir', 'cred', 'process', 'strict'] and v}
+    if input_args.strict:
+        init_creds(input_args)
+    aciton = CredCreatation(input_args.dir, input_args.cred, payload)
     aciton.process()
-    if args.strict:
-        shutil.rmtree(args.dir)
+    if input_args.strict:
+        shutil.rmtree(input_args.dir)
 
 
-def verify_creds(args):
-    aciton = CredVerification(args.dir, args.cred)
+def verify_creds(input_args):
+    aciton = CredVerification(input_args.dir, input_args.cred)
     aciton.process()
 
 
 class CredCommand:
-    def _setup_arguments(self, subparsers, config):
+    def _setup_arguments(self, subparsers, config: dict):
         action = config.get('action')
         arguments = config.get('arguments')
         parser = subparsers.add_parser(action.get('name'), help=action.get('help'))
