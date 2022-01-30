@@ -202,8 +202,8 @@ class CredInitialization:
     KEY_ALIAS_OEM = 'oem'
     KEY_ALIAS_DEVICE = 'device'
 
-    def __init__(self, dir: str):
-        self.ssl = OpenSslWrapper(dir)
+    def __init__(self, store_dir: str):
+        self.ssl = OpenSslWrapper(store_dir)
     pass
 
     def process(self):
@@ -232,8 +232,8 @@ class CredCreatationException(Exception):
 
 
 class CredCreatation:
-    def __init__(self, dir: str, file: str, payload: dict):
-        self.ssl = OpenSslWrapper(dir)
+    def __init__(self, store_dir: str, file: str, payload: dict):
+        self.ssl = OpenSslWrapper(store_dir)
         self.payload = payload
         self.file = file
     pass
@@ -314,8 +314,8 @@ class CredVerificationException(Exception):
 
 
 class CredVerification:
-    def __init__(self, dir: str, file: str):
-        self.ssl = OpenSslWrapper(dir)
+    def __init__(self, store_dir: str, file: str):
+        self.ssl = OpenSslWrapper(store_dir)
         self.file = file
         pass
 
@@ -333,30 +333,30 @@ class CredVerification:
 
         print('verify success!')
 
-    def _check_head(self, head):
-        str = self._base64decode(head).decode('utf8')
-        header = ast.literal_eval(str)
-        if header['typ'] != 'DSL':
+    def _check_head(self, header):
+        header_str = self._base64decode(header).decode('utf8')
+        header_obj = ast.literal_eval(header_str)
+        if header_obj['typ'] != 'DSL':
             raise CredVerificationException('head error')
         print('head:')
-        print(json.dumps(header, indent=2))
+        print(json.dumps(header_obj, indent=2))
 
     def _check_payload(self, payload):
-        str = self._base64decode(payload).decode('utf8')
+        payload_str = self._base64decode(payload).decode('utf8')
         print('payload:')
-        print(json.dumps(json.loads(str), indent=2))
+        print(json.dumps(json.loads(payload_str), indent=2))
 
     def _check_signature(self, signature):
         self._base64decode(signature)
 
     def _check_attestation(self, attestation, payload, payload_sign):
         ATTES_PARA_LEN = 3
-        str = self._base64decode(attestation).decode('utf8')
-        attes = json.loads(str)
-        if (len(attes) != ATTES_PARA_LEN):
+        atts_str = self._base64decode(attestation).decode('utf8')
+        attes_obj = json.loads(atts_str)
+        if (len(attes_obj) != ATTES_PARA_LEN):
             raise CredVerificationException('attes para error')
         ssl = self.ssl
-        device, oem, root = attes
+        device, oem, root = attes_obj
 
         root_pk_bytes = self._base64decode(root[ATTESTATION_KEY_USERPUBLICKEY])
         root_self_sign_bytes = self._base64decode(root[ATTESTATION_KEY_SIGNATURE])
