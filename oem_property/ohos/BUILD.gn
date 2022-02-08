@@ -65,18 +65,26 @@ ohos_source_set("dslm_ohos_cred_obj") {
   sources = [
     "impl/dslm_ohos_request.c",
     "impl/dslm_ohos_verify.c",
+    "impl/external_interface.c"
   ]
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/interfaces/include",
+    "//base/security/device_security_level/service/include",
+    "//base/security/deviceauth/interfaces/innerkits",
   ]
 
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
+  deps = [
+    "//base/security/device_security_level/baselib/utils:utils_static",
+    "//base/security/deviceauth/services:deviceauth_sdk",
+  ]
 
   external_deps = [
     "hilog_native:libhilog",
     "utils_base:utils",
+    "huks:libhukssdk",
+    "deviceauth_standard:deviceauth_sdk"
   ]
 
   part_name = "device_security_level"

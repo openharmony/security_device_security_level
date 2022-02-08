@@ -340,7 +340,11 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level1)
 
 HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
 {
-    const DeviceIdentify identiy = {DEVICE_ID_MAX_LEN, {0}};
+    char udidStr[] = "3290571486B516C751FA118A8F9A83F67E054476F4323177062B4D9ED3901A9E";
+    DeviceIdentify identity;
+    identity.length = strlen(udidStr);
+    memcpy(identity.identity, udidStr, 64);
+
     RequestObject object;
 
     object.arraySize = 1;
@@ -350,13 +354,13 @@ HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
 
     DslmCredBuff *cred = nullptr;
 
-    int32_t ret = DefaultRequestDslmCred(&identiy, &object, &cred);
+    int32_t ret = DefaultRequestDslmCred(&identity, &object, &cred);
     ASSERT_EQ(SUCCESS, (int32_t)ret);
 
     DslmCredInfo info;
     memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
-    ret = DefaultVerifyDslmCred(&identiy, object.challenge, cred, &info);
+    ret = DefaultVerifyDslmCred(&identity, object.challenge, cred, &info);
     EXPECT_EQ(SUCCESS, ret);
     EXPECT_GE(info.credLevel, (uint32_t)1);
 
