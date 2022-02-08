@@ -98,6 +98,14 @@ int32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *arra
     return index;
 }
 
+void AddFieldBoolToJson(JsonHandle handle, const char *field, bool value)
+{
+    if (handle == NULL || field == NULL) {
+        return;
+    }
+    (void)cJSON_AddBoolToObject((cJSON *)handle, field, value);
+}
+
 const char *GetJsonFieldString(JsonHandle handle, const char *field)
 {
     if (handle == NULL) {
@@ -125,6 +133,16 @@ const char *GetJsonFieldString(JsonHandle handle, const char *field)
 JsonHandle GetJsonFieldJson(JsonHandle handle, const char *field)
 {
     return cJSON_GetObjectItem((cJSON *)handle, field);
+}
+
+JsonHandle GetJsonFieldJsonArray(JsonHandle handle, uint32_t num)
+{
+    return cJSON_GetArrayItem((cJSON *)handle, num);
+}
+
+int32_t GetJsonFieldJsonArraySize(JsonHandle handle)
+{
+    return cJSON_GetArraySize((cJSON *)handle);
 }
 
 void AddFieldIntToJson(JsonHandle handle, const char *field, int32_t value)
@@ -170,6 +188,14 @@ char *ConvertJsonToString(JsonHandle handle)
         return ret;
     }
     return NULL;
+}
+
+bool CompareJsonData(JsonHandle handleA, JsonHandle handleB, bool caseSensitive)
+{
+    if (handleA == NULL || handleB == NULL) {
+        return false;
+    }
+    return cJSON_Compare(handleA, handleB, caseSensitive);
 }
 
 #ifdef __cplusplus

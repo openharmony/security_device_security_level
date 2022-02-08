@@ -21,6 +21,9 @@
 
 #define RAMDOM_MAX_LEN 32
 
+#define TYPE_ECDSA_SHA_256 0
+#define TYPE_ECDSA_SHA_384 1
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +33,15 @@ typedef struct RandomValue {
     uint8_t value[RAMDOM_MAX_LEN];
 } RandomValue;
 
+struct DataBuffer {
+    uint8_t *data;
+    uint32_t length;
+};
+
 void GenerateRandom(RandomValue *rand, uint32_t length);
+int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
+    const struct DataBuffer *pbkData, uint32_t algorithm);
+void HashSHA256(const uint8_t *data, uint32_t dataLen, uint8_t *out);
 
 #ifdef __cplusplus
 }
