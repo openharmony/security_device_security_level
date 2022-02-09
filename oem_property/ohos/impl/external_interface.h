@@ -30,9 +30,8 @@ struct CertChainValidateResult {
     uint32_t serialNumLen;
 };
 
-int GetPkInfoListBuffer(bool isSelf, uint8_t *udid, uint32_t udidLen, uint8_t **buffer, uint32_t *bufferLen);
-int DslmCredAttestAdapter(uint8_t *nounce, uint32_t nounceLen, uint8_t *cred, uint32_t credLen,
-    uint8_t *certChain, uint32_t *certChainLen, uint32_t certChainMaxLen);
+int GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, char **pkInfoList);
+int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, uint32_t *certChainLen);
 int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainValidateResult *resultInfo);
 
 void FreeCertChainValidateResult(struct CertChainValidateResult *resultInfo);

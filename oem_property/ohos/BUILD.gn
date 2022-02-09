@@ -70,8 +70,8 @@ ohos_source_set("dslm_ohos_cred_obj") {
 
   include_dirs = [
     "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/include",
-    "//base/security/device_security_level/service/include",
+    "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/services/include",
     "//base/security/deviceauth/interfaces/innerkits",
   ]
 
