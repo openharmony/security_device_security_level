@@ -123,14 +123,18 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const D
 bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t cookie, uint32_t result,
     uint32_t level)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto iter = map_.find(cookie);
-    if (iter == map_.end()) {
-        return false;
+    DeviceIdentify identity;
+    ResultCallback callback;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto iter = map_.find(cookie);
+        if (iter == map_.end()) {
+            return false;
+        }
+        identity = iter->second.identity;
+        callback = iter->second.callback;
+        map_.erase(iter);
     }
-    DeviceIdentify identity = iter->second.identity;
-    ResultCallback callback = iter->second.callback;
-    map_.erase(iter);
 
     if (callback != nullptr) {
         auto creator = [result, level]() {
