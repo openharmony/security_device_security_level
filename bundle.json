@@ -5,7 +5,7 @@
     "license": "Apache License 2.0",
     "publishAs": "code-segment",
     "segment": {
-        "destpath": "base/security/device_security_level"
+        "destPath": "base/security/device_security_level"
     },
     "dirs": {},
     "scripts": {},
