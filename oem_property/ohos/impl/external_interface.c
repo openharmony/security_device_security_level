@@ -1,5 +1,5 @@
 #/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,10 +28,113 @@
 
 char g_keyData[] = "hi_key_data";
 
-char nounceStr[] = "{\"challenge\": \"7856341278563412\",\"pkInfoList\": \"[{\\\"groupId\\\" : \\\"0\\\", \\\"publicKey\\\" : \\\"0\\\"}]\"}";
-char credStr[] = 
-        "ewogICAgInR5cCI6ICJEU0wiLAp9.eyJzZWN1cml0eUxldmVsIjoiU0w1IiwibWFudWZhY3R1cmUiOiJIVUFXRUkiLCJzaWduVGltZSI6IjIwMjExMjA3MTAzNzQ4IiwibW9kZWwiOiJKQUQtQU4wMCIsInR5cGUiOiJkZWJ1ZyIsInVkaWQiOiJmMzZkOTE4ZDBkYzkyMWM5YTJiMjVkNTI1NzBjYWZlZDcxM2ExMTYzOGY4YzNiOGZiYzI4Nzc5ZmQyMjBlNzgyIiwidmVyc2lvbiI6IjEuMCIsImJyYW5kIjoiSFVBV0VJIn0=.MEUCICg_vkckw64ft9X-K9hP9kNvOPzKqMRuXyFwLAJg9kr2AiEA131hT0GappcsJhFXaMz0tPWIdxciO5d1BBtHmfOpvjs.W3sidXNlclB1YmxpY0tleSI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRTZTRlFzWkZiLWxHbFkwRnpfR2Y2Q3dNWG5zRTRteVBXcUpRR0JPMDU1NjVqRXdSZkZENkIzMG00ZE9iQ2JFUzZ6T2lYek9EUEdBUEpqNkx5UklNdkl3IiwiYWxnb3JpdGhtIjoiU0hBMzg0d2l0aEVDRFNBIiwic2lnbmF0dXJlIjoiTUdZQ01RRFM5d255ZFRKdkFTejRhelp5TE9pbHBVQzVFb1B6QlJac0M1OU01N0RyWGluWFVJa2gySFhoNVA0ZTQ0M2daalFDTVFDRng4b0V0a3p5YkotWmw1RUExWS16UWdYQ3MxYXdLS0J4VWJZeG1IUGZTal9HUEQzcmRpaC01WUpwSnF1bUt0VSJ9LHsidXNlclB1YmxpY0tleSI6Ik1IWXdFQVlIS29aSXpqMENBUVlGSzRFRUFDSURZZ0FFU09kcnY3eXhEaFoxWmRUdDB3QUxCMnhYc0ZsUGV2TkQ0b1lfWE44QWtFTVllWVVyTXBkX1hTQTdlTHo5eVJaa08yX3RoSEx4bUpURGZrOUJFeTlTa0xxUF9xOGZJdzBhSXNBMHI0SlN0djh4YVo0RWxVTGxPV2QxXzF4YV9fdnIiLCJhbGdvcml0aG0iOiJTSEEzODR3aXRoRUNEU0EiLCJzaWduYXR1cmUiOiJNR1VDTUc1LXFFaUtfQ0xIYjNDRXdieU5PbFp4UXpqWGtwc2FnR3FCUkUxZUJjUDBacWhndV9nMEI5dFZhaXg2bE9Pa193SXhBTmdQWFY1dk9EZjFBSTdjckVVajhEMmNQbEVvcEc2LXgyUTM2UUoyMXIwdGlTMmJMT2Y0UE94cHpJN3ZRSVRDaVEifSx7InVzZXJQdWJsaWNLZXkiOiJNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRW8zQ3VDRUxDN1NpTGFKQ0JDRGRjQ3BldGdJR2toWkxzRl9hMGRkVTFDUjd3NTR6amlzQ1haR191eTZka0ZlZmtlM1Uxb0JpbDR4aTU5TnF5Wk5nUVBsQUhJVUd5a1FxWXhweDVaMGpBQkJKeUFKVWxwdHEzSnVaTlRBN0g5VUs3IiwiYWxnb3JpdGhtIjoiU0hBMzg0d2l0aEVDRFNBIiwic2lnbmF0dXJlIjoiTUdZQ01RRF9Sa2ZvRm0tWkJUM05HVzcwZV9BTkh1NDB6TlZNZ1VkbHRObG5TYThtQ1ZpRy1nbkFmNzVTRk11dU80VUxNTXNDTVFET3J4TG1kVTh0OENXLTBkZHUwZVJ4VHJ3Q3JJbVBhcjBqVTBMYkFvVGVkTWF2MzhQQUxrT21NSDBPRE50Z1V3VSJ9XQ==";
+#define HKS_TAG_ATTESTATION_ID_UDID (HKS_TAG_TYPE_BYTES | 513)
+#define HKS_TAG_ATTESTATION_ID_VERSION_INFO (HKS_TAG_TYPE_BYTES | 514)
 
+static int32_t HksAttestKey2(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksCertChain *certChain)
+{
+    if ((keyAlias == NULL) || (paramSet == NULL) || (certChain == NULL)) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    if (certChain->certs == NULL || certChain->certs->data == NULL ||
+        HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    uint8_t *tmp = certChain->certs->data;
+    uint32_t offSet = 0;
+    uint32_t dataLen;
+    uint32_t totalSize = 0;
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        switch (paramSet->params[i].tag) {
+            case HKS_TAG_ATTESTATION_CHALLENGE:
+            case HKS_TAG_ATTESTATION_ID_SERIAL:
+            case HKS_TAG_ATTESTATION_ID_UDID:
+            case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
+            case HKS_TAG_ATTESTATION_ID_VERSION_INFO:
+                (void)memcpy_s(tmp + offSet, sizeof(uint32_t), &(paramSet->params[i].tag), sizeof(uint32_t));
+                offSet += sizeof(uint32_t);
+                dataLen = paramSet->params[i].blob.size;
+                (void)memcpy_s(tmp + offSet, sizeof(uint32_t), &dataLen, sizeof(uint32_t));
+                offSet += sizeof(uint32_t);
+                (void)memcpy_s(tmp + offSet, dataLen, paramSet->params[i].blob.data, dataLen);
+                offSet += dataLen;
+                totalSize += (sizeof(uint32_t) * 2 + dataLen);
+                break;
+            default:
+                break;
+        }
+    }
+
+    certChain->certs->size = totalSize;
+    certChain->certsCount = 4;
+    return HKS_SUCCESS;
+}
+
+static int32_t HksValidateCertChain2(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
+{
+    if (certChain->certsCount != 4) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint8_t *tmp = certChain->certs->data;
+    uint32_t offSet = 0;
+    uint32_t dataLen;
+    struct HksParam tmpParams[5] = {0};
+    for (uint32_t i = 0; i < 2; i++) {
+        tmpParams[i].tag = *((uint32_t *)(&tmp[offSet]));
+        offSet += sizeof(uint32_t);
+        dataLen = *((uint32_t *)(&tmp[offSet]));
+        tmpParams[i].blob.size = dataLen;
+        offSet += sizeof(uint32_t);
+        SECURITY_LOG_INFO("len = %{public}d", dataLen);
+        tmpParams[i].blob.data = (uint8_t *)MALLOC(dataLen);
+        if (tmpParams[i].blob.data == NULL) {
+            SECURITY_LOG_INFO("error");
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        (void)memcpy_s(tmpParams[i].blob.data, dataLen, tmp + offSet, dataLen);
+        offSet += dataLen;
+    }
+
+    uint32_t tmpTag;
+    for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
+        tmpTag = paramSetOut->params[i].tag;
+        switch (tmpTag) {
+            case HKS_TAG_ATTESTATION_CHALLENGE:
+            case HKS_TAG_ATTESTATION_ID_SERIAL:
+            case HKS_TAG_ATTESTATION_ID_UDID:
+            case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
+            case HKS_TAG_ATTESTATION_ID_VERSION_INFO:
+                for (uint32_t i = 0; i < 2; i++) {
+                    if (tmpTag == tmpParams[i].tag) {
+                        paramSetOut->params[i].blob.size = tmpParams[i].blob.size;
+                        (void)memcpy_s(paramSetOut->params[i].blob.data, tmpParams[i].blob.size, tmpParams[i].blob.data,
+                            tmpParams[i].blob.size);
+                    } else {
+                        continue;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+void static fix(struct CertChainValidateResult *resultInfo)
+{
+    //(void)memcpy_s(resultInfo->nounce, resultInfo->nounceLen, (uint8_t *)g_challengeInfo, strlen(g_challengeInfo) +
+    // 1);
+    resultInfo->nounce = resultInfo->nounce + 8;
+    resultInfo->nounceLen = strlen((char *)resultInfo->nounce) + 1;
+
+    //(void)memcpy_s(resultInfo->cred, resultInfo->credLen, (uint8_t *)g_secInfo, strlen(g_secInfo) + 1);
+    resultInfo->cred = resultInfo->cred + 8;
+    resultInfo->credLen = strlen((char *)resultInfo->cred) + 1;
+}
 
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax)
 {
@@ -80,12 +183,8 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
     const DeviceGroupManager *interface = GetGmInstance();
     ret = interface->getPkInfoList("dslm_service", paramJson, &resultBuffer, &resultBufferLen);
     if (ret != SUCCESS) {
-        SECURITY_LOG_INFO("GetPkInfoListAdapter failed, continue");
-        char *temp = "[{\"groupId\" : \"0\", \"publicKey\" : \"0\"}]";
-        resultBuffer = (char*)malloc(strlen(temp) + 1);
-        strcpy_s(resultBuffer, strlen(temp) + 1, temp);
-        resultBufferLen = strlen(temp);
-        //return ret;
+        SECURITY_LOG_INFO("getPkInfoList failed! ret = %{public}d", ret);
+        return ERR_CALL_EXTERNAL_FUNC;
     }
     *pkInfoList = (char*)MALLOC(strlen(resultBuffer) + 1);
     if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
@@ -100,6 +199,7 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
 int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, uint32_t *certChainLen)
 {
     SECURITY_LOG_INFO("DslmCredAttestAdapter start");
+
     struct HksParam inputData[] = {
         {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = { strlen(nounceStr) + 1, (uint8_t*)nounceStr } }, // 调试，要保证出来的是带结束符的数据
         {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = { strlen(credStr) + 1, (uint8_t*)credStr } },
@@ -119,11 +219,11 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, ui
     }
 
     struct HksBlob certChainBlob = { 10240,  certChain};
-    struct HksCertChain hksCertChain = { &certChainBlob, 1 };
+    struct HksCertChain hksCertChain = {&certChainBlob, 4};
 
     const struct HksBlob keyAlias = { sizeof(g_keyData), (uint8_t*)g_keyData };
 
-    int32_t ret = HksAttestKey(&keyAlias, inputParam, &hksCertChain);
+    int32_t ret = HksAttestKey2(&keyAlias, inputParam, &hksCertChain);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_INFO("HksAttestKey ret = %{public}d ", ret);
         return ret;
@@ -135,54 +235,51 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, ui
 
 int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainValidateResult *resultInfo)
 {
-    
-    int32_t ret = 0;
+    SECURITY_LOG_INFO("ValidateCertChainAdapter start");
 
-    // 证书链数据，数据长度
-    struct HksBlob certChain = { dataLen, data };
-    resultInfo->nounce = (uint8_t*)malloc(1024);
-    resultInfo->cred = (uint8_t*)malloc(10240);
-    struct HksBlob challengeBlob = { 1024, resultInfo->nounce};
-    struct HksBlob credBlob = { 10240, resultInfo->cred};
-
-    // 验证后返回数据，需要提前分配空间
-    struct HksParam tmpParams[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = challengeBlob },
-        {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = credBlob },
+    struct HksParam outputData[] = {
+        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {resultInfo->nounceLen, resultInfo->nounce}},
+        {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {resultInfo->credLen, resultInfo->cred}},
     };
-
-    struct HksParamSet *resultParam = NULL;
-    if (HksInitParamSet(&resultParam) != HKS_SUCCESS) {
-        SECURITY_LOG_INFO("ValidateCertChainAdapter error 1");
+    struct HksParamSet *outputParam = NULL;
+    if (HksInitParamSet(&outputParam) != HKS_SUCCESS) {
         return -1;
     }
-    if (HksAddParams(resultParam, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) != HKS_SUCCESS) {
-        SECURITY_LOG_INFO("ValidateCertChainAdapter error 2");
+    if (HksAddParams(outputParam, outputData, sizeof(outputData) / sizeof(outputData[0])) != HKS_SUCCESS) {
         return -1;
     }
-    if (HksBuildParamSet(&resultParam) != HKS_SUCCESS) {
-        SECURITY_LOG_INFO("ValidateCertChainAdapter error 3");    
+    if (HksBuildParamSet(&outputParam) != HKS_SUCCESS) {
         return -1;
     }
 
-    ret = HksValidateCertChain(&certChain, resultParam);
+    struct HksBlob certChainBlob = {dataLen, data};
+    struct HksCertChain hksCertChain = {&certChainBlob, 4};
+    int32_t ret = HksValidateCertChain2(&hksCertChain, outputParam);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_INFO("HksValidateCertChain error, ret = %{public}d", ret);
+        return ERR_CALL_EXTERNAL_FUNC;
     }
-    (void)memcpy_s(resultInfo->nounce, 1024, data, dataLen);
-    resultInfo->nounceLen = dataLen;
-
-    (void)memcpy_s(resultInfo->nounce, 1024, (uint8_t*)nounceStr, strlen(nounceStr) + 1);
-    resultInfo->nounceLen = dataLen;
-    (void)memcpy_s(resultInfo->cred, 10240, (uint8_t*)credStr, strlen(credStr) + 1);
-    resultInfo->credLen = strlen(credStr);
-
+    fix(resultInfo);
     SECURITY_LOG_INFO("resultInfo nounce len = %{public}d", resultInfo->nounceLen);
     SECURITY_LOG_INFO("resultInfo cred len = %{public}d", resultInfo->credLen);
-    return ret;
+
+    SECURITY_LOG_INFO("resultInfo nounce = %{public}s", (char *)resultInfo->nounce);
+    SECURITY_LOG_INFO("resultInfo cred = %{public}s", (char *)resultInfo->cred);
+
+    return SUCCESS;
 }
 
-void FreeCertChainValidateResult(struct CertChainValidateResult *resultInfo)
+void InitCertChainValidateResult(struct CertChainValidateResult *resultInfo, uint32_t maxLen)
+{
+    maxLen = 10240;
+    (void)memset_s(resultInfo, sizeof(struct CertChainValidateResult), 0, sizeof(struct CertChainValidateResult));
+    resultInfo->nounce = (uint8_t *)MALLOC(maxLen);
+    resultInfo->nounceLen = maxLen;
+    resultInfo->cred = (uint8_t *)MALLOC(maxLen);
+    resultInfo->credLen = maxLen;
+}
+
+void DestroyCertChainValidateResult(struct CertChainValidateResult *resultInfo)
 {
     if (resultInfo == NULL) {
         return;
