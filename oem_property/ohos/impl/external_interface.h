@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ int GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, char **
 int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, uint32_t *certChainLen);
 int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainValidateResult *resultInfo);
 
-void FreeCertChainValidateResult(struct CertChainValidateResult *resultInfo);
+void InitCertChainValidateResult(struct CertChainValidateResult *resultInfo, uint32_t maxLen);
+void DestroyCertChainValidateResult(struct CertChainValidateResult *resultInfo);
 
 #endif  // EXTERNAL_INTERFACE_H
