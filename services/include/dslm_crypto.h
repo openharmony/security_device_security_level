@@ -41,7 +41,7 @@ struct DataBuffer {
 void GenerateRandom(RandomValue *rand, uint32_t length);
 int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
     const struct DataBuffer *pbkData, uint32_t algorithm);
-void HashSHA256(const uint8_t *data, uint32_t dataLen, uint8_t *out);
+void CallHashSha256(const uint8_t *data, uint32_t dataLen, uint8_t *out);
 
 #ifdef __cplusplus
 }
