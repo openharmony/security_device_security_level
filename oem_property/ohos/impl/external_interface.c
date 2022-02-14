@@ -160,8 +160,7 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
 
     char udidStr[UDID_STRING_LENGTH] = {0};
     char paramJson[HICHIAN_INPUT_PARAM_STRING_LENGTH] = {0};
-    char *resultBuffer;
-    uint32_t resultBufferLen;
+    char resultBuffer[] = "temp data";
 
     if (memcpy_s(udidStr, UDID_STRING_LENGTH, udid, udidLen) != EOK) {
         return ERR_MEMORY_ERR;
@@ -172,18 +171,11 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
         return ret;
     }
 
-    const DeviceGroupManager *interface = GetGmInstance();
-    ret = interface->getPkInfoList("dslm_service", paramJson, &resultBuffer, &resultBufferLen);
-    if (ret != SUCCESS) {
-        SECURITY_LOG_INFO("getPkInfoList failed! ret = %{public}d", ret);
-        return ERR_CALL_EXTERNAL_FUNC;
-    }
     *pkInfoList = (char*)MALLOC(strlen(resultBuffer) + 1);
     if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
         return ERR_MEMORY_ERR;
     }
     SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
-    interface->destroyInfo(&resultBuffer);
     return SUCCESS;
 }
 
