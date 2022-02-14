@@ -340,7 +340,7 @@ static int32_t CheckNounceOfCertChain(const struct NounceOfCertChain *nounce, ui
     int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char*)nounce->pbkInfoList);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("compare nounce public key info failed!");
-        // return ret;
+        return ret;
     }
     return SUCCESS;
 }
