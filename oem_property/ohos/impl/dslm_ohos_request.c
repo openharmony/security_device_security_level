@@ -65,9 +65,9 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
 {
     SECURITY_LOG_INFO("Invoke RequestOhosDslmCred");
 
-    char *pkInfoListStr = NULL;      // malloc in inner fuction, need free
-    char *nounceStr = NULL;          // malloc in inner fuction, need free
-    uint8_t *certChain = (uint8_t*)MALLOC(10240);       // malloc in inner fuction, need free
+    char *pkInfoListStr = NULL;
+    char *nounceStr = NULL;
+    uint8_t *certChain = (uint8_t *)MALLOC(10240);
     uint32_t certChainLen = 0;
 
     char credStr[CRED_STR_LEN_MAX] = { 0 };
@@ -81,7 +81,7 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
             break;
         }
 
-        ret = TransToJsonStr(obj->challenge, pkInfoListStr, &nounceStr);        // 换个名字
+        ret = TransToJsonStr(obj->challenge, pkInfoListStr, &nounceStr);
         if (ret != SUCCESS) {
             SECURITY_LOG_INFO("TransToJsonStr failed");
             break;
