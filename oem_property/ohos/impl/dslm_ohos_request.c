@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,55 +14,120 @@
  */
 
 #include "dslm_ohos_request.h"
+#include "external_interface.h"
 
+#include <securec.h>
 #include <string.h>
 
-#include "securec.h"
+#include "utils_hexstring.h"
+#include "utils_json.h"
 #include "utils_log.h"
-
 #include "utils_mem.h"
+
+#define CRED_CFG_FILE_POSITION  "/system/etc/dslm_finger.cfg"
+#define CRED_STR_LEN_MAX 4096
+#define CHALLENGE_STRING_LENGTH 32
+
+static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
+{
+    FILE *fp = NULL;
+    fp = fopen(CRED_CFG_FILE_POSITION, "r");
+    if (fp == NULL) {
+        SECURITY_LOG_INFO("fopen cred file failed!");
+        return ERR_INVALID_PARA;
+    }
+    int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
+    if (ret == -1) {
+        ret = ERR_INVALID_PARA;
+    } else {
+        ret = SUCCESS;
+    }
+    if (fclose(fp) != 0) {
+        ret = ERR_INVALID_PARA;
+    }
+    return ret;
+}
+
+static int32_t TransToJsonStr(uint64_t challenge, const char *pkInfoListStr, char **nounceStr)
+{
+    JsonHandle json = CreateJson(NULL);
+    if (json == NULL) {
+        return ERR_INVALID_PARA;
+    }
+
+    // add challenge
+
+    char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
+    char *saveData = &challengeStr[0];
+    ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)saveData, CHALLENGE_STRING_LENGTH);
+    AddFieldStringToJson(json, "challenge", saveData);
+
+    // add pkInfoList
+    AddFieldStringToJson(json, "pkInfoList", pkInfoListStr);
+
+    // tran to json
+    *nounceStr = (char *)ConvertJsonToString(json);
+    if (*nounceStr == NULL) {
+        DestroyJson(json);
+        return ERR_JSON_ERR;
+    }
+    DestroyJson(json);
+    return SUCCESS;
+}
 
 int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff)
 {
     SECURITY_LOG_INFO("Invoke RequestOhosDslmCred");
-    static const char *credStr =
-        "ewogICAgInR5cCI6ICJEU0wiLAp9."
-        "eyJzZWN1cml0eUxldmVsIjoiU0w0IiwibWFudWZhY3R1cmUiOiJNQU5VIiwic2lnblRpbWUiOiIyMDIxMTEwOTExMjczNCIsIm1vZGVsIjoiTU"
-        "9ERU"
-        "wiLCJ0eXBlIjoiZGVidWciLCJ1ZGlkIjoiMTIzNDU2Nzg5MEFCQ0RFRiIsInZlcnNpb24iOiIxLjAiLCJicmFuZCI6IkJSQU5EIiwic29mdHdh"
-        "cmVW"
-        "ZXJzaW9uIjoiMi4xLjAuNDIifQ==.MEUCIQCMglMcuEUhJBwbkPbgNi_VI7ksPkGZXBPMQI_YmepubQIgPuF9WLjaTum9d_"
-        "KhqmVdjfRmcFbhPh4Laq2NnlVz3uc."
-        "W3sidXNlclB1YmxpY0tleSI6Ik1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWFnOFZIMzN4OUpDOTYwSWsxejNKNmo1cnk0OV"
-        "JENG"
-        "t0TTBvQUZGenhiNHdOdS1OckZSbm5XbnZmR3hGTW16VFBMLWYxY1NqWGd2UV9NdU9aenVpclNnIiwiYWxnb3JpdGhtIjoiU0hBMzg0d2l0aEVD"
-        "RFNB"
-        "Iiwic2lnbmF0dXJlIjoiTUdVQ01DakdwWEZPNlRjb2NtWFdMdHU1SXQ0LVRJNzFoNzhLdDYyYjZ6Mm9tcnNVWElHcnFsMTZXT0ExV2ZfdDdGSU"
-        "1RZ0"
-        "l4QVBHMlV5T2d0dk1pbi1hbVR6Wi1DN2ZyMWttVl9jODc4ckFnZVlrUGFxWWdPWWpiSGN0QnFzMkJCV05LMGsxTnJRIn0seyJ1c2VyUHVibGlj"
-        "S2V5"
-        "IjoiTUhZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUNJRFlnQUVvM0N1Q0VMQzdTaUxhSkNCQ0RkY0NwZXRnSUdraFpMc0ZfYTBkZFUxQ1I3dzU0em"
-        "ppc0"
-        "NYWkdfdXk2ZGtGZWZrZTNVMW9CaWw0eGk1OU5xeVpOZ1FQbEFISVVHeWtRcVl4cHg1WjBqQUJCSnlBSlVscHRxM0p1Wk5UQTdIOVVLNyIsImFs"
-        "Z29y"
-        "aXRobSI6IlNIQTM4NHdpdGhFQ0RTQSIsInNpZ25hdHVyZSI6Ik1HVUNNQ1ZXUWIxdXFLb1E5SUFMaWJiWUlUX1NWSENXem84akcwRG1WNGt6Q0"
-        "JNQ3"
-        "pRQU0xZEFaSERGWFdidGUyY0FfWXdJeEFJSXVmaXJHbnN3NlBEV0txRm1mQmQ5Y3BubEFyLXVXV0RqZ2xuenoyRmx2LXNkaVhYRnR3amo3Y1hU"
-        "TF9F"
-        "NmJRUSJ9LHsidXNlclB1YmxpY0tleSI6Ik1IWXdFQVlIS29aSXpqMENBUVlGSzRFRUFDSURZZ0FFU09kcnY3eXhEaFoxWmRUdDB3QUxCMnhYc0"
-        "ZsUG"
-        "V2TkQ0b1lfWE44QWtFTVllWVVyTXBkX1hTQTdlTHo5eVJaa08yX3RoSEx4bUpURGZrOUJFeTlTa0xxUF9xOGZJdzBhSXNBMHI0SlN0djh4YVo0"
-        "RWxV"
-        "TGxPV2QxXzF4YV9fdnIiLCJhbGdvcml0aG0iOiJTSEEzODR3aXRoRUNEU0EiLCJzaWduYXR1cmUiOiJNR1FDTURmODNSNktLdm9tZnZyZVYycH"
-        "hVSE"
-        "pXb3RwM3BVOUdBWU5tcU1XUmVGcGp6WHpOVjc5dHNrZTBaa21JTVh3TXNBSXdXNUFiOWk4SnlObEp0WDJZcnpaYzJna3RranZ0U2JiSnYwaWhu"
-        "Umdx"
-        "MWNjUHBrVDJOc3F4ekJrZkRqOGhQWllzIn1d";
 
-    DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, strlen(credStr) + 1, (uint8_t *)credStr);
-    if (out == NULL) {
-        return ERR_MEMORY_ERR;
+    char *pkInfoListStr = NULL;
+    char *nounceStr = NULL;
+    uint8_t *certChain = NULL;
+    uint32_t certChainLen = 0;
+
+    char credStr[CRED_STR_LEN_MAX] = { 0 };
+    int32_t ret = GetCredFromCurrentDevice(credStr, CRED_STR_LEN_MAX);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("read data frome CFG failed!");
+        return ret;
     }
-    *credBuff = out;
-    return SUCCESS;
+
+    do {
+        ret = GetPkInfoListStr(true, device->identity, device->length, &pkInfoListStr);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_INFO("GetPkInfoListStr failed");
+            break;
+        }
+
+        ret = TransToJsonStr(obj->challenge, pkInfoListStr, &nounceStr);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_INFO("TransToJsonStr failed");
+            break;
+        }
+
+        ret = DslmCredAttestAdapter(nounceStr, credStr, &certChain, &certChainLen);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_INFO("DslmCredAttestAdapter failed");
+            break;
+        }
+
+        DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
+        if (out == NULL) {
+            ret =  ERR_MEMORY_ERR;
+            SECURITY_LOG_INFO("CreateDslmCred failed");
+            break;
+        }
+        *credBuff = out;
+        ret =  SUCCESS;
+    } while (0);
+
+    if (pkInfoListStr != NULL) {
+        FREE(pkInfoListStr);
+    }
+    if (nounceStr != NULL) {
+        FREE(nounceStr);
+    }
+    if (certChain != NULL) {
+        FREE(certChain);
+    }
+    return ret;
 }

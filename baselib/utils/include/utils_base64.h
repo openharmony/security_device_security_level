@@ -24,6 +24,8 @@ extern "C" {
 
 int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to);
 
+int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to);
+
 uint8_t *Base64EncodeApp(const uint8_t *from, uint32_t fromLen);
 
 #ifdef __cplusplus
