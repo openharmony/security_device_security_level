@@ -16,6 +16,7 @@
 #ifndef SEC_UTILS_JSON_H
 #define SEC_UTILS_JSON_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -32,12 +33,18 @@ int32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *arra
 const char *GetJsonFieldString(JsonHandle handle, const char *field);
 JsonHandle GetJsonFieldJson(JsonHandle handle, const char *field);
 
+JsonHandle GetJsonFieldJsonArray(JsonHandle handle, uint32_t num);
+int32_t GetJsonFieldJsonArraySize(JsonHandle handle);
+
 void AddFieldIntToJson(JsonHandle handle, const char *field, int32_t value);
 void AddFieldIntArrayToJson(JsonHandle handle, const char *field, const int32_t *array, int32_t arrayLen);
+void AddFieldBoolToJson(JsonHandle handle, const char *field, bool value);
 void AddFieldStringToJson(JsonHandle handle, const char *field, const char *value);
 void AddFieldJsonToJson(JsonHandle handle, const char *field, JsonHandle json);
 
 char *ConvertJsonToString(JsonHandle handle);
+
+bool CompareJsonData(JsonHandle handleA, JsonHandle handleB, bool caseSensitive);
 
 #ifdef __cplusplus
 }

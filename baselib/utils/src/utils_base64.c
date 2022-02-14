@@ -15,6 +15,7 @@
 
 #include "utils_base64.h"
 
+#include <securec.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -25,7 +26,8 @@
 extern "C" {
 #endif
 
-#define MAX_MALLOC_LEN (1 * 1024 * 1024)
+#define MAX_MALLOC_LEN  (1 * 1024 * 1024)
+#define RESIZE4(n)      (((n) + 3) & ~3)
 
 static const char *g_base64EncodeTable = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const uint8_t g_base64DecodeTable[256] = { /* 256 due to character size */
@@ -211,6 +213,35 @@ int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to)
     decoded[realLen] = '\0';
     *to = decoded;
     return realLen;
+}
+
+int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
+{
+    if ((src == NULL) || to == NULL) {
+        SECURITY_LOG_DEBUG("Unexpected nullptr!");
+        return 0;
+    }
+    uint32_t sourceLen = strlen((char*)src);
+    uint32_t alignLen = RESIZE4(sourceLen);
+    uint8_t *base64Str = (uint8_t*)malloc(alignLen + 1);
+    if (base64Str == NULL) {
+        SECURITY_LOG_DEBUG("Base64UrlDecodeApp MALLOC fail");
+        return 0;
+    }
+    memset_s(base64Str, alignLen + 1, '=', alignLen + 1);
+    for (uint32_t i = 0; i < sourceLen; i++) {
+        if (src[i] == '-')
+            base64Str[i] = '+';
+        else if (src[i] == '_')
+            base64Str[i] = '/';
+        else
+            base64Str[i] = src[i];
+    }
+    base64Str[alignLen] = '\0';
+    const uint8_t *from = base64Str;
+    int32_t realLength = Base64DecodeApp(from, to);
+    free(base64Str);
+    return realLength;
 }
 
 #ifdef __cplusplus
