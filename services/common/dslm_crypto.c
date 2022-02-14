@@ -14,12 +14,13 @@
  */
 
 #include "dslm_crypto.h"
-#include "device_security_defines.h"
 
-#include "utils_log.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/x509.h>
+
+#include "device_security_defines.h"
+#include "utils_log.h"
 
 void GenerateRandom(RandomValue *rand, uint32_t length)
 {

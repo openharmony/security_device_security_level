@@ -31,7 +31,7 @@ struct CertChainValidateResult {
 };
 
 int GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, char **pkInfoList);
-int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, uint32_t *certChainLen);
+int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, uint32_t *certChainLen);
 int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainValidateResult *resultInfo);
 
 void InitCertChainValidateResult(struct CertChainValidateResult *resultInfo, uint32_t maxLen);

@@ -34,6 +34,7 @@ char g_keyData[] = "hi_key_data";
 
 #define UDID_STRING_LENGTH 65
 #define HICHIAN_INPUT_PARAM_STRING_LENGTH 512
+#define CERT_CHAIN_BASE_LENGTH 4096
 
 static int32_t HksAttestKey2(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain)
@@ -186,8 +187,7 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
     return SUCCESS;
 }
 
-
-int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, uint32_t *certChainLen)
+int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, uint32_t *certChainLen)
 {
     SECURITY_LOG_INFO("DslmCredAttestAdapter start");
 
@@ -209,7 +209,9 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t *certChain, ui
         return -1;
     }
 
-    struct HksBlob certChainBlob = { 10240,  certChain};
+    uint32_t certChainMaxLen = strlen(nounceStr) + strlen(credStr) + CERT_CHAIN_BASE_LENGTH;
+    *certChain = (uint8_t *)malloc(certChainMaxLen);
+    struct HksBlob certChainBlob = {certChainMaxLen, *certChain};
     struct HksCertChain hksCertChain = {&certChainBlob, HKS_INTERFACE_TRANS_PARAM_NUM};
 
     const struct HksBlob keyAlias = { sizeof(g_keyData), (uint8_t*)g_keyData };
