@@ -25,13 +25,17 @@
 #include "utils_mem.h"
 
 #define CRED_CFG_FILE_POSITION  "/system/etc/dslm_finger.cfg"
-#define CRED_STR_LEN_MAX    10240
+#define CRED_STR_LEN_MAX 4096
 #define CHALLENGE_STRING_LENGTH 32
 
 static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 {
     FILE *fp = NULL;
     fp = fopen(CRED_CFG_FILE_POSITION, "r");
+    if (fp == NULL) {
+        SECURITY_LOG_INFO("fopen cred file failed!");
+        return ERR_INVALID_PARA;
+    }
     int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
     if (ret == -1) {
         ret = ERR_INVALID_PARA;
@@ -77,11 +81,11 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
 
     char *pkInfoListStr = NULL;
     char *nounceStr = NULL;
-    uint8_t *certChain = (uint8_t *)MALLOC(10240);
+    uint8_t *certChain = NULL;
     uint32_t certChainLen = 0;
 
     char credStr[CRED_STR_LEN_MAX] = { 0 };
-    int32_t ret = GetCredFromCurrentDevice(credStr, 10240);
+    int32_t ret = GetCredFromCurrentDevice(credStr, CRED_STR_LEN_MAX);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("read data frome CFG failed!");
         return ret;
@@ -100,7 +104,7 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
             break;
         }
 
-        ret = DslmCredAttestAdapter(nounceStr, credStr, certChain, &certChainLen);
+        ret = DslmCredAttestAdapter(nounceStr, credStr, &certChain, &certChainLen);
         if (ret != SUCCESS) {
             SECURITY_LOG_INFO("DslmCredAttestAdapter failed");
             break;
