@@ -60,14 +60,14 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
 
     do {
         ret = EVP_DigestVerifyInit(ctx, NULL, type, NULL, pkey);
-        if(ret != 1) {
+        if (ret != 1) {
             break;
         }
-        if(srcData == NULL) {
+        if (srcData == NULL) {
             SECURITY_LOG_ERROR("srcData  NULL!");
         }
         ret = EVP_DigestUpdate(ctx, srcData->data, srcData->length);
-        if(ret != 1) {
+        if (ret != 1) {
             break;
         }
         if (EVP_DigestVerifyFinal(ctx, sigData->data, sigData->length) <= 0) {
@@ -81,7 +81,7 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
     return ret;
 }
 
-void HashSHA256(const uint8_t *data, uint32_t dataLen, uint8_t *out)
+void CallHashSha256(const uint8_t *data, uint32_t dataLen, uint8_t *out)
 {
     SHA256_CTX sctx;
     SHA256_Init(&sctx);

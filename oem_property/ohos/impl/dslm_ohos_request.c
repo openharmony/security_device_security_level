@@ -16,23 +16,32 @@
 #include "dslm_ohos_request.h"
 #include "external_interface.h"
 
-#include "utils_log.h"
 #include <securec.h>
 #include <string.h>
 
-#include "utils_json.h"
 #include "utils_hexstring.h"
+#include "utils_json.h"
+#include "utils_log.h"
 #include "utils_mem.h"
 
 #define CRED_CFG_FILE_POSITION  "/system/etc/dslm_finger.cfg"
 #define CRED_STR_LEN_MAX    10240
+#define CHALLENGE_STRING_LENGTH 32
 
-static void GetCredFromCurrentDevice(char *credStr)
+static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 {
     FILE *fp = NULL;
     fp = fopen(CRED_CFG_FILE_POSITION, "r");
-    fscanf(fp, "%s", credStr);
-    fclose(fp);
+    int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
+    if (ret == -1) {
+        ret = ERR_INVALID_PARA;
+    } else {
+        ret = SUCCESS;
+    }
+    if (fclose(fp) != 0) {
+        ret = ERR_INVALID_PARA;
+    }
+    return ret;
 }
 
 static int32_t TransToJsonStr(uint64_t challenge, const char *pkInfoListStr, char **nounceStr)
@@ -43,9 +52,10 @@ static int32_t TransToJsonStr(uint64_t challenge, const char *pkInfoListStr, cha
     }
 
     // add challenge
-    char challengeStr[32] = { 0 };
+
+    char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     char *saveData = &challengeStr[0];
-    ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)saveData, 32);
+    ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)saveData, CHALLENGE_STRING_LENGTH);
     AddFieldStringToJson(json, "challenge", saveData);
 
     // add pkInfoList
@@ -71,9 +81,12 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
     uint32_t certChainLen = 0;
 
     char credStr[CRED_STR_LEN_MAX] = { 0 };
-    GetCredFromCurrentDevice(credStr);
+    int32_t ret = GetCredFromCurrentDevice(credStr, 10240);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("read data frome CFG failed!");
+        return ret;
+    }
 
-    int32_t ret = ERR_DEFAULT;
     do {
         ret = GetPkInfoListStr(true, device->identity, device->length, &pkInfoListStr);
         if (ret != SUCCESS) {
