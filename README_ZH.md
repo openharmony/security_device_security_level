@@ -14,7 +14,7 @@
 
 OpenHarmony的分布式技术可以实现不同设备的资源融合，将多个设备虚拟成一个“超级虚拟终端”。在这个“超级虚拟终端”的内部，处理、流转各类用户数据时，需要确保各个节点不因安全能力薄弱，成为整个“超级虚拟终端”的薄弱点，因此引入设备安全等级管理模块来解决这类问题。
 
-OpenHarmony系统安全能力，根植于硬件实现的三个可信根：启动、存储、计算，以基础安全工程能力为依托，重点围绕设备完整性保护、数据机密性保护、漏洞攻防对抗构建相关的安全技术和能力。
+OpenHarmony设备的安全等级取决于设备的系统安全能力。OpenHarmony系统安全能力，根植于硬件实现的三个可信根：启动、存储、计算。基于基础安全工程能力，重点围绕以下三点构建相关的安全技术和能力：设备完整性保护、数据机密性保护、漏洞攻防对抗。
 
 OpenHarmony系统安全架构如下图所示：
 
@@ -57,7 +57,7 @@ OpenHarmony系统安全架构如下图所示：
 ## 约束
 
 - 开发语言：C/C++
-- OpenHarmony设备的默认安全等级为SL1，设备制造商可以根据设备实际情况定制更高的安全等级。
+- OpenHarmony设备的默认安全等级为SL1，设备制造商可以根据设备实际情况[定制](https://gitee.com/openharmony/docs/tree/master/zh-cn/device-dev/subsystems/subsys-security-devicesecuritylevel.md#%E8%AE%BE%E5%A4%87%E5%AE%89%E5%85%A8%E7%AD%89%E7%BA%A7%E5%AE%9A%E5%88%B6)更高的安全等级。
 
 ## 说明
 
@@ -67,10 +67,10 @@ OpenHarmony系统安全架构如下图所示：
 
 | 接口名                                                                                                                                       | 说明                     |
 | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| int32_t RequestDeviceSecurityInfo(const DeviceIdentify *identify, const RequestOption *option, DeviceSecurityInfo **info);                | 请求获取某设备的设备安全等级信息（同步接口） |
-| int32_t RequestDeviceSecurityInfoAsync(const DeviceIdentify *identify, const RequestOption *option, DeviceSecurityInfoCallback callback); | 请求获取某设备的设备安全等级信息（异步接口） |
-| void FreeDeviceSecurityInfo(DeviceSecurityInfo *info);                                                                                    | 释放设备安全等级信息             |
-| int32_t GetDeviceSecurityLevelValue(const DeviceSecurityInfo *info, int32_t *level);                                                      | 从设备安全等级信息中提取对应的设备安全等级  |
+| int32_t RequestDeviceSecurityInfo(const DeviceIdentify \*identify, const RequestOption \*option, DeviceSecurityInfo **info);                | 请求获取某设备的设备安全等级信息（同步接口） |
+| int32_t RequestDeviceSecurityInfoAsync(const DeviceIdentify \*identify, const RequestOption \*option, DeviceSecurityInfoCallback callback); | 请求获取某设备的设备安全等级信息（异步接口） |
+| void FreeDeviceSecurityInfo(DeviceSecurityInfo \*info);                                                                                    | 释放设备安全等级信息             |
+| int32_t GetDeviceSecurityLevelValue(const DeviceSecurityInfo \*info, int32_t \*level);                                                      | 从设备安全等级信息中提取对应的设备安全等级  |
 
 ### 使用说明
 
@@ -87,8 +87,8 @@ OpenHarmony系统安全架构如下图所示：
 2. 头文件依赖添加
 
     ```cpp
-    #include "device_security_defines.h"
-    #include "device_security_info.h"
+    #include "device_security_defines.h" // 关键数据结构定义头文件
+    #include "device_security_info.h"    // 接口函数定义头文件
     ```
 
 - 接口使用示例
