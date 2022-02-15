@@ -37,4 +37,4 @@ int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainVa
 void InitCertChainValidateResult(struct CertChainValidateResult *resultInfo, uint32_t maxLen);
 void DestroyCertChainValidateResult(struct CertChainValidateResult *resultInfo);
 
-#endif  // EXTERNAL_INTERFACE_H
+#endif // EXTERNAL_INTERFACE_H

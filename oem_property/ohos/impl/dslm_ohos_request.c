@@ -24,7 +24,7 @@
 #include "utils_log.h"
 #include "utils_mem.h"
 
-#define CRED_CFG_FILE_POSITION  "/system/etc/dslm_finger.cfg"
+#define CRED_CFG_FILE_POSITION "/system/etc/dslm_finger.cfg"
 #define CRED_STR_LEN_MAX 4096
 #define CHALLENGE_STRING_LENGTH 32
 
@@ -56,7 +56,6 @@ static int32_t TransToJsonStr(uint64_t challenge, const char *pkInfoListStr, cha
     }
 
     // add challenge
-
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     char *saveData = &challengeStr[0];
     ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)saveData, CHALLENGE_STRING_LENGTH);
@@ -84,7 +83,7 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
     uint8_t *certChain = NULL;
     uint32_t certChainLen = 0;
 
-    char credStr[CRED_STR_LEN_MAX] = { 0 };
+    char credStr[CRED_STR_LEN_MAX] = {0};
     int32_t ret = GetCredFromCurrentDevice(credStr, CRED_STR_LEN_MAX);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("read data frome CFG failed!");
@@ -112,12 +111,12 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
 
         DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
         if (out == NULL) {
-            ret =  ERR_MEMORY_ERR;
+            ret = ERR_MEMORY_ERR;
             SECURITY_LOG_INFO("CreateDslmCred failed");
             break;
         }
         *credBuff = out;
-        ret =  SUCCESS;
+        ret = SUCCESS;
     } while (0);
 
     if (pkInfoListStr != NULL) {
