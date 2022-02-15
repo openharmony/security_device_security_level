@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "device_security_defines.h"
 #include "external_interface.h"
+#include "device_security_defines.h"
 
 #include <securec.h>
 
@@ -24,7 +24,6 @@
 #include "utils_json.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-
 
 char g_keyData[] = "hi_key_data";
 
@@ -160,7 +159,7 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
 
     char udidStr[UDID_STRING_LENGTH] = {0};
     char paramJson[HICHIAN_INPUT_PARAM_STRING_LENGTH] = {0};
-    char resultBuffer[] = "temp data";
+    char resultBuffer[] = "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]";
 
     if (memcpy_s(udidStr, UDID_STRING_LENGTH, udid, udidLen) != EOK) {
         return ERR_MEMORY_ERR;
@@ -171,7 +170,7 @@ int32_t GetPkInfoListStr(bool isSelf, const uint8_t *udid, uint32_t udidLen, cha
         return ret;
     }
 
-    *pkInfoList = (char*)MALLOC(strlen(resultBuffer) + 1);
+    *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
     if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
         return ERR_MEMORY_ERR;
     }
@@ -206,7 +205,7 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
     struct HksBlob certChainBlob = {certChainMaxLen, *certChain};
     struct HksCertChain hksCertChain = {&certChainBlob, HKS_INTERFACE_TRANS_PARAM_NUM};
 
-    const struct HksBlob keyAlias = { sizeof(g_keyData), (uint8_t*)g_keyData };
+    const struct HksBlob keyAlias = {sizeof(g_keyData), (uint8_t *)g_keyData};
 
     int32_t ret = HksAttestKey2(&keyAlias, inputParam, &hksCertChain);
     if (ret != HKS_SUCCESS) {
