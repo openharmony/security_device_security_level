@@ -389,7 +389,7 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
     }
 
     const SessionAttribute attr = {
-        .dataType = TYPE_MESSAGE,
+        .dataType = TYPE_BYTES,
     };
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     int ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
