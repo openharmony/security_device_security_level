@@ -27,13 +27,16 @@
 
 char g_keyData[] = "hi_key_data";
 
-#define HKS_TAG_ATTESTATION_ID_UDID (HKS_TAG_TYPE_BYTES | 513)
-#define HKS_TAG_ATTESTATION_ID_VERSION_INFO (HKS_TAG_TYPE_BYTES | 514)
-#define HKS_INTERFACE_TRANS_PARAM_NUM 2
+#define DSLM_HKS_TAG_ATTESTATION_CHALLENGE (HKS_TAG_TYPE_BYTES | 511)
+#define DSLM_HKS_TAG_ATTESTATION_ID_SERIAL (HKS_TAG_TYPE_BYTES | 512)
+#define DSLM_HKS_TAG_ATTESTATION_ID_UDID (HKS_TAG_TYPE_BYTES | 513)
+#define DSLM_HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO (HKS_TAG_TYPE_BYTES | 514)
+#define DSLM_HKS_TAG_ATTESTATION_ID_VERSION_INFO (HKS_TAG_TYPE_BYTES | 515)
+#define DSLM_HKS_INTERFACE_TRANS_PARAM_NUM 2
 
 #define UDID_STRING_LENGTH 65
 #define HICHIAN_INPUT_PARAM_STRING_LENGTH 512
-#define CERT_CHAIN_BASE_LENGTH 4096
+#define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 static int32_t HksAttestKey2(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain)
@@ -52,11 +55,11 @@ static int32_t HksAttestKey2(const struct HksBlob *keyAlias, const struct HksPar
     uint32_t totalSize = 0;
     for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
         switch (paramSet->params[i].tag) {
-            case HKS_TAG_ATTESTATION_CHALLENGE:
-            case HKS_TAG_ATTESTATION_ID_SERIAL:
-            case HKS_TAG_ATTESTATION_ID_UDID:
-            case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
-            case HKS_TAG_ATTESTATION_ID_VERSION_INFO:
+            case DSLM_HKS_TAG_ATTESTATION_CHALLENGE:
+            case DSLM_HKS_TAG_ATTESTATION_ID_SERIAL:
+            case DSLM_HKS_TAG_ATTESTATION_ID_UDID:
+            case DSLM_HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
+            case DSLM_HKS_TAG_ATTESTATION_ID_VERSION_INFO:
                 (void)memcpy_s(tmp + offSet, sizeof(uint32_t), &(paramSet->params[i].tag), sizeof(uint32_t));
                 offSet += sizeof(uint32_t);
                 dataLen = paramSet->params[i].blob.size;
@@ -72,13 +75,13 @@ static int32_t HksAttestKey2(const struct HksBlob *keyAlias, const struct HksPar
     }
 
     certChain->certs->size = totalSize;
-    certChain->certsCount = HKS_INTERFACE_TRANS_PARAM_NUM;
+    certChain->certsCount = DSLM_HKS_INTERFACE_TRANS_PARAM_NUM;
     return HKS_SUCCESS;
 }
 
 static int32_t HksValidateCertChain2(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
 {
-    if (certChain->certsCount != HKS_INTERFACE_TRANS_PARAM_NUM) {
+    if (certChain->certsCount != DSLM_HKS_INTERFACE_TRANS_PARAM_NUM) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -86,7 +89,7 @@ static int32_t HksValidateCertChain2(const struct HksCertChain *certChain, struc
     uint32_t offSet = 0;
     uint32_t dataLen;
     struct HksParam tmpParams[5] = {0};
-    for (uint32_t i = 0; i < HKS_INTERFACE_TRANS_PARAM_NUM; i++) {
+    for (uint32_t i = 0; i < DSLM_HKS_INTERFACE_TRANS_PARAM_NUM; i++) {
         tmpParams[i].tag = *((uint32_t *)(&tmp[offSet]));
         offSet += sizeof(uint32_t);
         dataLen = *((uint32_t *)(&tmp[offSet]));
@@ -105,12 +108,12 @@ static int32_t HksValidateCertChain2(const struct HksCertChain *certChain, struc
     for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
         tmpTag = paramSetOut->params[i].tag;
         switch (tmpTag) {
-            case HKS_TAG_ATTESTATION_CHALLENGE:
-            case HKS_TAG_ATTESTATION_ID_SERIAL:
-            case HKS_TAG_ATTESTATION_ID_UDID:
-            case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
-            case HKS_TAG_ATTESTATION_ID_VERSION_INFO:
-                for (uint32_t i = 0; i < HKS_INTERFACE_TRANS_PARAM_NUM; i++) {
+            case DSLM_HKS_TAG_ATTESTATION_CHALLENGE:
+            case DSLM_HKS_TAG_ATTESTATION_ID_SERIAL:
+            case DSLM_HKS_TAG_ATTESTATION_ID_UDID:
+            case DSLM_HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
+            case DSLM_HKS_TAG_ATTESTATION_ID_VERSION_INFO:
+                for (uint32_t i = 0; i < DSLM_HKS_INTERFACE_TRANS_PARAM_NUM; i++) {
                     if (tmpTag == tmpParams[i].tag) {
                         paramSetOut->params[i].blob.size = tmpParams[i].blob.size;
                         (void)memcpy_s(paramSetOut->params[i].blob.data, tmpParams[i].blob.size, tmpParams[i].blob.data,
@@ -183,8 +186,8 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
     SECURITY_LOG_INFO("DslmCredAttestAdapter start");
 
     struct HksParam inputData[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(nounceStr) + 1, (uint8_t *)nounceStr}},
-        {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(credStr) + 1, (uint8_t *)credStr}},
+        {.tag = DSLM_HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(nounceStr) + 1, (uint8_t *)nounceStr}},
+        {.tag = DSLM_HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(credStr) + 1, (uint8_t *)credStr}},
     };
     struct HksParamSet *inputParam = NULL;
     if (HksInitParamSet(&inputParam) != HKS_SUCCESS) {
@@ -200,10 +203,10 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
         return -1;
     }
 
-    uint32_t certChainMaxLen = strlen(nounceStr) + strlen(credStr) + CERT_CHAIN_BASE_LENGTH;
+    uint32_t certChainMaxLen = strlen(nounceStr) + strlen(credStr) + DSLM_CERT_CHAIN_BASE_LENGTH;
     *certChain = (uint8_t *)malloc(certChainMaxLen);
     struct HksBlob certChainBlob = {certChainMaxLen, *certChain};
-    struct HksCertChain hksCertChain = {&certChainBlob, HKS_INTERFACE_TRANS_PARAM_NUM};
+    struct HksCertChain hksCertChain = {&certChainBlob, DSLM_HKS_INTERFACE_TRANS_PARAM_NUM};
 
     const struct HksBlob keyAlias = {sizeof(g_keyData), (uint8_t *)g_keyData};
 
@@ -221,8 +224,8 @@ int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainVa
 {
     SECURITY_LOG_INFO("ValidateCertChainAdapter start");
     struct HksParam outputData[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {resultInfo->nounceLen, resultInfo->nounce}},
-        {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {resultInfo->credLen, resultInfo->cred}},
+        {.tag = DSLM_HKS_TAG_ATTESTATION_CHALLENGE, .blob = {resultInfo->nounceLen, resultInfo->nounce}},
+        {.tag = DSLM_HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {resultInfo->credLen, resultInfo->cred}},
     };
     struct HksParamSet *outputParam = NULL;
     if (HksInitParamSet(&outputParam) != HKS_SUCCESS) {
@@ -236,7 +239,7 @@ int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainVa
     }
 
     struct HksBlob certChainBlob = {dataLen, data};
-    struct HksCertChain hksCertChain = {&certChainBlob, HKS_INTERFACE_TRANS_PARAM_NUM};
+    struct HksCertChain hksCertChain = {&certChainBlob, DSLM_HKS_INTERFACE_TRANS_PARAM_NUM};
     int32_t ret = HksValidateCertChain2(&hksCertChain, outputParam);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_INFO("HksValidateCertChain error, ret = %{public}d", ret);
