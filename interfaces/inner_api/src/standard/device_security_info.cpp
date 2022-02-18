@@ -52,7 +52,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         HiLog::Error(LABEL, "GetDeviceSecurityInfo get registry error.");
         return ERR_IPC_REGISTER_ERR;
     }
-    auto object = registry->GetSystemAbility(SA_ID_DEVICE_SECURITY_MANAGER_SERVICE);
+    auto object = registry->GetSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
     if (object == nullptr) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo get object error.");
         return ERR_IPC_REMOTE_OBJ_ERR;
@@ -102,6 +102,7 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
 static void FreeDeviceSecurityInfoImpl(DeviceSecurityInfo *info)
 {
     if (info != nullptr && info->magicNum == SECURITY_MAGIC) {
+        info->magicNum = 0;
         delete info;
     }
 }
