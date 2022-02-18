@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-REGISTER_SYSTEM_ABILITY_BY_ID(DslmService, SA_ID_DEVICE_SECURITY_MANAGER_SERVICE, true);
+REGISTER_SYSTEM_ABILITY_BY_ID(DslmService, DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, true);
 
 DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate)
 {

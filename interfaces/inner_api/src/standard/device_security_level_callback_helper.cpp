@@ -137,16 +137,13 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t
     }
 
     if (callback != nullptr) {
-        auto creator = [result, level]() {
-            DeviceSecurityInfo *info = new (std::nothrow) DeviceSecurityInfo;
-            if (info != nullptr) {
-                info->magicNum = SECURITY_MAGIC;
-                info->result = result;
-                info->level = level;
-            }
-            return info;
-        };
-        callback(&identity, creator());
+        DeviceSecurityInfo *info = new (std::nothrow) DeviceSecurityInfo;
+        if (info != nullptr) {
+            info->magicNum = SECURITY_MAGIC;
+            info->result = result;
+            info->level = level;
+        }
+        callback(&identity, info);
     }
 
     return true;
