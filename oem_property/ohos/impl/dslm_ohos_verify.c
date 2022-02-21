@@ -634,7 +634,9 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
     } while (0);
 
     DestroyCertChainValidateResult(&resultInfo);
-    SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
-    SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
+    if (ret == SUCCESS) {
+        SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
+        SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
+    }
     return ret;
 }

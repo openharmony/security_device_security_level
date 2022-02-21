@@ -119,6 +119,8 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
         ret = SUCCESS;
     } while (0);
 
+    
+
     if (pkInfoListStr != NULL) {
         FREE(pkInfoListStr);
     }
