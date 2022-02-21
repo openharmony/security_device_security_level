@@ -28,17 +28,16 @@
 
 char g_keyData[] = "hi_key_data";
 
-#define DSLM_HKS_INTERFACE_TRANS_PARAM_NUM 2
-
 #define UDID_STRING_LENGTH 65
 #define HICHIAN_INPUT_PARAM_STRING_LENGTH 512
-#define DSLM_CERT_CHAIN_BASE_LENGTH 2048
+
 //const static char g_secInfoData[] = "hi_security_level_info";
 //const static char g_challengeData[] = "hi_challenge_data";
 const static char g_versionData[] = "hi_os_version_data";
 const static char g_udidData[] = "hi_udid_data";
 const static char g_snData[] = "hi_sn_data";
 const static uint32_t g_size = 4096;
+#define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 //const static struct HksBlob secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
 //const static struct HksBlob challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
@@ -127,56 +126,7 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const s
     return 0;
 }
 
-/*
-static int32_t HksCertificateChainUnpackFromBlob(const struct HksBlob *srcData, struct HksCertChain *certChain)
-{
-    if (srcData->size < sizeof(certChain->certsCount)) {  // srcData的size，四字节比较，必须>=4？ certChain必须提前初始化好
-        SECURITY_LOG_ERROR("invalid certs buffer");
-        return HKS_FAILURE;
-    }
-    uint32_t certsCount = *(uint32_t *)(srcData->data);  // srcData开始四字节为证书级数
-    if (certsCount > certChain->certsCount) {
-        SECURITY_LOG_ERROR("not enough output certs, real count %u, output count %u", certsCount, certChain->certsCount);
-        return HKS_FAILURE;
-    }
-    uint32_t offset = sizeof(certsCount);               // srcData开始四字节偏移，
 
-    struct HksBlob tmp = { 0, NULL };
-    for (uint32_t i = 0; i < certsCount; ++i) {
-        if (GetBlobFromBuffer(&tmp, srcData, &offset) != HKS_SUCCESS) {
-            SECURITY_LOG_ERROR("get certs %d fail", i);
-            return HKS_FAILURE;
-        }
-        if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, tmp.data, tmp.size)) {
-            SECURITY_LOG_ERROR("copy certs %d fail", i);
-            return HKS_FAILURE;
-        }
-
-        certChain->certs[i].size = tmp.size;
-    }
-    certChain->certsCount = certsCount;
-    return HKS_SUCCESS;
-}
-
-
-
-static int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset)
-{
-    if ((*srcOffset > srcBlob->size) || ((srcBlob->size - *srcOffset) < sizeof(blob->size))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));    // size为此级证书长度
-    if (ALIGN_SIZE(size) > (srcBlob->size - *srcOffset - sizeof(blob->size))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-    blob->size = size;
-    *srcOffset += sizeof(blob->size);
-    blob->data = (uint8_t *)(srcBlob->data + *srcOffset);
-    *srcOffset += ALIGN_SIZE(blob->size);
-    return HKS_SUCCESS;
-}
-*/
 
 #define MAX_ENTRY 8
 #define TYPE_NOUNCE 0x200
@@ -322,13 +272,6 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
     if (TestGenerateKey(&keyAlias) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("TestGenerateKey failed");
     }
-/*
-    struct HksParam inputData[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(nounceStr) + 1, (uint8_t *)nounceStr}},
-        {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(credStr) + 1, (uint8_t *)credStr}},
-        {.tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias},
-    };
-*/
     struct HksParam inputData[] = {
         { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(credStr) + 1, (uint8_t *)credStr}},
         { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(nounceStr) + 1, (uint8_t *)nounceStr}},
@@ -336,6 +279,7 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
         { .tag = HKS_TAG_ATTESTATION_ID_DEVICE, .blob = udid },
         { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = sn },
         { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
+
     };
     struct HksParamSet *inputParam = NULL;
     if (HksInitParamSet(&inputParam) != HKS_SUCCESS) {
@@ -359,6 +303,7 @@ int DslmCredAttestAdapter(char *nounceStr, char *credStr, uint8_t **certChain, u
         SECURITY_LOG_INFO("ConstructDataToCertChain ret = %{public}d ", ret);
         return ret;
     }
+
 
     ret = HksAttestKey(&keyAlias, inputParam, hksCertChain);
     if (ret != HKS_SUCCESS) {
@@ -427,6 +372,7 @@ int ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct CertChainVa
     showData(&hksCertChain);
     ret = HksValidateCertChain(&hksCertChain, outputParam);
     SECURITY_LOG_INFO("lwk 5.5");
+
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksValidateCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
