@@ -37,7 +37,7 @@ typedef void (*WorkProcess)(const uint8_t *data, uint32_t len);
 
 uint32_t QueueWork(WorkQueue *queue, WorkProcess process, uint8_t *data, uint32_t length);
 
-WorkQueue *CreateWorkQueue(uint32_t capacity);
+WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name);
 
 uint32_t DestroyWorkQueue(WorkQueue *queue);
 
