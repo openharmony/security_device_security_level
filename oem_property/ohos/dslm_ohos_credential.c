@@ -25,8 +25,8 @@ __attribute__((constructor)) static void Constructor(void)
         .initFunc = NULL,
         .requestFunc = RequestOhosDslmCred,
         .verifyFunc = VerifyOhosDslmCred,
-        .credTypeCnt = 1,
-        .credTypeArray = {CRED_TYPE_STANDARD},
+        .credTypeCnt = 2,
+        .credTypeArray = {CRED_TYPE_SMALL, CRED_TYPE_STANDARD},
     };
     InitDslmCredentialFunctions(&func);
 }

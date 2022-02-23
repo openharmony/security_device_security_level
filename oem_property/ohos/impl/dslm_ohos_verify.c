@@ -19,7 +19,8 @@
 #include <string.h>
 
 #include "dslm_crypto.h"
-#include "external_interface.h"
+#include "external_interface_adapter.h"
+#include "parameter.h"
 #include "utils_base64.h"
 #include "utils_hexstring.h"
 #include "utils_json.h"
@@ -228,20 +229,36 @@ static int32_t GenerateDeviceUdid(const char *manufacture, const char *productMo
     return 0;
 }
 
-static int32_t CheckCredInfo(const struct DeviceIdentify *device, const char *serialNum, const DslmCredInfo *info)
+static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCredInfo *info)
 {
+    SECURITY_LOG_DEBUG("CheckCredInfo start!");
     if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
-        if (strncmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
-            return SUCCESS;
-        }
+        char data[68] = {0};
+        memcpy_s(data, 68, device->identity, 64);
+        SECURITY_LOG_DEBUG("identity = %{public}s", data);
+        SECURITY_LOG_DEBUG("udid = %{public}s", info->udid);
+        SECURITY_LOG_DEBUG("manufacture = %{public}s", info->manufacture);
+        SECURITY_LOG_DEBUG("serialStr = %{public}s", GetSerial());
+        if (0) {
+            if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
+                return SUCCESS;
+            }
+            
+            char udidStr[UDID_STRING_LENGTH] = {0};
 
-        char udidStr[UDID_STRING_LENGTH] = {0};
-        GenerateDeviceUdid(info->manufacture, info->model, serialNum, udidStr, UDID_STRING_LENGTH);
-        if (strcasecmp(udidStr, info->udid) == 0) {
-            return SUCCESS;
+            const char* serialStr = GetSerial();
+            if (serialStr == NULL) {
+                return ERR_INVALID_PARA;
+            }
+            
+            GenerateDeviceUdid(info->manufacture, info->model, serialStr, udidStr, UDID_STRING_LENGTH);
+            if (strcasecmp(udidStr, info->udid) == 0) {
+                return SUCCESS;
+            }
+            return ERR_CHECK_CRED_INFO;
         }
-        return ERR_CHECK_CRED_INFO;
     }
+    SECURITY_LOG_DEBUG("CheckCredInfo SUCCESS!");
     return SUCCESS;
 }
 
@@ -350,6 +367,11 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
     struct NounceOfCertChain nounce;
     (void)memset_s(&nounce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
 
+    char udidStr[65] = {0};
+    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
+        return ERR_MEMORY_ERR;
+    }
+
     int32_t ret = ERR_DEFAULT;
     do {
         ret = ParseNounceOfCertChain(jsonStr, &nounce);
@@ -358,7 +380,7 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
             break;
         }
 
-        ret = GetPkInfoListStr(false, (uint8_t *)device->identity, device->length, &pkInfoListStr);
+        ret = GetPkInfoListStr(false, udidStr, &pkInfoListStr);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("GetPkInfoListStr failed!");
             break;
@@ -506,12 +528,9 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
     struct DataBuffer srcData, sigData, pbkData;
     srcData.data = (uint8_t *)srcMsg;
     srcData.length = strlen(srcMsg);
-    SECURITY_LOG_ERROR("src msg = %{public}s", srcMsg);
-    SECURITY_LOG_ERROR("src msgLen = %{public}d", srcData.length);
     pbkData.data = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.data;
     pbkData.length = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.length;
     sigData.length = Base64UrlDecodeApp((uint8_t *)credData->signature, &(sigData.data));
-    SECURITY_LOG_ERROR("sig msgLen = %{public}d", sigData.length);
     if (sigData.data == NULL) {
         FREE(srcMsg);
         return ERR_MEMORY_ERR;
@@ -587,21 +606,48 @@ static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
         // 4. Parse cred payload.
         ret = GetCredPayloadInfo(credData.payload, credInfo);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyCredPayload failed!");
+            SECURITY_LOG_ERROR("VerifyCredData success!");
             break;
         }
     } while (0);
 
     FreeCredData(&credData);
+    if (ret == SUCCESS) {
+        SECURITY_LOG_INFO("VerifyCredData SUCCESS!");
+    }
+    return ret;
+}
+
+static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
+{
+    char *credStr = (char*)malloc(credBuff->credLen + 1);
+    (void)memset_s(credStr, credBuff->credLen + 1, 0, credBuff->credLen + 1);
+    if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK) {
+        return ERR_MEMORY_ERR;
+    }
+
+    int32_t ret = VerifyCredData(credStr, credInfo);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("VerifyCredData failed!");
+        FREE(credStr);
+        return ret;
+    }
+    FREE(credStr);
+
+    ret = CheckCredInfo(device, credInfo);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("CheckCredInfo failed!");
+        return ret;
+    }
+
     return SUCCESS;
 }
 
-int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
+static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
     DslmCredInfo *credInfo)
 {
-    SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
-    struct CertChainValidateResult resultInfo;
-    InitCertChainValidateResult(&resultInfo, credBuff->credLen);
+    struct DslmInfoInCertChain resultInfo;
+    (void)memset_s(&resultInfo, sizeof(struct DslmInfoInCertChain), 0, sizeof(struct DslmInfoInCertChain));
 
     int32_t ret = ERR_DEFAULT;
     do {
@@ -613,30 +659,46 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
         }
 
         // 2. Parses the NOUNCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
-        ret = VerifyNounceOfCertChain((char *)resultInfo.nounce, device, challenge);
+        ret = VerifyNounceOfCertChain(resultInfo.nounceStr, device, challenge);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("verifyNounceOfCertChain failed!");
             break;
         }
 
         // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and vefity it.
-        ret = VerifyCredData((char *)resultInfo.cred, credInfo);
+        ret = VerifyCredData(resultInfo.credStr, credInfo);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("VerifyCredData failed!");
             break;
         }
-
-        ret = CheckCredInfo(device, (char *)resultInfo.serialNum, credInfo);
+        ret = CheckCredInfo(device, credInfo);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("CheckCredInfo failed!");
             break;
         }
     } while (0);
 
-    DestroyCertChainValidateResult(&resultInfo);
+    //DestroyDslmInfoInCertChain(&resultInfo);
     if (ret == SUCCESS) {
         SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
         SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
     }
     return ret;
+}
+
+int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
+    DslmCredInfo *credInfo)
+{
+    SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
+
+    switch (credBuff->type) {
+        case CRED_TYPE_SMALL:
+            return verifySmallDslmCred(device, credBuff, credInfo);
+        case CRED_TYPE_STANDARD:
+            return verifyStandardDslmCred(device, challenge, credBuff, credInfo);
+        default:
+            SECURITY_LOG_ERROR("Invalid cred type!");
+            break;  
+    }
+    return ERR_INVALID_PARA;
 }
