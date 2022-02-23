@@ -65,7 +65,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
   sources = [
     "impl/dslm_ohos_request.c",
     "impl/dslm_ohos_verify.c",
-    "impl/external_interface.c",
+    "impl/external_interface_adapter.c",
   ]
 
   include_dirs = [
@@ -85,6 +85,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "hilog_native:libhilog",
     "huks:libhukssdk",
     "utils_base:utils",
+    "startup_l2:syspara",
   ]
 
   part_name = "device_security_level"

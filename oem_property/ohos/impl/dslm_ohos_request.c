@@ -14,7 +14,7 @@
  */
 
 #include "dslm_ohos_request.h"
-#include "external_interface.h"
+#include "external_interface_adapter.h"
 
 #include <securec.h>
 #include <string.h>
@@ -74,24 +74,20 @@ static int32_t TransToJsonStr(uint64_t challenge, const char *pkInfoListStr, cha
     return SUCCESS;
 }
 
-int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff)
+static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const RequestObject *obj, char* credStr, 
+    uint8_t **certChain, uint32_t *certChainLen)
 {
-    SECURITY_LOG_INFO("Invoke RequestOhosDslmCred");
-
     char *pkInfoListStr = NULL;
     char *nounceStr = NULL;
-    uint8_t *certChain = NULL;
-    uint32_t certChainLen = 0;
+    struct DslmInfoInCertChain saveInfo; 
 
-    char credStr[CRED_STR_LEN_MAX] = {0};
-    int32_t ret = GetCredFromCurrentDevice(credStr, CRED_STR_LEN_MAX);
-    if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("read data frome CFG failed!");
-        return ret;
+    char udidStr[65] = {0};
+    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
+        return ERR_MEMORY_ERR;
     }
-
+    int32_t ret = ERR_DEFAULT;
     do {
-        ret = GetPkInfoListStr(true, device->identity, device->length, &pkInfoListStr);
+        ret = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
         if (ret != SUCCESS) {
             SECURITY_LOG_INFO("GetPkInfoListStr failed");
             break;
@@ -102,33 +98,70 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
             SECURITY_LOG_INFO("TransToJsonStr failed");
             break;
         }
+    
 
-        ret = DslmCredAttestAdapter(nounceStr, credStr, &certChain, &certChainLen);
+        ret = FillDslmInfoInCertChain(&saveInfo, credStr, nounceStr, udidStr);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_INFO("FillDslmInfoInCertChain failed");
+            break;
+        }
+
+        ret = DslmCredAttestAdapter(&saveInfo, certChain, certChainLen);
         if (ret != SUCCESS) {
             SECURITY_LOG_INFO("DslmCredAttestAdapter failed");
             break;
         }
-
-        DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
-        if (out == NULL) {
-            ret = ERR_MEMORY_ERR;
-            SECURITY_LOG_INFO("CreateDslmCred failed");
-            break;
-        }
-        *credBuff = out;
-        ret = SUCCESS;
     } while (0);
-
-    
 
     if (pkInfoListStr != NULL) {
         FREE(pkInfoListStr);
     }
-    if (nounceStr != NULL) {
+    if (pkInfoListStr != NULL) {
         FREE(nounceStr);
-    }
-    if (certChain != NULL) {
-        FREE(certChain);
     }
     return ret;
 }
+
+
+int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff)
+{
+    SECURITY_LOG_INFO("Invoke RequestOhosDslmCred");
+
+    char credStr[CRED_STR_LEN_MAX] = {0};
+    DslmCredBuff *out = NULL;
+    int32_t ret = GetCredFromCurrentDevice(credStr, CRED_STR_LEN_MAX);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("Read cred data from file failed!");
+        return ret;
+    }
+    if (HksAttestIsReadyAdapter() != SUCCESS) {
+        // small type
+        out = CreateDslmCred(CRED_TYPE_SMALL, strlen(credStr), (uint8_t*)credStr);
+    } else {
+        // standard type
+   
+        uint8_t *certChain = NULL;      // malloc, need free
+        uint32_t certChainLen = 0;
+        ret = GenerateDslmCertChain(device, obj, credStr, &certChain, &certChainLen);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_ERROR("GenerateCertChain failed!");
+            if (certChain != NULL) {
+                FREE(certChain);
+            }
+            return ret;
+        }
+        out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
+        if (certChain != NULL) {
+            FREE(certChain);
+        }
+
+    }
+    if (out == NULL) {
+        SECURITY_LOG_INFO("CreateDslmCred failed");
+        return ERR_MEMORY_ERR;
+    }
+    *credBuff = out;
+    SECURITY_LOG_INFO("RequestOhosDslmCred success!");
+    return SUCCESS;
+}
+   
