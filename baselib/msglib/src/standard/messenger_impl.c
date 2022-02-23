@@ -28,6 +28,7 @@
 
 #define MESSENGER_MAGIC_HEAD 0x1234abcd
 #define MESSENGER_PROCESS_QUEUE_SIZE 256
+#define MESSENGER_PROCESS_QUEUE_NAME "messenger_queue"
 typedef struct Messenger {
     uint32_t magicHead;
     WorkQueue *processQueue;
@@ -40,7 +41,7 @@ Messenger *CreateMessengerImpl(const MessengerConfig *cfg)
         return NULL;
     }
 
-    WorkQueue *processQueue = CreateWorkQueue(MESSENGER_PROCESS_QUEUE_SIZE);
+    WorkQueue *processQueue = CreateWorkQueue(MESSENGER_PROCESS_QUEUE_SIZE, MESSENGER_PROCESS_QUEUE_NAME);
     if (processQueue == NULL) {
         return NULL;
     }

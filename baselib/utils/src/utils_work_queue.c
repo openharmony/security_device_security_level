@@ -19,6 +19,7 @@
 #include "utils_work_queue.h"
 
 #include <pthread.h>
+#include <sys/prctl.h>
 
 #include <securec.h>
 
@@ -36,6 +37,7 @@ typedef struct WorkQueue {
     uint32_t capacity;
     uint32_t size;
     pthread_t pthreadId;
+    const char *name;
 } WorkQueue;
 
 typedef struct {
@@ -49,6 +51,9 @@ static void *WorkQueueThread(void *data)
 {
     WorkQueue *queue = (WorkQueue *)data;
     Worker *worker = NULL;
+
+    prctl(PR_SET_NAME, queue->name, 0, 0, 0);
+
     (void)pthread_mutex_lock(&queue->mutex);
     while (queue->state == RUN) {
         while ((IsEmptyList(&queue->head)) && (queue->state == RUN)) {
@@ -81,7 +86,7 @@ static void *WorkQueueThread(void *data)
     return NULL;
 }
 
-WorkQueue *CreateWorkQueue(uint32_t capacity)
+WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name)
 {
     WorkQueue *queue = MALLOC(sizeof(WorkQueue));
     if (queue == NULL) {
@@ -93,6 +98,7 @@ WorkQueue *CreateWorkQueue(uint32_t capacity)
     queue->state = RUN;
     queue->capacity = capacity;
     queue->size = 0;
+    queue->name = name;
 
     int32_t iRet = pthread_mutex_init(&(queue->mutex), NULL);
     if (iRet != 0) {
