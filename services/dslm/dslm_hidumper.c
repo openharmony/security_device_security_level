@@ -15,6 +15,7 @@
 
 #include "dslm_hidumper.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 static void PrintBanner(int fd)
