@@ -112,6 +112,7 @@ OpenHarmony系统安全架构如下图所示：
         ret = GetDeviceSecurityLevelValue(info, &level);
         if (ret != SUCCESS) {
             // 提取信息失败， 此场景建议开发者根据实际情况进行重试
+            FreeDeviceSecurityInfo(info);
             return;
         }
 
@@ -139,6 +140,7 @@ OpenHarmony系统安全架构如下图所示：
         int32_t ret = GetDeviceSecurityLevelValue(info, &level);
         if (ret != SUCCESS) {
             // 获取信息失败。此场景建议开发者根据实际情况进行重试
+            FreeDeviceSecurityInfo(info);
             return;
         }
 
