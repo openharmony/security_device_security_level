@@ -38,7 +38,6 @@ extern "C" {
 typedef struct DslmDeviceInfo {
     ListNode linkNode;
     StateMachine machine;
-    Mutex mutex;
     DeviceIdentify identity;
     uint32_t version;
     uint32_t onlineStatus;
