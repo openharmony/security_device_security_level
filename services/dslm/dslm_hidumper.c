@@ -33,7 +33,7 @@ static void PrintBanner(int fd)
 static void PrintHeader(int fd)
 {
     const DeviceIdentify *device = GetSelfDevice(NULL);
-    char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
+    char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
     errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, device->identity, DEVICE_ID_MAX_LEN);
     if (ret != EOK) {
         return;
@@ -46,7 +46,7 @@ static void DeviceDumper(const DslmDeviceInfo *info, int32_t fd)
     if (info == NULL) {
         return;
     }
-    char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
+    char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
     errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, info->identity.identity, DEVICE_ID_MAX_LEN);
     if (ret == EOK) {
         dprintf(fd, "deviceId: %s\n", deviceName);
