@@ -19,21 +19,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-struct DslmInfoInCertChain {
+struct DslmInfoInCertChain
+{
     char *udidStr;
     char *credStr;
-    char *nounceStr;    // challenge + pkinfoList
+    char *nounceStr; // challenge + pkinfoList
 };
 
-int32_t GetPkInfoListStr(bool isSelf, char* udidStr, char **pkInfoList);
+int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList);
 int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certChain, uint32_t *certChainLen);
 int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInfoInCertChain *resultInfo);
 int32_t HksAttestIsReadyAdapter();
 
-
-//int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo);
-int32_t FillDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo, char* credStr, char* nounceStr, char* udidStr);
+int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo);
 void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo);
-
 
 #endif // EXTERNAL_INTERFACE_ADAPTER_H
