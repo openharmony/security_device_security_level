@@ -58,13 +58,16 @@ static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t *
 static int32_t BufferToHksCertChain(uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain);
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax);
 
-int32_t GetPkInfoListStr(bool isSelf, char* udidStr, char **pkInfoList)
+const char *pkInfoEmpty = "[]";
+const char *pkInfoBase = "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]";
+
+int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
     SECURITY_LOG_INFO("GetPkInfoListStr start");
 
     char paramJson[HICHIAN_INPUT_PARAM_STRING_LENGTH] = {0};
     char *resultBuffer = NULL;
-    uint32_t resultBufferLen = 0;
+    uint32_t resultNum = 0;
 
     int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHIAN_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS)
@@ -74,29 +77,37 @@ int32_t GetPkInfoListStr(bool isSelf, char* udidStr, char **pkInfoList)
     }
 
     const DeviceGroupManager *interface = GetGmInstance();
-    ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultBufferLen);
-    if (ret != SUCCESS) {
+    ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
+    if (ret != SUCCESS)
+    {
         SECURITY_LOG_INFO("getPkInfoList failed! ret = %{public}d", ret);
-        //return ERR_CALL_EXTERNAL_FUNC;
-        char fakeResult[] = "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]";
-        *pkInfoList = (char *)MALLOC(strlen(fakeResult) + 1);
-        if (strcpy_s(*pkInfoList, strlen(fakeResult) + 1, fakeResult) != EOK) {
-            return ERR_MEMORY_ERR;
+        return ERR_CALL_EXTERNAL_FUNC;
+    }
+
+    if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0)
+    {
+        SECURITY_LOG_INFO("Current pkInfoList is NULL.");
+        *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
+        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK)
+        {
+            ret = ERR_MEMORY_ERR;
         }
+    }
+    else
+    {
+        *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
+        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK)
+        {
+            ret = ERR_MEMORY_ERR;
+        }
+    }
+    if (ret == SUCCESS)
+    {
         SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
-        return SUCCESS;
     }
-    *pkInfoList = (char*)MALLOC(strlen(resultBuffer) + 1);
-    if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
-        return ERR_MEMORY_ERR;
-    }
-    SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
     interface->destroyInfo(&resultBuffer);
     return SUCCESS;
-    
 }
-
-
 
 int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certChain, uint32_t *certChainLen)
 {
@@ -204,9 +215,21 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
         SECURITY_LOG_ERROR("HksValidateCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    resultInfo->nounceStr = (char*)outputParam->params[0].blob.data;
-    resultInfo->credStr = (char*)outputParam->params[1].blob.data;
-    resultInfo->udidStr = (char*)outputParam->params[2].blob.data;
+    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[0].blob.data, outputParam->params[0].blob.size) != EOK)
+    {
+        SECURITY_LOG_INFO("memcpy_s error 1!  %{public}d", outputParam->params[0].blob.size);
+        return ERR_MEMORY_ERR;
+    }
+    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[1].blob.data, outputParam->params[1].blob.size) != EOK)
+    {
+        SECURITY_LOG_INFO("memcpy_s error 2!  %{public}d", outputParam->params[1].blob.size);
+        return ERR_MEMORY_ERR;
+    }
+    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[2].blob.data, outputParam->params[2].blob.size) != EOK)
+    {
+        SECURITY_LOG_INFO("memcpy_s error 3!  %{public}d", outputParam->params[2].blob.size);
+        return ERR_MEMORY_ERR;
+    }
 
     SECURITY_LOG_INFO("ValidateCertChainAdapter success!");
     return SUCCESS;
@@ -214,13 +237,13 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
 
 int32_t HksAttestIsReadyAdapter()
 {
-    if (HksIsAttestReady() != HKS_SUCCESS) {
+    if (HksIsAttestReady() != HKS_SUCCESS)
+    {
         SECURITY_LOG_ERROR("Hks attest not ready!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
     return SUCCESS;
 }
-
 
 static int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 {
@@ -400,15 +423,27 @@ static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *d
     return SUCCESS;
 }
 
-int32_t FillDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo, char* credStr, char* nounceStr, char* udidStr)
+int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
 {
-    if (saveInfo == NULL || credStr == NULL || nounceStr == NULL || udidStr == NULL)
+    if (saveInfo == NULL)
     {
         return ERR_INVALID_PARA;
     }
-    saveInfo->credStr = credStr;
-    saveInfo->nounceStr = nounceStr;
-    saveInfo->udidStr = udidStr;
+    saveInfo->nounceStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_NOUNCE);
+    if (saveInfo->nounceStr == NULL)
+    {
+        return ERR_NO_MEMORY;
+    }
+    saveInfo->credStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_CRED);
+    if (saveInfo->credStr == NULL)
+    {
+        return ERR_NO_MEMORY;
+    }
+    saveInfo->udidStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_UDID);
+    if (saveInfo->udidStr == NULL)
+    {
+        return ERR_NO_MEMORY;
+    }
     return SUCCESS;
 }
 
@@ -417,11 +452,6 @@ void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
     if (saveInfo == NULL)
     {
         return;
-    }
-    if (saveInfo->udidStr != NULL)
-    {
-        FREE(saveInfo->udidStr);
-        saveInfo->udidStr = NULL;
     }
     if (saveInfo->nounceStr != NULL)
     {
@@ -432,6 +462,11 @@ void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
     {
         FREE(saveInfo->credStr);
         saveInfo->credStr = NULL;
+    }
+    if (saveInfo->udidStr != NULL)
+    {
+        FREE(saveInfo->udidStr);
+        saveInfo->udidStr = NULL;
     }
     (void)memset_s(saveInfo, sizeof(struct DslmInfoInCertChain), 0, sizeof(struct DslmInfoInCertChain));
 }

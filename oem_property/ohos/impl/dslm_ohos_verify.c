@@ -59,20 +59,23 @@
 #define CRED_VALUE_TYPE_DEBUG "debug"
 #define CRED_VALUE_TYPE_RELEASE "release"
 
-struct NounceOfCertChain {
+struct NounceOfCertChain
+{
     uint64_t challenge;
     uint8_t *pbkInfoList;
     uint32_t pbkInfoListLen;
 };
 
-struct PbkChain {
+struct PbkChain
+{
     struct DataBuffer src;
     struct DataBuffer sig;
     struct DataBuffer pbk;
     uint32_t algorithm;
 };
 
-struct CredData {
+struct CredData
+{
     char *credPtr;
     const char *header;
     const char *payload;
@@ -83,14 +86,17 @@ struct CredData {
 
 static int32_t GetSecLevelFromString(const char *data, uint32_t dataLen, uint32_t *securityLevel)
 {
-    if (data == NULL || dataLen != SEC_LEVEL_STR_LEN) {
+    if (data == NULL || dataLen != SEC_LEVEL_STR_LEN)
+    {
         return ERR_INVALID_PARA;
     }
-    if (memcmp(data, "SL", SEC_LEVEL_STR_LEN - 1) != 0) {
+    if (memcmp(data, "SL", SEC_LEVEL_STR_LEN - 1) != 0)
+    {
         return ERR_INVALID_PARA;
     }
     int32_t num = data[SEC_LEVEL_STR_LEN - 1] - '0';
-    if (num < CLOUD_CRED_SEC_LEVEL_0 || num > CLOUD_CRED_SEC_LEVEL_MAX) {
+    if (num < CLOUD_CRED_SEC_LEVEL_0 || num > CLOUD_CRED_SEC_LEVEL_MAX)
+    {
         return ERR_INVALID_PARA;
     }
     *securityLevel = num;
@@ -99,14 +105,20 @@ static int32_t GetSecLevelFromString(const char *data, uint32_t dataLen, uint32_
 
 static int32_t GetAlgorithmType(const char *data, uint32_t dataLen, uint32_t *algorithm)
 {
-    if (data == NULL || dataLen == 0) {
+    if (data == NULL || dataLen == 0)
+    {
         return ERR_INVALID_PARA;
     }
-    if (strncmp(data, "SHA384withECDSA", strlen("SHA384withECDSA")) == 0) {
+    if (strncmp(data, "SHA384withECDSA", strlen("SHA384withECDSA")) == 0)
+    {
         *algorithm = TYPE_ECDSA_SHA_384;
-    } else if (strncmp(data, "SHA256withECDSA", strlen("SHA256withECDSA")) == 0) {
+    }
+    else if (strncmp(data, "SHA256withECDSA", strlen("SHA256withECDSA")) == 0)
+    {
         *algorithm = TYPE_ECDSA_SHA_256;
-    } else {
+    }
+    else
+    {
         return ERR_INVALID_PARA;
     }
     return SUCCESS;
@@ -115,10 +127,12 @@ static int32_t GetAlgorithmType(const char *data, uint32_t dataLen, uint32_t *al
 static int32_t CopyParamDataFromJson(const JsonHandle json, const char *paramKey, char *dest, uint32_t destLen)
 {
     const char *tempData = GetJsonFieldString(json, paramKey);
-    if (tempData == NULL) {
+    if (tempData == NULL)
+    {
         return ERR_INVALID_PARA;
     }
-    if (strcpy_s(dest, destLen, tempData) != EOK) {
+    if (strcpy_s(dest, destLen, tempData) != EOK)
+    {
         return ERR_MEMORY_ERR;
     }
     return SUCCESS;
@@ -128,67 +142,80 @@ static int32_t GetCredPayloadInfo(const char *credPayload, DslmCredInfo *credInf
 {
     uint8_t *buffer = NULL;
     Base64DecodeApp((uint8_t *)credPayload, &buffer);
-    if (buffer == NULL) {
+    if (buffer == NULL)
+    {
         return ERR_INVALID_PARA;
     }
     JsonHandle json = CreateJson((char *)buffer);
-    if (json == NULL) {
+    if (json == NULL)
+    {
         FREE(buffer);
         return ERR_INVALID_PARA;
     }
     FREE(buffer);
     buffer = NULL;
 
-    do {
+    do
+    {
         credInfo->credType = DEVICE_LEVEL_CRED_TYPE_CRED_CLOUD_WITH_HUKS;
 
         // get security level
         if (CopyParamDataFromJson(json, CRED_KEY_SECURITY_LEVEL, credInfo->securityLevel, CRED_INFO_LEVEL_LEN) !=
-            SUCCESS) {
+            SUCCESS)
+        {
             SECURITY_LOG_ERROR("get securityLevel failed!");
             break;
         }
         if (GetSecLevelFromString(credInfo->securityLevel, strlen(credInfo->securityLevel), &(credInfo->credLevel)) !=
-            SUCCESS) {
+            SUCCESS)
+        {
             SECURITY_LOG_ERROR("get credLevel failed!");
             break;
         }
 
         // get type, debug or release
-        if (CopyParamDataFromJson(json, CRED_KEY_TYPE, credInfo->type, CRED_INFO_TYPE_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_TYPE, credInfo->type, CRED_INFO_TYPE_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get type failed!");
             break;
         }
 
         // get cred version. The following data is not important, so continue even it fails.
-        if (CopyParamDataFromJson(json, CRED_KEY_CRED_VERSION, credInfo->version, CRED_INFO_VERSION_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_CRED_VERSION, credInfo->version, CRED_INFO_VERSION_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get version failed!");
         }
 
         // get udid, when type is debug
-        if (strncmp(credInfo->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
-            if (CopyParamDataFromJson(json, CRED_KEY_UDID, credInfo->udid, CRED_INFO_UDID_LEN) != SUCCESS) {
+        if (strncmp(credInfo->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0)
+        {
+            if (CopyParamDataFromJson(json, CRED_KEY_UDID, credInfo->udid, CRED_INFO_UDID_LEN) != SUCCESS)
+            {
                 SECURITY_LOG_ERROR("get udid failed!");
             }
         }
 
         // get signTime
-        if (CopyParamDataFromJson(json, CRED_KEY_SIGN_TIME, credInfo->signTime, CRED_INFO_SIGNTIME_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_SIGN_TIME, credInfo->signTime, CRED_INFO_SIGNTIME_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get signTime failed!");
         }
 
         // get manufacture
-        if (CopyParamDataFromJson(json, CRED_KEY_MANUFACTURE, credInfo->manufacture, CRED_INFO_MANU_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_MANUFACTURE, credInfo->manufacture, CRED_INFO_MANU_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get manufacture failed!");
         }
 
         // get model
-        if (CopyParamDataFromJson(json, CRED_KEY_MODEL_NAME, credInfo->model, CRED_INFO_MODEL_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_MODEL_NAME, credInfo->model, CRED_INFO_MODEL_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get model name failed!");
         }
 
         // get brand
-        if (CopyParamDataFromJson(json, CRED_KEY_BRAND, credInfo->brand, CRED_INFO_BRAND_LEN) != SUCCESS) {
+        if (CopyParamDataFromJson(json, CRED_KEY_BRAND, credInfo->brand, CRED_INFO_BRAND_LEN) != SUCCESS)
+        {
             SECURITY_LOG_ERROR("get brand failed!");
         }
 
@@ -202,7 +229,7 @@ static int32_t GetCredPayloadInfo(const char *credPayload, DslmCredInfo *credInf
 }
 
 static int32_t GenerateDeviceUdid(const char *manufacture, const char *productModel, const char *serialNum,
-    char *udidStr, uint32_t MaxLen)
+                                  char *udidStr, uint32_t MaxLen)
 {
     uint32_t manufactureLen = strlen(manufacture);
     uint32_t productModelLen = strlen(productModel);
@@ -211,13 +238,16 @@ static int32_t GenerateDeviceUdid(const char *manufacture, const char *productMo
     uint32_t dataLen = manufactureLen + productModelLen + serialNumLen;
     char *data = (char *)MALLOC(dataLen + 1);
 
-    if (strcat_s(data, dataLen + 1, manufacture) != EOK) {
+    if (strcat_s(data, dataLen + 1, manufacture) != EOK)
+    {
         return ERR_INVALID_PARA;
     }
-    if (strcat_s(data, dataLen + 1, productModel) != EOK) {
+    if (strcat_s(data, dataLen + 1, productModel) != EOK)
+    {
         return ERR_INVALID_PARA;
     }
-    if (strcat_s(data, dataLen + 1, serialNum) != EOK) {
+    if (strcat_s(data, dataLen + 1, serialNum) != EOK)
+    {
         return ERR_INVALID_PARA;
     }
 
@@ -232,31 +262,31 @@ static int32_t GenerateDeviceUdid(const char *manufacture, const char *productMo
 static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCredInfo *info)
 {
     SECURITY_LOG_DEBUG("CheckCredInfo start!");
-    if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
-        char data[68] = {0};
-        memcpy_s(data, 68, device->identity, 64);
-        SECURITY_LOG_DEBUG("identity = %{public}s", data);
-        SECURITY_LOG_DEBUG("udid = %{public}s", info->udid);
-        SECURITY_LOG_DEBUG("manufacture = %{public}s", info->manufacture);
-        SECURITY_LOG_DEBUG("serialStr = %{public}s", GetSerial());
-        if (0) {
-            if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
-                return SUCCESS;
-            }
-            
-            char udidStr[UDID_STRING_LENGTH] = {0};
-
-            const char* serialStr = GetSerial();
-            if (serialStr == NULL) {
-                return ERR_INVALID_PARA;
-            }
-            
-            GenerateDeviceUdid(info->manufacture, info->model, serialStr, udidStr, UDID_STRING_LENGTH);
-            if (strcasecmp(udidStr, info->udid) == 0) {
-                return SUCCESS;
-            }
-            return ERR_CHECK_CRED_INFO;
+    if (strlen(info->udid) == 0)
+    {
+        SECURITY_LOG_DEBUG("Current cred has no udid, skip CheckCredInfo.");
+        return SUCCESS;
+    }
+    if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0)
+    {
+        if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0)
+        {
+            return SUCCESS;
         }
+
+        char udidStr[UDID_STRING_LENGTH] = {0};
+        const char *serialStr = GetSerial();
+        if (serialStr == NULL)
+        {
+            return ERR_INVALID_PARA;
+        }
+
+        GenerateDeviceUdid(info->manufacture, info->model, serialStr, udidStr, UDID_STRING_LENGTH);
+        if (strcasecmp(udidStr, info->udid) == 0)
+        {
+            return SUCCESS;
+        }
+        return ERR_CHECK_CRED_INFO;
     }
     SECURITY_LOG_DEBUG("CheckCredInfo SUCCESS!");
     return SUCCESS;
@@ -265,37 +295,43 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCred
 static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCertChain *nounce)
 {
     JsonHandle json = CreateJson(jsonBuffer);
-    if (json == NULL) {
+    if (json == NULL)
+    {
         return ERR_INVALID_PARA;
     }
 
     // 1. Get challenge.
     const char *challengeStr = GetJsonFieldString(json, "challenge");
-    if (challengeStr == NULL) {
+    if (challengeStr == NULL)
+    {
         DestroyJson(json);
         return ERR_PARSE_NOUNCE;
     }
     int32_t ret =
         HexStringToByte(challengeStr, strlen(challengeStr), (uint8_t *)&nounce->challenge, sizeof(nounce->challenge));
-    if (ret != SUCCESS) {
+    if (ret != SUCCESS)
+    {
         DestroyJson(json);
         return ERR_PARSE_NOUNCE;
     }
 
     // 2. Get PublicKey Info.
     const char *pkInfoListStr = GetJsonFieldString(json, "pkInfoList");
-    if (pkInfoListStr == NULL) {
+    if (pkInfoListStr == NULL)
+    {
         DestroyJson(json);
         return ERR_PARSE_NOUNCE;
     }
     nounce->pbkInfoList = (uint8_t *)MALLOC(strlen(pkInfoListStr) + 1);
-    if (nounce->pbkInfoList == NULL) {
+    if (nounce->pbkInfoList == NULL)
+    {
         DestroyJson(json);
         return ERR_NO_MEMORY;
     }
 
     ret = strcpy_s((char *)nounce->pbkInfoList, strlen(pkInfoListStr) + 1, pkInfoListStr);
-    if (ret != EOK) {
+    if (ret != EOK)
+    {
         FREE(nounce->pbkInfoList);
         nounce->pbkInfoList = NULL;
         DestroyJson(json);
@@ -307,7 +343,8 @@ static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCer
 
 static void FreeNounceOfCertChain(struct NounceOfCertChain *nounce)
 {
-    if (nounce != NULL && nounce->pbkInfoList != NULL) {
+    if (nounce != NULL && nounce->pbkInfoList != NULL)
+    {
         FREE(nounce->pbkInfoList);
         nounce->pbkInfoList = NULL;
     }
@@ -316,24 +353,30 @@ static void FreeNounceOfCertChain(struct NounceOfCertChain *nounce)
 
 static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
 {
-    if (bufferA == NULL || bufferB == NULL) {
+    if (bufferA == NULL || bufferB == NULL)
+    {
         return ERR_INVALID_PARA;
     }
     JsonHandle jsonA = CreateJson(bufferA);
-    if (jsonA == NULL) {
+    if (jsonA == NULL)
+    {
         return ERR_INVALID_PARA;
     }
     JsonHandle jsonB = CreateJson(bufferB);
-    if (jsonB == NULL) {
+    if (jsonB == NULL)
+    {
         DestroyJson(jsonA);
         return ERR_INVALID_PARA;
     }
     uint32_t sizeA = GetJsonFieldJsonArraySize(jsonA);
     uint32_t sizeB = GetJsonFieldJsonArraySize(jsonB);
 
-    for (uint32_t i = 0; i < sizeA; i++) {
-        for (uint32_t j = 0; j < sizeB; j++) {
-            if (CompareJsonData(GetJsonFieldJsonArray(jsonA, i), GetJsonFieldJsonArray(jsonB, j), true)) {
+    for (uint32_t i = 0; i < sizeA; i++)
+    {
+        for (uint32_t j = 0; j < sizeB; j++)
+        {
+            if (CompareJsonData(GetJsonFieldJsonArray(jsonA, i), GetJsonFieldJsonArray(jsonB, j), true))
+            {
                 DestroyJson(jsonA);
                 DestroyJson(jsonB);
                 return SUCCESS;
@@ -346,15 +389,17 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
 }
 
 static int32_t CheckNounceOfCertChain(const struct NounceOfCertChain *nounce, uint64_t challenge,
-    const char *pbkInfoList)
+                                      const char *pbkInfoList)
 {
-    if (challenge != nounce->challenge) {
+    if (challenge != nounce->challenge)
+    {
         SECURITY_LOG_ERROR("compare nounce challenge failed!");
         return ERR_CHALLENGE_ERR;
     }
 
     int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char *)nounce->pbkInfoList);
-    if (ret != SUCCESS) {
+    if (ret != SUCCESS)
+    {
         SECURITY_LOG_ERROR("compare nounce public key info failed!");
         return ret;
     }
@@ -368,26 +413,31 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
     (void)memset_s(&nounce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
 
     char udidStr[65] = {0};
-    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
+    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK)
+    {
         return ERR_MEMORY_ERR;
     }
 
     int32_t ret = ERR_DEFAULT;
-    do {
+    do
+    {
         ret = ParseNounceOfCertChain(jsonStr, &nounce);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("ParseNounceOfCertChain failed!");
             break;
         }
 
         ret = GetPkInfoListStr(false, udidStr, &pkInfoListStr);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("GetPkInfoListStr failed!");
             break;
         }
 
         ret = CheckNounceOfCertChain(&nounce, challenge, pkInfoListStr);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("CheckNounceOfCertChain failed!");
             break;
         }
@@ -403,16 +453,19 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
 {
     uint8_t *buffer = NULL;
     Base64DecodeApp((uint8_t *)credAttestionInfo, &buffer);
-    if (buffer == NULL) {
+    if (buffer == NULL)
+    {
         return ERR_INVALID_PARA;
     }
     JsonHandle json = CreateJson((char *)buffer);
-    if (json == NULL) {
+    if (json == NULL)
+    {
         FREE(buffer);
         return ERR_INVALID_PARA;
     }
     FREE(buffer);
-    if (GetJsonFieldJsonArraySize(json) != PBK_CHAIN_LEVEL) {
+    if (GetJsonFieldJsonArraySize(json) != PBK_CHAIN_LEVEL)
+    {
         DestroyJson(json);
         return ERR_JSON_ERR;
     }
@@ -422,42 +475,52 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
     const char *sigMsg = NULL;
     const char *pbkMsg = NULL;
     const char *algMsg = NULL;
-    for (uint32_t i = 0; i < PBK_CHAIN_LEVEL; i++) {
+    for (uint32_t i = 0; i < PBK_CHAIN_LEVEL; i++)
+    {
         item = GetJsonFieldJsonArray(json, PBK_CHAIN_LEVEL - i - 1);
         pbkMsg = srcMsg;
         srcMsg = GetJsonFieldString(item, JSON_KEY_USER_PUBLIC_KEY);
-        if (srcMsg == NULL) {
+        if (srcMsg == NULL)
+        {
             break;
         }
         sigMsg = GetJsonFieldString(item, JSON_KEY_SIGNATURE);
-        if (sigMsg == NULL) {
+        if (sigMsg == NULL)
+        {
             break;
         }
         algMsg = GetJsonFieldString(item, JSON_KEY_ALGORITHM);
-        if (algMsg == NULL) {
+        if (algMsg == NULL)
+        {
             algMsg = "SHA384withECDSA";
         }
-        if (i == 0) {
+        if (i == 0)
+        {
             pbkMsg = srcMsg;
         }
         pbkChain[i].src.length = Base64UrlDecodeApp((uint8_t *)srcMsg, &(pbkChain[i].src.data));
-        if (pbkChain[i].src.data == NULL) {
+        if (pbkChain[i].src.data == NULL)
+        {
             break;
         }
         pbkChain[i].sig.length = Base64UrlDecodeApp((uint8_t *)sigMsg, &(pbkChain[i].sig.data));
-        if (pbkChain[i].sig.data == NULL) {
+        if (pbkChain[i].sig.data == NULL)
+        {
             break;
         }
         pbkChain[i].pbk.length = Base64UrlDecodeApp((uint8_t *)pbkMsg, &(pbkChain[i].pbk.data));
-        if (pbkChain[i].pbk.data == NULL) {
+        if (pbkChain[i].pbk.data == NULL)
+        {
             break;
         }
-        if (GetAlgorithmType(algMsg, strlen(algMsg), &(pbkChain[i].algorithm)) != SUCCESS) {
+        if (GetAlgorithmType(algMsg, strlen(algMsg), &(pbkChain[i].algorithm)) != SUCCESS)
+        {
             SECURITY_LOG_DEBUG("ParsePubKeyChain get type error");
             break;
         }
 
-        if (i == PBK_CHAIN_THIRD_KEY_INDEX) {
+        if (i == PBK_CHAIN_THIRD_KEY_INDEX)
+        {
             DestroyJson(json);
             SECURITY_LOG_DEBUG("ParsePubKeyChain ok and return");
             return SUCCESS;
@@ -470,29 +533,35 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
 static int32_t ParseCredData(const char *credStr, struct CredData *credData)
 {
     credData->credPtr = (char *)MALLOC(strlen(credStr) + 1);
-    if (credData->credPtr == NULL) {
+    if (credData->credPtr == NULL)
+    {
         return ERR_NO_MEMORY;
     }
-    if (strcpy_s(credData->credPtr, strlen(credStr) + 1, credStr) != EOK) {
+    if (strcpy_s(credData->credPtr, strlen(credStr) + 1, credStr) != EOK)
+    {
         credData->credPtr = NULL;
         return ERR_MEMORY_ERR;
     }
 
     char *context = NULL;
     credData->header = strtok_s(credData->credPtr, ".", &context);
-    if (context == NULL) {
+    if (context == NULL)
+    {
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
     credData->payload = strtok_s(NULL, ".", &context);
-    if (context == NULL) {
+    if (context == NULL)
+    {
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
     credData->signature = strtok_s(NULL, ".", &context);
-    if (context == NULL) {
+    if (context == NULL)
+    {
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
     credData->attestionInfo = strtok_s(NULL, ".", &context);
-    if (context == NULL) {
+    if (context == NULL)
+    {
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
 
@@ -501,8 +570,10 @@ static int32_t ParseCredData(const char *credStr, struct CredData *credData)
 
 static int32_t VerifyCredPubKeyChain(const struct PbkChain *pbkChain)
 {
-    for (int i = 0; i < 3; i++) {
-        if (EcdsaVerify(&(pbkChain[i].src), &(pbkChain[i].sig), &(pbkChain[i].pbk), pbkChain[i].algorithm) != SUCCESS) {
+    for (int i = 0; i < 3; i++)
+    {
+        if (EcdsaVerify(&(pbkChain[i].src), &(pbkChain[i].sig), &(pbkChain[i].pbk), pbkChain[i].algorithm) != SUCCESS)
+        {
             return ERR_ECC_VERIFY_ERR;
         }
     }
@@ -516,11 +587,13 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
 
     uint32_t srcMsgLen = strlen(credData->header) + strlen(credData->payload) + 1;
     char *srcMsg = (char *)MALLOC(srcMsgLen + 1);
-    if (srcMsg == NULL) {
+    if (srcMsg == NULL)
+    {
         return ERR_NO_MEMORY;
     }
     (void)memset_s(srcMsg, srcMsgLen + 1, 0, srcMsgLen + 1);
-    if (memcpy_s(srcMsg, srcMsgLen, cred, srcMsgLen) != EOK) {
+    if (memcpy_s(srcMsg, srcMsgLen, cred, srcMsgLen) != EOK)
+    {
         FREE(srcMsg);
         return ERR_MEMORY_ERR;
     }
@@ -531,17 +604,21 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
     pbkData.data = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.data;
     pbkData.length = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.length;
     sigData.length = Base64UrlDecodeApp((uint8_t *)credData->signature, &(sigData.data));
-    if (sigData.data == NULL) {
+    if (sigData.data == NULL)
+    {
         FREE(srcMsg);
         return ERR_MEMORY_ERR;
     }
 
     int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, TYPE_ECDSA_SHA_384);
-    if (ret != SUCCESS) {
+    if (ret != SUCCESS)
+    {
         SECURITY_LOG_ERROR("EcdsaVerify failed!");
         ret = ERR_ECC_VERIFY_ERR;
-    } else {
-        SECURITY_LOG_ERROR("EcdsaVerify success!");
+    }
+    else
+    {
+        SECURITY_LOG_ERROR("VerifyCredPayload success!");
         ret = SUCCESS;
     }
     FREE(srcMsg);
@@ -551,23 +628,29 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
 
 static void FreeCredData(struct CredData *credData)
 {
-    if (credData == NULL) {
+    if (credData == NULL)
+    {
         return;
     }
-    if (credData->credPtr != NULL) {
+    if (credData->credPtr != NULL)
+    {
         FREE(credData->credPtr);
         credData->credPtr = NULL;
     }
-    for (uint32_t i = 0; i < PBK_CHAIN_LEVEL; i++) {
-        if (credData->pbkChain[i].src.data != NULL) {
+    for (uint32_t i = 0; i < PBK_CHAIN_LEVEL; i++)
+    {
+        if (credData->pbkChain[i].src.data != NULL)
+        {
             FREE(credData->pbkChain[i].src.data);
             credData->pbkChain[i].src.data = NULL;
         }
-        if (credData->pbkChain[i].sig.data != NULL) {
+        if (credData->pbkChain[i].sig.data != NULL)
+        {
             FREE(credData->pbkChain[i].sig.data);
             credData->pbkChain[i].sig.data = NULL;
         }
-        if (credData->pbkChain[i].pbk.data != NULL) {
+        if (credData->pbkChain[i].pbk.data != NULL)
+        {
             FREE(credData->pbkChain[i].pbk.data);
             credData->pbkChain[i].pbk.data = NULL;
         }
@@ -581,38 +664,44 @@ static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
     (void)memset_s(&credData, sizeof(struct CredData), 0, sizeof(struct CredData));
 
     int32_t ret = ERR_DEFAULT;
-    do {
+    do
+    {
         // 1. Parse Cred.
         ret = ParseCredData(credStr, &credData);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("ParseCredData failed!");
             break;
         }
 
         // 2. Verify public key chain, get root public key.
         ret = VerifyCredPubKeyChain(&credData.pbkChain[0]);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("verifyCredPubKeyChain failed!");
             break;
         }
 
         // 3. Verify source data by root public key.
         ret = VerifyCredPayload(credStr, &credData);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("verifyCredPayload failed!");
             break;
         }
 
         // 4. Parse cred payload.
         ret = GetCredPayloadInfo(credData.payload, credInfo);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("VerifyCredData success!");
             break;
         }
     } while (0);
 
     FreeCredData(&credData);
-    if (ret == SUCCESS) {
+    if (ret == SUCCESS)
+    {
         SECURITY_LOG_INFO("VerifyCredData SUCCESS!");
     }
     return ret;
@@ -620,14 +709,16 @@ static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
 
 static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
-    char *credStr = (char*)malloc(credBuff->credLen + 1);
+    char *credStr = (char *)malloc(credBuff->credLen + 1);
     (void)memset_s(credStr, credBuff->credLen + 1, 0, credBuff->credLen + 1);
-    if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK) {
+    if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK)
+    {
         return ERR_MEMORY_ERR;
     }
 
     int32_t ret = VerifyCredData(credStr, credInfo);
-    if (ret != SUCCESS) {
+    if (ret != SUCCESS)
+    {
         SECURITY_LOG_ERROR("VerifyCredData failed!");
         FREE(credStr);
         return ret;
@@ -635,7 +726,8 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
     FREE(credStr);
 
     ret = CheckCredInfo(device, credInfo);
-    if (ret != SUCCESS) {
+    if (ret != SUCCESS)
+    {
         SECURITY_LOG_ERROR("CheckCredInfo failed!");
         return ret;
     }
@@ -644,42 +736,52 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
 }
 
 static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
-    DslmCredInfo *credInfo)
+                                      DslmCredInfo *credInfo)
 {
     struct DslmInfoInCertChain resultInfo;
-    (void)memset_s(&resultInfo, sizeof(struct DslmInfoInCertChain), 0, sizeof(struct DslmInfoInCertChain));
+    int32_t ret = InitDslmInfoInCertChain(&resultInfo);
+    if (ret != SUCCESS)
+    {
+        SECURITY_LOG_ERROR("InitDslmInfoInCertChain failed!");
+        return ret;
+    }
 
-    int32_t ret = ERR_DEFAULT;
-    do {
+    do
+    {
         // 1. Verify the certificate chain, get data in the certificate chain(nounce + UDID + cred).
         ret = ValidateCertChainAdapter(credBuff->credVal, credBuff->credLen, &resultInfo);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("ValidateCertChainAdapter failed!");
             break;
         }
 
         // 2. Parses the NOUNCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
         ret = VerifyNounceOfCertChain(resultInfo.nounceStr, device, challenge);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("verifyNounceOfCertChain failed!");
             break;
         }
 
         // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and vefity it.
         ret = VerifyCredData(resultInfo.credStr, credInfo);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("VerifyCredData failed!");
             break;
         }
         ret = CheckCredInfo(device, credInfo);
-        if (ret != SUCCESS) {
+        if (ret != SUCCESS)
+        {
             SECURITY_LOG_ERROR("CheckCredInfo failed!");
             break;
         }
     } while (0);
 
-    //DestroyDslmInfoInCertChain(&resultInfo);
-    if (ret == SUCCESS) {
+    DestroyDslmInfoInCertChain(&resultInfo);
+    if (ret == SUCCESS)
+    {
         SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
         SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
     }
@@ -687,18 +789,19 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
 }
 
 int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
-    DslmCredInfo *credInfo)
+                           DslmCredInfo *credInfo)
 {
     SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
 
-    switch (credBuff->type) {
-        case CRED_TYPE_SMALL:
-            return verifySmallDslmCred(device, credBuff, credInfo);
-        case CRED_TYPE_STANDARD:
-            return verifyStandardDslmCred(device, challenge, credBuff, credInfo);
-        default:
-            SECURITY_LOG_ERROR("Invalid cred type!");
-            break;  
+    switch (credBuff->type)
+    {
+    case CRED_TYPE_SMALL:
+        return verifySmallDslmCred(device, credBuff, credInfo);
+    case CRED_TYPE_STANDARD:
+        return verifyStandardDslmCred(device, challenge, credBuff, credInfo);
+    default:
+        SECURITY_LOG_ERROR("Invalid cred type!");
+        break;
     }
     return ERR_INVALID_PARA;
 }
