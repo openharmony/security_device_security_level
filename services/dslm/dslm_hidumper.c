@@ -34,7 +34,7 @@ static void PrintHeader(int fd)
 {
     const DeviceIdentify *device = GetSelfDevice(NULL);
     char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN, device->identity, DEVICE_ID_MAX_LEN);
+    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, device->identity, DEVICE_ID_MAX_LEN);
     if (ret != EOK) {
         return;
     }
@@ -47,7 +47,7 @@ static void DeviceDumper(const DslmDeviceInfo *info, int32_t fd)
         return;
     }
     char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN, info->identity.identity, DEVICE_ID_MAX_LEN);
+    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, info->identity.identity, DEVICE_ID_MAX_LEN);
     if (ret == EOK) {
         dprintf(fd, "deviceId: %s\n", deviceName);
         dprintf(fd, "credLevel: %d\n", info->credInfo.credLevel);
