@@ -213,7 +213,7 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
 
 int32_t HksAttestIsReadyAdapter(void)
 {
-    if (HksIsAttestReady() != HKS_SUCCESS) {
+    if (HcmIsDeviceKeyExist(NULL) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("Hks attest not ready!");
         return ERR_CALL_EXTERNAL_FUNC;
     }

@@ -134,11 +134,6 @@ static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObj
         *type = CRED_TYPE_SMALL;
         return SUCCESS;
     }
-
-    if (HksAttestIsReadyAdapter() != SUCCESS) {
-        *type = CRED_TYPE_SMALL;
-        return SUCCESS;
-    }
     *type = CRED_TYPE_STANDARD;
     return SUCCESS;
 }
