@@ -38,9 +38,10 @@ const char g_dslmKey[] = "dslm_key";
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 #define CERT_CHAIN_CERT_NUM 4
+#define MAX_ENTRY 8
 #define TYPE_NOUNCE 0x200
 #define TYPE_CERT_BASE 0x100
-#define TYPE_CERT_END (TYPE_CERT_BASE + CERT_CHAIN_CERT_NUM)
+#define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
 #define LIST_MAX_SIZE 8192
 
 struct HksTestCertChain {
@@ -296,7 +297,7 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const s
 // certChain转blob，需要malloc
 static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t **data, uint32_t *dataLen)
 {
-    TlvCommon tlvs[CERT_CHAIN_CERT_NUM];
+    TlvCommon tlvs[MAX_ENTRY];
     memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
     uint32_t tlvCnt = 0;
 
@@ -324,18 +325,18 @@ static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t *
 // blob转为certChain，构造结构体，使其指针对应到blob中对应段。不需要malloc，hksBlob在外面使用完直接释放。
 static int32_t BufferToHksCertChain(uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain)
 {
-    TlvCommon tlvs[CERT_CHAIN_CERT_NUM];
+    TlvCommon tlvs[MAX_ENTRY];
     memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
 
     uint32_t cnt = 0;
-    uint32_t ret = Deserialize(data, dataLen, &tlvs[0], CERT_CHAIN_CERT_NUM, &cnt);
+    uint32_t ret = Deserialize(data, dataLen, &tlvs[0], MAX_ENTRY, &cnt);
     if (ret != TLV_OK || cnt == 0) {
         return ERR_INVALID_PARA;
     }
     uint32_t certCnt = 0;
     for (uint32_t i = 0; i < cnt; i++) {
         if ((tlvs[i].tag >= TYPE_CERT_BASE) && (tlvs[i].tag <= TYPE_CERT_END)) {
-            if (certCnt >= CERT_CHAIN_CERT_NUM) {
+            if (certCnt >= MAX_ENTRY) {
                 return ERR_HUKS_ERR;
             }
             hksCertChain->certs[certCnt].data = tlvs[i].value;
