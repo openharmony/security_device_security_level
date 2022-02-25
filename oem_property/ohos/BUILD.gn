@@ -84,8 +84,8 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "deviceauth_standard:deviceauth_sdk",
     "hilog_native:libhilog",
     "huks:libhukssdk",
-    "utils_base:utils",
     "startup_l2:syspara",
+    "utils_base:utils",
   ]
 
   part_name = "device_security_level"
