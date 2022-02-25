@@ -28,7 +28,7 @@ typedef struct DslmCallbackInfo {
     uint32_t extraLen;
 } DslmCallbackInfo;
 
-typedef void RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
+typedef void RequestCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
 
 #ifdef __cplusplus
 }
