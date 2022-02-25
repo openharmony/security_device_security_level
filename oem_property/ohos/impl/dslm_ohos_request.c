@@ -191,7 +191,6 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
         SECURITY_LOG_ERROR("SelectDslmCredType failed!");
         return ret;
     }
-    credType = CRED_TYPE_STANDARD;
     switch (credType) {
         case CRED_TYPE_SMALL:
             return RequestSmallDslmCred((uint8_t *)credStr, strlen(credStr), credBuff);

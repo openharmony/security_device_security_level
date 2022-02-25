@@ -193,17 +193,17 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
     }
     uint32_t cnt = 0;
     if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[cnt].blob.data,
-                 outputParam->params[cnt].blob.size) != EOK) {
+        outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
     cnt++;
     if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[cnt].blob.data,
-                 outputParam->params[cnt].blob.size) != EOK) {
+        outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
     cnt++;
     if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[cnt].blob.data,
-                 outputParam->params[cnt].blob.size) != EOK) {
+        outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
 
