@@ -30,6 +30,7 @@ typedef struct DslmNotifyListNode {
     ListNode linkNode;
     uint64_t start;
     uint32_t keep;
+    uint32_t owner;
     uint32_t cookie;
     uint32_t extra;
     RequestCallback *requestCallback;

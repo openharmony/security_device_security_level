@@ -83,7 +83,7 @@ int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, Messag
         auto cookie = data.ReadUint32();
         auto result = data.ReadUint32();
         auto level = data.ReadUint32();
-        HiLog::Info(LABEL, "cookie %{public}u, result %{public}u, level %{public}u", cookie, result, level);
+        HiLog::Info(LABEL, "callback cookie %{public}u, result %{public}u, level %{public}u", cookie, result, level);
         holder_.PopCallback(cookie, result, level);
     }
 
