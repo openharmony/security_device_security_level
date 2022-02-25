@@ -28,7 +28,7 @@ struct DslmInfoInCertChain {
 int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList);
 int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certChain, uint32_t *certChainLen);
 int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInfoInCertChain *resultInfo);
-int32_t HksAttestIsReadyAdapter();
+int32_t HksAttestIsReadyAdapter(void);
 
 int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo);
 void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo);

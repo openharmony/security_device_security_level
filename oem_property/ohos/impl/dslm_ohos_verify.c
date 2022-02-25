@@ -59,6 +59,8 @@
 #define CRED_VALUE_TYPE_DEBUG "debug"
 #define CRED_VALUE_TYPE_RELEASE "release"
 
+#define DSLM_CRED_STR_LEN_MAX 4096
+
 struct NounceOfCertChai {
     uint64_t challenge;
     uint8_t *pbkInfoList;
@@ -365,8 +367,8 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
     struct NounceOfCertChain nounce;
     (void)memset_s(&nounce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
 
-    char udidStr[65] = {0};
-    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
+    char udidStr[UDID_STRING_LENGTH] = {0};
+    if (memcpy_s(udidStr, UDID_STRING_LENGTH, device->identity, device->length) != EOK) {
         return ERR_MEMORY_ERR;
     }
 
@@ -618,20 +620,17 @@ static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
 
 static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
-    char *credStr = (char *)malloc(credBuff->credLen + 1);
+    char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     (void)memset_s(credStr, credBuff->credLen + 1, 0, credBuff->credLen + 1);
     if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK) {
-        FREE(credStr);
         return ERR_MEMORY_ERR;
     }
 
     int32_t ret = VerifyCredData(credStr, credInfo);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("VerifyCredData failed!");
-        FREE(credStr);
         return ret;
     }
-    FREE(credStr);
 
     ret = CheckCredInfo(device, credInfo);
     if (ret != SUCCESS) {
