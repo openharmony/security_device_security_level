@@ -36,23 +36,18 @@ static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 {
     FILE *fp = NULL;
     fp = fopen(DSLM_CRED_CFG_FILE_POSITION, "r");
-    if (fp == NULL)
-    {
+    if (fp == NULL) {
         SECURITY_LOG_ERROR("fopen cred file failed!");
         return ERR_INVALID_PARA;
     }
     int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
-    if (ret == -1)
-    {
+    if (ret == -1) {
         SECURITY_LOG_ERROR("fscanf_s cred file failed!");
         ret = ERR_INVALID_PARA;
-    }
-    else
-    {
+    } else {
         ret = SUCCESS;
     }
-    if (fclose(fp) != 0)
-    {
+    if (fclose(fp) != 0) {
         SECURITY_LOG_ERROR("fclose cred file failed!");
         ret = ERR_INVALID_PARA;
     }
@@ -62,8 +57,7 @@ static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListStr, char **nounceStr)
 {
     JsonHandle json = CreateJson(NULL);
-    if (json == NULL)
-    {
+    if (json == NULL) {
         return ERR_INVALID_PARA;
     }
 
@@ -75,8 +69,7 @@ static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListSt
 
     // tran to json
     *nounceStr = (char *)ConvertJsonToString(json);
-    if (*nounceStr == NULL)
-    {
+    if (*nounceStr == NULL) {
         DestroyJson(json);
         return ERR_JSON_ERR;
     }
@@ -85,51 +78,42 @@ static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListSt
 }
 
 static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const RequestObject *obj, char *credStr,
-                                     uint8_t **certChain, uint32_t *certChainLen)
+    uint8_t **certChain, uint32_t *certChainLen)
 {
     char *pkInfoListStr = NULL;
     char *nounceStr = NULL;
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
-    ByteToHexString((uint8_t *)&(obj->challenge), sizeof(obj->challenge), (uint8_t *)challengeStr, CHALLENGE_STRING_LENGTH);
+    ByteToHexString((uint8_t *)&(obj->challenge), sizeof(obj->challenge), (uint8_t *)challengeStr,
+        CHALLENGE_STRING_LENGTH);
     char udidStr[65] = {0};
-    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK)
-    {
+    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
         return ERR_MEMORY_ERR;
     }
     int32_t ret = ERR_DEFAULT;
-    do
-    {
+    do {
         ret = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
-        if (ret != SUCCESS)
-        {
+        if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("GetPkInfoListStr failed");
             break;
         }
 
         ret = TransToJsonStr(challengeStr, pkInfoListStr, &nounceStr);
-        if (ret != SUCCESS)
-        {
+        if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("TransToJsonStr failed");
             break;
         }
-        struct DslmInfoInCertChain saveInfo = {
-            .credStr = credStr,
-            .nounceStr = nounceStr,
-            .udidStr = udidStr};
+        struct DslmInfoInCertChain saveInfo = {.credStr = credStr, .nounceStr = nounceStr, .udidStr = udidStr};
         ret = DslmCredAttestAdapter(&saveInfo, certChain, certChainLen);
-        if (ret != SUCCESS)
-        {
+        if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("DslmCredAttestAdapter failed");
             break;
         }
     } while (0);
 
-    if (pkInfoListStr != NULL)
-    {
+    if (pkInfoListStr != NULL) {
         FREE(pkInfoListStr);
     }
-    if (nounceStr != NULL)
-    {
+    if (nounceStr != NULL) {
         FREE(nounceStr);
     }
     return ret;
@@ -139,21 +123,18 @@ static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObj
 {
     uint32_t devType = 0;
     const DeviceIdentify *deviceSelf = GetSelfDevice(&devType);
-    if (deviceSelf->length == 0)
-    {
+    if (deviceSelf->length == 0) {
         SECURITY_LOG_ERROR("SelectDslmCredType, GetSelfDevice failed");
         return ERR_INVALID_PARA;
     }
 
     // is self
-    if (memcmp(device->identity, deviceSelf->identity, deviceSelf->length) == 0)
-    {
+    if (memcmp(device->identity, deviceSelf->identity, deviceSelf->length) == 0) {
         *type = CRED_TYPE_SMALL;
         return SUCCESS;
     }
 
-    if (HksAttestIsReadyAdapter() != SUCCESS)
-    {
+    if (HksAttestIsReadyAdapter() != SUCCESS) {
         *type = CRED_TYPE_SMALL;
         return SUCCESS;
     }
@@ -164,8 +145,7 @@ static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObj
 static int32_t RequestSmallDslmCred(uint8_t *data, uint32_t dataLen, DslmCredBuff **credBuff)
 {
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_SMALL, dataLen, data);
-    if (out == NULL)
-    {
+    if (out == NULL) {
         SECURITY_LOG_ERROR("RequestSmallDslmCred, CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
@@ -175,20 +155,18 @@ static int32_t RequestSmallDslmCred(uint8_t *data, uint32_t dataLen, DslmCredBuf
 }
 
 static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const RequestObject *obj, char *credStr,
-                                       DslmCredBuff **credBuff)
+    DslmCredBuff **credBuff)
 {
 
     uint8_t *certChain = NULL; // malloc, need free
     uint32_t certChainLen = 0;
     int32_t ret = GenerateDslmCertChain(device, obj, credStr, &certChain, &certChainLen);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("RequestStandardDslmCred, GenerateDslmCertChain failed");
         return ret;
     }
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
-    if (out == NULL)
-    {
+    if (out == NULL) {
         SECURITY_LOG_ERROR("RequestSmallDslmCred, CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
@@ -203,28 +181,25 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
     uint32_t credType = 0;
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     int32_t ret = GetCredFromCurrentDevice(credStr, DSLM_CRED_STR_LEN_MAX);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("Read cred data from file failed!");
         return ret;
     }
 
     ret = SelectDslmCredType(device, obj, &credType);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("SelectDslmCredType failed!");
         return ret;
     }
     credType = CRED_TYPE_STANDARD;
-    switch (credType)
-    {
-    case CRED_TYPE_SMALL:
-        return RequestSmallDslmCred((uint8_t *)credStr, strlen(credStr), credBuff);
-    case CRED_TYPE_STANDARD:
-        return RequestStandardDslmCred(device, obj, credStr, credBuff);
-    default:
-        SECURITY_LOG_ERROR("Invalid cred type!");
-        break;
+    switch (credType) {
+        case CRED_TYPE_SMALL:
+            return RequestSmallDslmCred((uint8_t *)credStr, strlen(credStr), credBuff);
+        case CRED_TYPE_STANDARD:
+            return RequestStandardDslmCred(device, obj, credStr, credBuff);
+        default:
+            SECURITY_LOG_ERROR("Invalid cred type!");
+            break;
     }
 
     return SUCCESS;
