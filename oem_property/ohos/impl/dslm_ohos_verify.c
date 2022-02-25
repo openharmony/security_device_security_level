@@ -343,7 +343,11 @@ static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCer
 
 static void FreeNounceOfCertChain(struct NounceOfCertChain *nounce)
 {
-    if (nounce != NULL && nounce->pbkInfoList != NULL)
+    if (nounce == NULL)
+    {
+        return;
+    }
+    if (nounce->pbkInfoList != NULL)
     {
         FREE(nounce->pbkInfoList);
         nounce->pbkInfoList = NULL;
@@ -713,6 +717,7 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
     (void)memset_s(credStr, credBuff->credLen + 1, 0, credBuff->credLen + 1);
     if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK)
     {
+        FREE(credStr);
         return ERR_MEMORY_ERR;
     }
 
