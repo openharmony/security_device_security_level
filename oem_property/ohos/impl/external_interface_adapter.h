@@ -19,8 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-struct DslmInfoInCertChain
-{
+struct DslmInfoInCertChain {
     char *udidStr;
     char *credStr;
     char *nounceStr; // challenge + pkinfoList

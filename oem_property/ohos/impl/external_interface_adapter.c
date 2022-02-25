@@ -44,8 +44,7 @@ const char g_dslmKey[] = "dslm_key";
 #define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
 #define LIST_MAX_SIZE 8192
 
-struct HksTestCertChain
-{
+struct HksTestCertChain {
     bool certChainExist;
     bool certCountValid;
     bool certDataExist;
@@ -70,39 +69,31 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
     uint32_t resultNum = 0;
 
     int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHIAN_INPUT_PARAM_STRING_LENGTH);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_INFO("GenerateFuncParamJson failed");
         return ret;
     }
 
     const DeviceGroupManager *interface = GetGmInstance();
     ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_INFO("getPkInfoList failed! ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
-    if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0)
-    {
+    if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
         SECURITY_LOG_INFO("Current pkInfoList is NULL.");
         *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
-        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK)
-        {
+        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
             ret = ERR_MEMORY_ERR;
         }
-    }
-    else
-    {
+    } else {
         *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
-        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK)
-        {
+        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
             ret = ERR_MEMORY_ERR;
         }
     }
-    if (ret == SUCCESS)
-    {
+    if (ret == SUCCESS) {
         SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
     }
     interface->destroyInfo(&resultBuffer);
@@ -114,8 +105,7 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
     SECURITY_LOG_INFO("DslmCredAttestAdapter start");
 
     struct HksBlob keyAlias = {sizeof(g_dslmKey), (uint8_t *)g_dslmKey};
-    if (HksGenerateKeyAdapter(&keyAlias) != HKS_SUCCESS)
-    {
+    if (HksGenerateKeyAdapter(&keyAlias) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKeyAdapter failed!");
     }
     struct HksParam inputData[] = {
@@ -126,18 +116,15 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
 
     };
     struct HksParamSet *inputParam = NULL;
-    if (HksInitParamSet(&inputParam) != HKS_SUCCESS)
-    {
+    if (HksInitParamSet(&inputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksInitParamSet failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (HksAddParams(inputParam, inputData, sizeof(inputData) / sizeof(inputData[0])) != HKS_SUCCESS)
-    {
+    if (HksAddParams(inputParam, inputData, sizeof(inputData) / sizeof(inputData[0])) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAddParams failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (HksBuildParamSet(&inputParam) != HKS_SUCCESS)
-    {
+    if (HksBuildParamSet(&inputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksBuildParamSet failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
@@ -146,22 +133,19 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
     struct HksCertChain *hksCertChain = NULL;
     const struct HksTestCertChain certParam = {true, true, true, certChainMaxLen};
     int32_t ret = ConstructDataToCertChain(&hksCertChain, &certParam);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_INFO("ConstructDataToCertChain ret = %{public}d ", ret);
         return ret;
     }
 
     ret = HksAttestKey(&keyAlias, inputParam, hksCertChain);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAttestKey failed, ret = %{public}d ", ret);
         return ret;
     }
 
     ret = HksCertChainToBuffer(hksCertChain, certChain, certChainLen);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("HksCertChainToHksBlob failed!");
         return ret;
     }
@@ -183,18 +167,15 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
     };
 
     struct HksParamSet *outputParam = NULL;
-    if (HksInitParamSet(&outputParam) != HKS_SUCCESS)
-    {
+    if (HksInitParamSet(&outputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksInitParamSet failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (HksAddParams(outputParam, outputData, sizeof(outputData) / sizeof(outputData[0])) != HKS_SUCCESS)
-    {
+    if (HksAddParams(outputParam, outputData, sizeof(outputData) / sizeof(outputData[0])) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAddParams failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (HksBuildParamSet(&outputParam) != HKS_SUCCESS)
-    {
+    if (HksBuildParamSet(&outputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksBuildParamSet failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
@@ -203,30 +184,28 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
     struct HksCertChain hksCertChain = {&certBlob[0], 4};
 
     int32_t ret = BufferToHksCertChain(data, dataLen, &hksCertChain);
-    if (ret != SUCCESS)
-    {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("HksBlobToHksCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
     ret = HksValidateCertChain(&hksCertChain, outputParam);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksValidateCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[0].blob.data, outputParam->params[0].blob.size) != EOK)
-    {
+    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[0].blob.data,
+            outputParam->params[0].blob.size) != EOK) {
         SECURITY_LOG_INFO("memcpy_s error 1!  %{public}d", outputParam->params[0].blob.size);
         return ERR_MEMORY_ERR;
     }
-    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[1].blob.data, outputParam->params[1].blob.size) != EOK)
-    {
+    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[1].blob.data,
+            outputParam->params[1].blob.size) != EOK) {
         SECURITY_LOG_INFO("memcpy_s error 2!  %{public}d", outputParam->params[1].blob.size);
         return ERR_MEMORY_ERR;
     }
-    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[2].blob.data, outputParam->params[2].blob.size) != EOK)
-    {
+    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[2].blob.data,
+            outputParam->params[2].blob.size) != EOK) {
         SECURITY_LOG_INFO("memcpy_s error 3!  %{public}d", outputParam->params[2].blob.size);
         return ERR_MEMORY_ERR;
     }
@@ -237,8 +216,7 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
 
 int32_t HksAttestIsReadyAdapter()
 {
-    if (HksIsAttestReady() != HKS_SUCCESS)
-    {
+    if (HksIsAttestReady() != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("Hks attest not ready!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
@@ -259,31 +237,27 @@ static int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
     };
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksInitParamSet(&paramSet);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksInitParamSet failed!");
         return ret;
     }
 
     ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAddParams failed!");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksBuildParamSet(&paramSet);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksBuildParamSet failed!");
         HksFreeParamSet(&paramSet);
         return ret;
     }
 
     ret = HksGenerateKey(keyAlias, paramSet, NULL);
-    if (ret != HKS_SUCCESS)
-    {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKey failed!");
     }
     HksFreeParamSet(&paramSet);
@@ -292,34 +266,28 @@ static int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 
 static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const struct HksTestCertChain *certChainParam)
 {
-    if (!certChainParam->certChainExist)
-    {
+    if (!certChainParam->certChainExist) {
         return 0;
     }
     *certChain = (struct HksCertChain *)MALLOC(sizeof(struct HksCertChain));
-    if (*certChain == NULL)
-    {
+    if (*certChain == NULL) {
         SECURITY_LOG_ERROR("malloc fail");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    if (!certChainParam->certCountValid)
-    {
+    if (!certChainParam->certCountValid) {
         (*certChain)->certsCount = 0;
         return 0;
     }
     (*certChain)->certsCount = 4;
-    if (!certChainParam->certDataExist)
-    {
+    if (!certChainParam->certDataExist) {
         (*certChain)->certs = NULL;
         return 0;
     }
     (*certChain)->certs = (struct HksBlob *)MALLOC(sizeof(struct HksBlob) * ((*certChain)->certsCount));
-    for (uint32_t i = 0; i < (*certChain)->certsCount; i++)
-    {
+    for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = certChainParam->certDataSize;
         (*certChain)->certs[i].data = (uint8_t *)MALLOC((*certChain)->certs[i].size);
-        if ((*certChain)->certs[i].data == NULL)
-        {
+        if ((*certChain)->certs[i].data == NULL) {
             SECURITY_LOG_ERROR("malloc fail");
             return HKS_ERROR_MALLOC_FAIL;
         }
@@ -340,8 +308,7 @@ static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t *
     tlvs[tlvCnt].len = 100;
     tlvs[tlvCnt].value = &lwk;
 
-    for (uint32_t i = 0; i < hksCertChain->certsCount; i++)
-    {
+    for (uint32_t i = 0; i < hksCertChain->certsCount; i++) {
         tlvs[tlvCnt].tag = TYPE_CERT_BASE + 1;
         tlvs[tlvCnt].len = hksCertChain->certs[i].size;
         tlvs[tlvCnt].value = hksCertChain->certs[i].data;
@@ -349,13 +316,11 @@ static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t *
     }
 
     uint8_t *out = MALLOC(LIST_MAX_SIZE);
-    if (out == NULL)
-    {
+    if (out == NULL) {
         return ERR_NO_MEMORY;
     }
     memset_s(out, LIST_MAX_SIZE, 0, LIST_MAX_SIZE);
-    if (Serialize(tlvs, tlvCnt, out, LIST_MAX_SIZE, dataLen) != TLV_OK)
-    {
+    if (Serialize(tlvs, tlvCnt, out, LIST_MAX_SIZE, dataLen) != TLV_OK) {
         FREE(out);
         return ERR_NO_MEMORY;
     }
@@ -372,17 +337,13 @@ static int32_t BufferToHksCertChain(uint8_t *data, uint32_t dataLen, struct HksC
 
     uint32_t cnt = 0;
     uint32_t ret = Deserialize(data, dataLen, &tlvs[0], MAX_ENTRY, &cnt);
-    if (ret != TLV_OK || cnt == 0)
-    {
+    if (ret != TLV_OK || cnt == 0) {
         return ERR_INVALID_PARA;
     }
     uint32_t certCnt = 0;
-    for (uint32_t i = 0; i < cnt; i++)
-    {
-        if ((tlvs[i].tag >= TYPE_CERT_BASE) && (tlvs[i].tag <= TYPE_CERT_END))
-        {
-            if (certCnt >= MAX_ENTRY)
-            {
+    for (uint32_t i = 0; i < cnt; i++) {
+        if ((tlvs[i].tag >= TYPE_CERT_BASE) && (tlvs[i].tag <= TYPE_CERT_END)) {
+            if (certCnt >= MAX_ENTRY) {
                 return ERR_HUKS_ERR;
             }
             hksCertChain->certs[certCnt].data = tlvs[i].value;
@@ -397,8 +358,7 @@ static int32_t BufferToHksCertChain(uint8_t *data, uint32_t dataLen, struct HksC
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax)
 {
     JsonHandle json = CreateJson(NULL);
-    if (json == NULL)
-    {
+    if (json == NULL) {
         return ERR_INVALID_PARA;
     }
 
@@ -406,14 +366,12 @@ static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *d
     AddFieldStringToJson(json, "udid", udidStr);
 
     char *paramsJsonBuffer = ConvertJsonToString(json);
-    if (paramsJsonBuffer == NULL)
-    {
+    if (paramsJsonBuffer == NULL) {
         DestroyJson(json);
         return ERR_MEMORY_ERR;
     }
     DestroyJson(json);
-    if (strcpy_s(dest, destMax, paramsJsonBuffer) != EOK)
-    {
+    if (strcpy_s(dest, destMax, paramsJsonBuffer) != EOK) {
         FREE(paramsJsonBuffer);
         paramsJsonBuffer = NULL;
         return ERR_MEMORY_ERR;
@@ -425,23 +383,19 @@ static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *d
 
 int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
 {
-    if (saveInfo == NULL)
-    {
+    if (saveInfo == NULL) {
         return ERR_INVALID_PARA;
     }
     saveInfo->nounceStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_NOUNCE);
-    if (saveInfo->nounceStr == NULL)
-    {
+    if (saveInfo->nounceStr == NULL) {
         return ERR_NO_MEMORY;
     }
     saveInfo->credStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_CRED);
-    if (saveInfo->credStr == NULL)
-    {
+    if (saveInfo->credStr == NULL) {
         return ERR_NO_MEMORY;
     }
     saveInfo->udidStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_UDID);
-    if (saveInfo->udidStr == NULL)
-    {
+    if (saveInfo->udidStr == NULL) {
         return ERR_NO_MEMORY;
     }
     return SUCCESS;
@@ -449,22 +403,18 @@ int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
 
 void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
 {
-    if (saveInfo == NULL)
-    {
+    if (saveInfo == NULL) {
         return;
     }
-    if (saveInfo->nounceStr != NULL)
-    {
+    if (saveInfo->nounceStr != NULL) {
         FREE(saveInfo->nounceStr);
         saveInfo->nounceStr = NULL;
     }
-    if (saveInfo->credStr != NULL)
-    {
+    if (saveInfo->credStr != NULL) {
         FREE(saveInfo->credStr);
         saveInfo->credStr = NULL;
     }
-    if (saveInfo->udidStr != NULL)
-    {
+    if (saveInfo->udidStr != NULL) {
         FREE(saveInfo->udidStr);
         saveInfo->udidStr = NULL;
     }
