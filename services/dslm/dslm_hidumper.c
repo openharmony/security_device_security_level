@@ -15,12 +15,8 @@
 
 #include "dslm_hidumper.h"
 
+#include <stdio.h>
 #include <stdlib.h>
-
-#include "securec.h"
-
-#include "dslm_device_list.h"
-#include "dslm_messenger_wrapper.h"
 
 static void PrintBanner(int fd)
 {
@@ -30,36 +26,7 @@ static void PrintBanner(int fd)
     dprintf(fd, " |___/|___/____|_|  |_| |___/ \\___/|_|  |_|_| |___|_|_\\\n");
 }
 
-static void PrintHeader(int fd)
-{
-    const DeviceIdentify *device = GetSelfDevice(NULL);
-    char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, device->identity, DEVICE_ID_MAX_LEN);
-    if (ret != EOK) {
-        return;
-    }
-    dprintf(fd, "selfUdid: %s\n", deviceName);
-}
-
-static void DeviceDumper(const DslmDeviceInfo *info, int32_t fd)
-{
-    if (info == NULL) {
-        return;
-    }
-    char *deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    errno_t ret = memcpy_s(deviceName, DEVICE_ID_MAX_LEN + 1, info->identity.identity, DEVICE_ID_MAX_LEN);
-    if (ret == EOK) {
-        dprintf(fd, "deviceId: %s\n", deviceName);
-        dprintf(fd, "credLevel: %d\n", info->credInfo.credLevel);
-        dprintf(fd, "manufacture: %s\n", info->credInfo.manufacture);
-        dprintf(fd, "brand: %s\n", info->credInfo.brand);
-        dprintf(fd, "\n");
-    }
-}
-
 void DslmDumper(int fd)
 {
     PrintBanner(fd);
-    PrintHeader(fd);
-    ForEachDeviceDump(DeviceDumper, fd);
 }
