@@ -34,14 +34,13 @@ const char g_dslmKey[] = "dslm_key";
 #define DSLM_INFO_MAX_LEN_CRED 2048
 #define DSLM_INFO_MAX_LEN_NOUNCE 2048
 
-#define UDID_STRING_LENGTH 65
 #define HICHIAN_INPUT_PARAM_STRING_LENGTH 512
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
-#define MAX_ENTRY 8
+#define CERT_CHAIN_CERT_NUM 4
 #define TYPE_NOUNCE 0x200
 #define TYPE_CERT_BASE 0x100
-#define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
+#define TYPE_CERT_END (TYPE_CERT_BASE + CERT_CHAIN_CERT_NUM)
 #define LIST_MAX_SIZE 8192
 
 struct HksTestCertChain {
@@ -180,33 +179,31 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
-    struct HksBlob certBlob[4] = {0};
-    struct HksCertChain hksCertChain = {&certBlob[0], 4};
+    struct HksBlob certBlob[CERT_CHAIN_CERT_NUM] = {0};
+    struct HksCertChain hksCertChain = {&certBlob[0], CERT_CHAIN_CERT_NUM};
 
-    int32_t ret = BufferToHksCertChain(data, dataLen, &hksCertChain);
-    if (ret != SUCCESS) {
+    if (BufferToHksCertChain(data, dataLen, &hksCertChain != SUCCESS) {
         SECURITY_LOG_ERROR("HksBlobToHksCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
-    ret = HksValidateCertChain(&hksCertChain, outputParam);
-    if (ret != HKS_SUCCESS) {
+    if (HksValidateCertChain(&hksCertChain, outputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksValidateCertChain error, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[0].blob.data,
-            outputParam->params[0].blob.size) != EOK) {
-        SECURITY_LOG_INFO("memcpy_s error 1!  %{public}d", outputParam->params[0].blob.size);
+    int cnt = 0;
+    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[cnt].blob.data,
+            outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
-    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[1].blob.data,
-            outputParam->params[1].blob.size) != EOK) {
-        SECURITY_LOG_INFO("memcpy_s error 2!  %{public}d", outputParam->params[1].blob.size);
+    cnt++;
+    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[cnt].blob.data,
+            outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
-    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[2].blob.data,
-            outputParam->params[2].blob.size) != EOK) {
-        SECURITY_LOG_INFO("memcpy_s error 3!  %{public}d", outputParam->params[2].blob.size);
+    cnt++;
+    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[cnt].blob.data,
+            outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
     }
 
@@ -214,7 +211,7 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
     return SUCCESS;
 }
 
-int32_t HksAttestIsReadyAdapter()
+int32_t HksAttestIsReadyAdapter(void)
 {
     if (HksIsAttestReady() != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("Hks attest not ready!");
@@ -278,7 +275,7 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const s
         (*certChain)->certsCount = 0;
         return 0;
     }
-    (*certChain)->certsCount = 4;
+    (*certChain)->certsCount = CERT_CHAIN_CERT_NUM;
     if (!certChainParam->certDataExist) {
         (*certChain)->certs = NULL;
         return 0;
@@ -299,14 +296,9 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const s
 // certChain转blob，需要malloc
 static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t **data, uint32_t *dataLen)
 {
-    TlvCommon tlvs[MAX_ENTRY];
+    TlvCommon tlvs[CERT_CHAIN_CERT_NUM];
     memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
-    uint8_t lwk = 100;
-
     uint32_t tlvCnt = 0;
-    tlvs[tlvCnt].tag = TYPE_NOUNCE;
-    tlvs[tlvCnt].len = 100;
-    tlvs[tlvCnt].value = &lwk;
 
     for (uint32_t i = 0; i < hksCertChain->certsCount; i++) {
         tlvs[tlvCnt].tag = TYPE_CERT_BASE + 1;
@@ -332,18 +324,18 @@ static int32_t HksCertChainToBuffer(struct HksCertChain *hksCertChain, uint8_t *
 // blob转为certChain，构造结构体，使其指针对应到blob中对应段。不需要malloc，hksBlob在外面使用完直接释放。
 static int32_t BufferToHksCertChain(uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain)
 {
-    TlvCommon tlvs[MAX_ENTRY];
+    TlvCommon tlvs[CERT_CHAIN_CERT_NUM];
     memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
 
     uint32_t cnt = 0;
-    uint32_t ret = Deserialize(data, dataLen, &tlvs[0], MAX_ENTRY, &cnt);
+    uint32_t ret = Deserialize(data, dataLen, &tlvs[0], CERT_CHAIN_CERT_NUM, &cnt);
     if (ret != TLV_OK || cnt == 0) {
         return ERR_INVALID_PARA;
     }
     uint32_t certCnt = 0;
     for (uint32_t i = 0; i < cnt; i++) {
         if ((tlvs[i].tag >= TYPE_CERT_BASE) && (tlvs[i].tag <= TYPE_CERT_END)) {
-            if (certCnt >= MAX_ENTRY) {
+            if (certCnt >= CERT_CHAIN_CERT_NUM) {
                 return ERR_HUKS_ERR;
             }
             hksCertChain->certs[certCnt].data = tlvs[i].value;

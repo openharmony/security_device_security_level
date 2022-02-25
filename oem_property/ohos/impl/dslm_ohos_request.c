@@ -28,6 +28,7 @@
 #define DSLM_CRED_CFG_FILE_POSITION "/system/etc/dslm_finger.cfg"
 #define DSLM_CRED_STR_LEN_MAX 4096
 #define CHALLENGE_STRING_LENGTH 32
+#define UDID_STRING_LENGTH 65
 
 #define DEVAUTH_JSON_KEY_CHALLENGE "challenge"
 #define DEVAUTH_JSON_KEY_PKINFO_LIST "pkInfoList"
@@ -85,8 +86,8 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     ByteToHexString((uint8_t *)&(obj->challenge), sizeof(obj->challenge), (uint8_t *)challengeStr,
         CHALLENGE_STRING_LENGTH);
-    char udidStr[65] = {0};
-    if (memcpy_s(udidStr, 65, device->identity, device->length) != EOK) {
+    char udidStr[UDID_STRING_LENGTH] = {0};
+    if (memcpy_s(udidStr, UDID_STRING_LENGTH, device->identity, device->length) != EOK) {
         return ERR_MEMORY_ERR;
     }
     int32_t ret = ERR_DEFAULT;
@@ -157,7 +158,6 @@ static int32_t RequestSmallDslmCred(uint8_t *data, uint32_t dataLen, DslmCredBuf
 static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const RequestObject *obj, char *credStr,
     DslmCredBuff **credBuff)
 {
-
     uint8_t *certChain = NULL; // malloc, need free
     uint32_t certChainLen = 0;
     int32_t ret = GenerateDslmCertChain(device, obj, credStr, &certChain, &certChainLen);
