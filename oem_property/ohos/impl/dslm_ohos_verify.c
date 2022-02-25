@@ -61,7 +61,7 @@
 
 #define DSLM_CRED_STR_LEN_MAX 4096
 
-struct NounceOfCertChai {
+struct NounceOfCertChain {
     uint64_t challenge;
     uint8_t *pbkInfoList;
     uint32_t pbkInfoListLen;
