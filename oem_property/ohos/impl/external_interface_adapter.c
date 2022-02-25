@@ -182,16 +182,16 @@ int32_t ValidateCertChainAdapter(uint8_t *data, uint32_t dataLen, struct DslmInf
     struct HksBlob certBlob[CERT_CHAIN_CERT_NUM] = {0};
     struct HksCertChain hksCertChain = {&certBlob[0], CERT_CHAIN_CERT_NUM};
 
-    if (BufferToHksCertChain(data, dataLen, &hksCertChain != SUCCESS) {
-        SECURITY_LOG_ERROR("HksBlobToHksCertChain error, ret = %{public}d", ret);
+    if (BufferToHksCertChain(data, dataLen, &hksCertChain) != SUCCESS) {
+        SECURITY_LOG_ERROR("HksBlobToHksCertChain failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
     if (HksValidateCertChain(&hksCertChain, outputParam) != HKS_SUCCESS) {
-        SECURITY_LOG_ERROR("HksValidateCertChain error, ret = %{public}d", ret);
+        SECURITY_LOG_ERROR("HksValidateCertChain failed!");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    int cnt = 0;
+    uint32_t cnt = 0;
     if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[cnt].blob.data,
             outputParam->params[cnt].blob.size) != EOK) {
         return ERR_MEMORY_ERR;
