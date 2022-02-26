@@ -376,7 +376,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
         uint32_t cookie = 1234;
         DslmRequestCallbackMock mockCallback;
         EXPECT_CALL(mockCallback, RequestCallback(_, _, _)).Times(Exactly(0));
-        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, cookie, DslmRequestCallbackMock::MockedCallback);
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ((int32_t)ret, ERR_MSG_NOT_INIT);
     }
 
@@ -387,7 +387,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
         EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
         EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(false));
         EXPECT_CALL(mockCallback, RequestCallback(_, _, _)).Times(Exactly(0));
-        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, cookie, DslmRequestCallbackMock::MockedCallback);
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ((int32_t)ret, ERR_NOEXIST_DEVICE);
 
         EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(AtLeast(2));
@@ -407,7 +407,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
         auto IsRightLevel = [](const DslmCallbackInfo *info) { return info->level >= 1; };
         EXPECT_CALL(mockCallback, RequestCallback(cookie, 0, Truly(IsRightLevel))).Times(Exactly(1));
 
-        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, cookie, DslmRequestCallbackMock::MockedCallback);
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ(ret, (int32_t)0);
         mockMsg.MakeDeviceOffline(&device);
     }
@@ -434,7 +434,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level1)
 
     uint32_t cookie = 0x4567;
     EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, Truly(isSendRequestOut), _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
-    int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, cookie, DslmRequestCallbackMock::MockedCallback);
+    int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
     EXPECT_EQ((int32_t)ret, (int32_t)0);
     mockMsg.MakeDeviceOffline(&device);
 }
@@ -475,7 +475,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level1)
     for (int i = 1; i <= reqTimes; i++) {
         option.timeout = timeouts[i];
         int32_t ret =
-            OnRequestDeviceSecLevelInfo(&device, &option, cookies[i], DslmRequestCallbackMock::MockedCallback);
+            OnRequestDeviceSecLevelInfo(&device, &option, i, cookies[i], DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ((int32_t)ret, (int32_t)0);
     }
 

@@ -39,7 +39,7 @@ public:
     ~DslmRequestCallbackMock() override;
     MOCK_METHOD3(RequestCallback, void(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info));
 
-    static void MockedCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
+    static void MockedCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
 
 private:
     static DslmRequestCallback *obj_;

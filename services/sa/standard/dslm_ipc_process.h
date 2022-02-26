@@ -37,11 +37,11 @@ public:
         DECLARE_SINGLETON(RemoteHolder);
 
     public:
-        bool Push(uint32_t cookie, const sptr<IRemoteObject> object);
-        const sptr<IRemoteObject> Pop(uint32_t cookie);
+        bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object);
+        const sptr<IRemoteObject> Pop(uint32_t owner, uint32_t cookie);
 
     private:
-        std::map<uint32_t, sptr<IRemoteObject>> map_;
+        std::map<uint64_t, sptr<IRemoteObject>> map_;
         std::mutex mutex_;
     };
 

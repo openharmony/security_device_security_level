@@ -31,8 +31,8 @@ int32_t OnPeerMsgRequestInfoReceived(const DeviceIdentify *deviceId, const uint8
 
 int32_t OnPeerMsgResponseInfoReceived(const DeviceIdentify *deviceId, const uint8_t *msg, uint32_t len);
 
-int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const RequestOption *option, uint32_t cookie,
-    RequestCallback callback);
+int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const RequestOption *option, uint32_t owner,
+    uint32_t cookie, RequestCallback callback);
 
 int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo, uint32_t result);
 
