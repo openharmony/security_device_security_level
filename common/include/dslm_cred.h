@@ -66,7 +66,7 @@ typedef struct DslmCredBuff {
     uint8_t *credVal;
 } DslmCredBuff;
 
-typedef int32_t InitDslmCredFunc(DslmCredInfo *credInfo);
+typedef int32_t InitDslmCredFunc(const DeviceIdentify *device, DslmCredInfo *credInfo);
 
 typedef int32_t RequestDslmCredFunc(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff);
 typedef int32_t VerifyDslmCredFunc(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,

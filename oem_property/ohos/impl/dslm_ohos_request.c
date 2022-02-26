@@ -33,8 +33,11 @@
 #define DEVAUTH_JSON_KEY_CHALLENGE "challenge"
 #define DEVAUTH_JSON_KEY_PKINFO_LIST "pkInfoList"
 
-static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
+int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 {
+    if (credStr == NULL || maxLen == 0) {
+        return ERR_INVALID_PARA;
+    }
     FILE *fp = NULL;
     fp = fopen(DSLM_CRED_CFG_FILE_POSITION, "r");
     if (fp == NULL) {
@@ -122,6 +125,7 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
 
 static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObject *obj, uint32_t *type)
 {
+    /*
     uint32_t devType = 0;
     const DeviceIdentify *deviceSelf = GetSelfDevice(&devType);
     if (deviceSelf->length == 0) {
@@ -134,6 +138,7 @@ static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObj
         *type = CRED_TYPE_SMALL;
         return SUCCESS;
     }
+    */
     *type = CRED_TYPE_STANDARD;
     return SUCCESS;
 }

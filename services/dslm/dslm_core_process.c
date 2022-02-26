@@ -203,9 +203,12 @@ bool InitSelfDeviceSecureLevel(void)
         return true;
     }
 
-    DefaultInitDslmCred(&info->credInfo);
+    int32_t ret = DefaultInitDslmCred(device, &info->credInfo);
+    if (ret == SUCCESS && info->credInfo.credLevel > 0) {
+        return true;
+    }
 
-    int ret = OnPeerStatusReceiver(device, ONLINE_STATUS_ONLINE, devType);
+    ret = OnPeerStatusReceiver(device, ONLINE_STATUS_ONLINE, devType);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("InitDeviceSecLevel, make self online failed");
     }
