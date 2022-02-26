@@ -124,8 +124,8 @@ int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo
     return SUCCESS;
 }
 
-int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const RequestOption *option, uint32_t cookie,
-    RequestCallback callback)
+int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const RequestOption *option, uint32_t owner,
+    uint32_t cookie, RequestCallback callback)
 {
     if (deviceId == NULL || option == NULL || callback == NULL) {
         SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo invalid para");
@@ -156,6 +156,7 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
         SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo malloc error");
         return ERR_NO_MEMORY;
     }
+    nofityNode->owner = owner;
     nofityNode->cookie = cookie;
     nofityNode->requestCallback = callback;
     nofityNode->start = GetMillisecondSinceBoot();

@@ -135,7 +135,7 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
         }
         SECURITY_LOG_DEBUG("ProcessSendDeviceInfoCallback result %{public}u for device %{public}x, level %{public}u.",
             result, info->machine.machineId, cbInfo.level);
-        notifyNode->requestCallback(notifyNode->cookie, result, &cbInfo);
+        notifyNode->requestCallback(notifyNode->owner, notifyNode->cookie, result, &cbInfo);
         RemoveListNode(node);
         FREE(notifyNode);
     }
@@ -175,8 +175,9 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
     }
 
     AddListNode(&notify->linkNode, &deviceInfo->notifyList);
-    SECURITY_LOG_DEBUG("ProcessSdkRequest, device is %{public}x, cookie is %{public}u, keep is %{public}u",
-        deviceInfo->machine.machineId, notify->cookie, notify->keep);
+    SECURITY_LOG_DEBUG(
+        "ProcessSdkRequest, device is %{public}x, owner is %{public}u, cookie is %{public}u, keep is %{public}u",
+        deviceInfo->machine.machineId, notify->owner, notify->cookie, notify->keep);
     uint32_t state = GetCurrentMachineState(deviceInfo);
     if (state == STATE_SUCCESS || state == STATE_FAILED || deviceInfo->credInfo.credLevel != 0) {
         ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneCheker);
@@ -252,8 +253,8 @@ static bool SdkTimeoutCheker(const DslmDeviceInfo *devInfo, const DslmNotifyList
         return false;
     }
 
-    SECURITY_LOG_INFO("SdkTimeoutCheker active, device is %{public}x, cookie is %{public}u, keep is %{public}u",
-        devInfo->machine.machineId, node->cookie, node->keep);
+    SECURITY_LOG_INFO("SdkTimeout, device is %{public}x, owner is %{public}u, cookie is %{public}u, keep is %{public}u",
+        devInfo->machine.machineId, node->owner, node->cookie, node->keep);
 
     *result = ERR_TIMEOUT;
     cbInfo->level = 0;
@@ -269,6 +270,11 @@ static bool RequestDoneCheker(const DslmDeviceInfo *devInfo, const DslmNotifyLis
     cbInfo->level = devInfo->credInfo.credLevel;
     cbInfo->extraLen = 0;
     cbInfo->extraBuff = NULL;
+
+    SECURITY_LOG_INFO(
+        "RequestDone, device is %{public}x, owner is %{public}u, cookie is %{public}u, keep is %{public}u",
+        devInfo->machine.machineId, node->owner, node->cookie, node->keep);
+
     return true;
 }
 

@@ -15,6 +15,7 @@
 
 #include "dslm_ipc_process.h"
 
+#include <ipc_skeleton.h>
 #include <securec.h>
 #include <string_ex.h>
 
@@ -28,17 +29,22 @@ constexpr uint32_t DFT_TIMEOUT = 45;
 constexpr uint32_t MAX_TIMEOUT = 60;
 constexpr uint32_t MIN_TIMEOUT = 1;
 constexpr uint32_t WARAING_GATE = 64;
+constexpr uint32_t COOKIE_SHIFT = 32;
 } // namespace
 
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-static void ProcessCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
+static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
 {
     if ((cookie == 0) || (info == nullptr)) {
         return;
     }
-    auto object = Singleton<DslmIpcProcess::RemoteHolder>::GetInstance().Pop(cookie);
+    auto object = Singleton<DslmIpcProcess::RemoteHolder>::GetInstance().Pop(owner, cookie);
+    if (object == nullptr) {
+        SECURITY_LOG_ERROR("ProcessCallback Pop error.");
+        return;
+    }
 
     auto proxy = iface_cast<DslmCallbackProxy>(object);
     if (object == nullptr) {
@@ -123,18 +129,19 @@ int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, M
         return ret;
     }
 
-    Singleton<RemoteHolder>::GetInstance().Push(cookie, callback);
+    auto owner = IPCSkeleton::GetCallingPid();
+    Singleton<RemoteHolder>::GetInstance().Push(owner, cookie, callback);
 
-    ret = OnRequestDeviceSecLevelInfo(&identity, &option, cookie, ProcessCallback);
+    ret = OnRequestDeviceSecLevelInfo(&identity, &option, owner, cookie, ProcessCallback);
     if (ret != SUCCESS) {
-        Singleton<RemoteHolder>::GetInstance().Pop(cookie);
+        Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
         SECURITY_LOG_ERROR("ProcessGetDeviceSecurityLevel OnRequestDeviceSecLevelInfo failed, ret = %{public}d", ret);
         return ret;
     }
 
     ret = DslmSetResponseToParcel(reply, cookie);
     if (ret != SUCCESS) {
-        Singleton<RemoteHolder>::GetInstance().Pop(cookie);
+        Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
         SECURITY_LOG_ERROR("ProcessGetDeviceSecurityLevel DslmSetResponseToParcel failed, ret = %{public}d", ret);
         return ret;
     }
@@ -149,20 +156,22 @@ DslmIpcProcess::RemoteHolder::~RemoteHolder()
 {
 }
 
-bool DslmIpcProcess::RemoteHolder::Push(uint32_t cookie, const sptr<IRemoteObject> object)
+bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    map_[cookie] = object;
+    uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
+    map_[key] = object;
     if (map_.size() > WARAING_GATE) {
         SECURITY_LOG_WARN("DslmIpcProcess remote objects max warning");
     }
     return true;
 }
 
-const sptr<IRemoteObject> DslmIpcProcess::RemoteHolder::Pop(uint32_t cookie)
+const sptr<IRemoteObject> DslmIpcProcess::RemoteHolder::Pop(uint32_t owner, uint32_t cookie)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto iter = map_.find(cookie);
+    uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
+    auto iter = map_.find(key);
     if (iter == map_.end()) {
         return nullptr;
     }
