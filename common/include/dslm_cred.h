@@ -32,10 +32,10 @@
 #define CRED_INFO_SOFTVERSION_LEN 64
 
 typedef enum {
-    CRED_TYPE_MINI = 100,
-    CRED_TYPE_SMALL = 200,
-    CRED_TYPE_STANDARD = 300,
-    CRED_TYPE_LARGE = 400,
+    CRED_TYPE_MINI = 1000,
+    CRED_TYPE_SMALL = 2000,
+    CRED_TYPE_STANDARD = 3000,
+    CRED_TYPE_LARGE = 4000,
 } CredType;
 
 typedef struct DslmCredInfo {
