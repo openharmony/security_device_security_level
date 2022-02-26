@@ -25,6 +25,7 @@
 extern "C" {
 #endif
 
+int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen);
 int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff);
 
 #ifdef __cplusplus

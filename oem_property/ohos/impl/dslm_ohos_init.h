@@ -13,27 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef DSLM_CREDENTIAL_H
-#define DSLM_CREDENTIAL_H
+#ifndef DSLM_OHOS_INIT_H
+#define DSLM_OHOS_INIT_H
 
 #include <stdint.h>
 
+#include "device_security_defines.h"
 #include "dslm_cred.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t DefaultRequestDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff);
-
-int32_t DefaultVerifyDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
-    DslmCredInfo *credInfo);
-
-int32_t DefaultInitDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo);
-
-int32_t GetSupportedCredTypes(CredType *list, uint32_t len);
+int32_t InitOhosDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // DSLM_CREDENTIAL_H
+
+#endif // DSLM_OHOS_INIT_H
