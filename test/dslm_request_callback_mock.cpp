@@ -39,7 +39,8 @@ DslmRequestCallbackMock::~DslmRequestCallbackMock()
     obj_ = nullptr;
 }
 
-void DslmRequestCallbackMock::MockedCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
+void DslmRequestCallbackMock::MockedCallback(uint32_t owner, uint32_t cookie, uint32_t result,
+    const DslmCallbackInfo *info)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (obj_ != nullptr) {
