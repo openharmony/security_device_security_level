@@ -33,20 +33,11 @@ int32_t InitOhosDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo)
         return ret;
     }
 
-    // small type
-    DslmCredBuff *credBuff = CreateDslmCred(CRED_TYPE_SMALL, strlen(credStr), (uint8_t*)credStr);
-    if (credBuff == NULL) {
-        SECURITY_LOG_ERROR("InitOhosDslmCred, CreateDslmCred failed");
-        return ERR_MEMORY_ERR;
-    }
-
-    uint64_t tmpChallenge = 123456;
-    ret = VerifyOhosDslmCred(device, tmpChallenge, credBuff, credInfo);
+    ret = VerifyCredData(credStr, credInfo);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyOhosDslmCred failed!");
+        SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyCredData failed!");
         return ret;
     }
-
     SECURITY_LOG_INFO("InitOhosDslmCred success!");
     return SUCCESS;
 }
