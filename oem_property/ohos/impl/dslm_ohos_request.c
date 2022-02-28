@@ -104,8 +104,9 @@ static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObj
     (void)obj;
     if (HksAttestIsReadyAdapter() != SUCCESS) {
         *type = CRED_TYPE_SMALL;
+    } else {
+        *type = CRED_TYPE_STANDARD;
     }
-    *type = CRED_TYPE_STANDARD;
     return SUCCESS;
 }
 
@@ -133,11 +134,11 @@ static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const Reque
     }
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
     if (out == NULL) {
-        SECURITY_LOG_ERROR("RequestSmallDslmCred, CreateDslmCred failed");
+        SECURITY_LOG_ERROR("RequestStandardDslmCred, CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
     *credBuff = out;
-    SECURITY_LOG_INFO("RequestSmallDslmCred success!");
+    SECURITY_LOG_INFO("RequestStandardDslmCred success!");
     return SUCCESS;
 }
 
@@ -176,7 +177,6 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
         SECURITY_LOG_ERROR("Read cred data from file failed!");
         return ret;
     }
-
     ret = SelectDslmCredType(device, obj, &credType);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("SelectDslmCredType failed!");
@@ -184,12 +184,12 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
     }
     switch (credType) {
         case CRED_TYPE_SMALL:
-            return RequestSmallDslmCred((uint8_t *)credStr, strlen(credStr), credBuff);
+            return RequestSmallDslmCred((uint8_t *)credStr, strlen(credStr) + 1, credBuff);
         case CRED_TYPE_STANDARD:
             return RequestStandardDslmCred(device, obj, credStr, credBuff);
         default:
             SECURITY_LOG_ERROR("Invalid cred type!");
-            break;
+            return ERR_INVALID_PARA;
     }
 
     return SUCCESS;

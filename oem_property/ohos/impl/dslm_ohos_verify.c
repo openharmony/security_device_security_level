@@ -456,7 +456,6 @@ static int32_t ParseCredData(const char *credStr, struct CredData *credData)
     if (context == NULL) {
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
-
     return ParsePubKeyChain(credData->attestionInfo, strlen(credData->attestionInfo), &credData->pbkChain[0]);
 }
 
@@ -539,7 +538,6 @@ static void FreeCredData(struct CredData *credData)
 static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
-    (void)memset_s(credStr, credBuff->credLen + 1, 0, credBuff->credLen + 1);
     if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK) {
         return ERR_MEMORY_ERR;
     }
