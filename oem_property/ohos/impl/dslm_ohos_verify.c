@@ -203,34 +203,6 @@ static int32_t GetCredPayloadInfo(const char *credPayload, DslmCredInfo *credInf
     return ERR_GET_CLOUD_CRED_INFO;
 }
 
-static int32_t GenerateDeviceUdid(const char *manufacture, const char *productModel, const char *serialNum,
-    char *udidStr, uint32_t MaxLen)
-{
-    uint32_t manufactureLen = strlen(manufacture);
-    uint32_t productModelLen = strlen(productModel);
-    uint32_t serialNumLen = strlen(serialNum);
-
-    uint32_t dataLen = manufactureLen + productModelLen + serialNumLen;
-    char *data = (char *)MALLOC(dataLen + 1);
-
-    if (strcat_s(data, dataLen + 1, manufacture) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-    if (strcat_s(data, dataLen + 1, productModel) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-    if (strcat_s(data, dataLen + 1, serialNum) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-
-    uint8_t hashResult[SHA_256_HASH_RESULT_LEN] = {0};
-    CallHashSha256((uint8_t *)data, dataLen, hashResult);
-
-    ByteToHexString(hashResult, SHA_256_HASH_RESULT_LEN, (uint8_t *)udidStr, UDID_STRING_LENGTH);
-
-    return 0;
-}
-
 static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCredInfo *info)
 {
     SECURITY_LOG_DEBUG("CheckCredInfo start!");
@@ -240,17 +212,6 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCred
     }
     if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
         if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
-            return SUCCESS;
-        }
-
-        char udidStr[UDID_STRING_LENGTH] = {0};
-        const char *serialStr = GetSerial();
-        if (serialStr == NULL) {
-            return ERR_INVALID_PARA;
-        }
-
-        GenerateDeviceUdid(info->manufacture, info->model, serialStr, udidStr, UDID_STRING_LENGTH);
-        if (strcasecmp(udidStr, info->udid) == 0) {
             return SUCCESS;
         }
         return ERR_CHECK_CRED_INFO;
@@ -575,8 +536,11 @@ static void FreeCredData(struct CredData *credData)
     (void)memset_s(credData, sizeof(struct CredData), 0, sizeof(struct CredData));
 }
 
-static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
+int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
 {
+    if (credStr == NULL || credInfo == NULL) {
+        return ERR_INVALID_PARA;
+    }
     struct CredData credData;
     (void)memset_s(&credData, sizeof(struct CredData), 0, sizeof(struct CredData));
 
