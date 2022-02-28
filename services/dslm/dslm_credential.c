@@ -64,12 +64,12 @@ int32_t DefaultVerifyDslmCred(const DeviceIdentify *device, uint64_t challenge, 
     return -1;
 }
 
-int32_t DefaultInitDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo)
+int32_t DefaultInitDslmCred(DslmCredInfo *credInfo)
 {
     ProcessDslmCredFunctions *cb = GetFunctionCb();
     InitDslmCredFunc *init = cb->initFunc;
     if (init != NULL) {
-        return init(device, credInfo);
+        return init(credInfo);
     }
     SECURITY_LOG_INFO("invoke DefaultInitDslmCred");
     return -1;

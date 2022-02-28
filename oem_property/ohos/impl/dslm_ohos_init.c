@@ -23,7 +23,7 @@
 
 #define DSLM_CRED_STR_LEN_MAX 4096
 
-int32_t InitOhosDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo)
+int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
 {
     SECURITY_LOG_INFO("Invoke InitOhosDslmCred");
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};

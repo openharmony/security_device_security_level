@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-int32_t InitOhosDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo);
+int32_t InitOhosDslmCred(DslmCredInfo *credInfo);
 
 #ifdef __cplusplus
 }

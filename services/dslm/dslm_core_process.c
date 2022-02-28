@@ -203,7 +203,7 @@ bool InitSelfDeviceSecureLevel(void)
         return true;
     }
 
-    int32_t ret = DefaultInitDslmCred(device, &info->credInfo);
+    int32_t ret = DefaultInitDslmCred(&info->credInfo);
     if (ret == SUCCESS && info->credInfo.credLevel > 0) {
         return true;
     }
