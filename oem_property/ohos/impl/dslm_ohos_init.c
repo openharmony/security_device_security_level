@@ -38,6 +38,6 @@ int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
         SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyCredData failed!");
         return ret;
     }
-    SECURITY_LOG_INFO("InitOhosDslmCred success!");
+    SECURITY_LOG_INFO("InitOhosDslmCred success, self level is %{public}d", credInfo->credLevel);
     return SUCCESS;
 }

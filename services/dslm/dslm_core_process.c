@@ -197,12 +197,12 @@ bool InitSelfDeviceSecureLevel(void)
     }
 
     info->deviceType = devType;
+    info->onlineStatus = ONLINE_STATUS_ONLINE;
 
     if (info->credInfo.credLevel > 0) {
         info->result = SUCCESS;
         return true;
     }
-
     int32_t ret = DefaultInitDslmCred(&info->credInfo);
     if (ret == SUCCESS && info->credInfo.credLevel > 0) {
         return true;
