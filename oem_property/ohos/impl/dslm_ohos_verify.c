@@ -43,8 +43,11 @@
 #define JSON_KEY_ALGORITHM "algorithm"
 
 #define SEC_LEVEL_STR_LEN 3 // "SL0"
-#define CLOUD_CRED_SEC_LEVEL_0 0
-#define CLOUD_CRED_SEC_LEVEL_MAX 5
+#define CRED_SEC_LEVEL_MIN 1
+#define CRED_SEC_LEVEL_MAX 5
+
+#define CRED_MAX_LEVEL_TYPE_SMALL 2
+#define CRED_MAX_LEVEL_TYPE_STANDARD 5
 
 #define CRED_KEY_CRED_VERSION "version"
 #define CRED_KEY_MANUFACTURE "manufacture"
@@ -92,7 +95,7 @@ static int32_t GetSecLevelFromString(const char *data, uint32_t dataLen, uint32_
         return ERR_INVALID_PARA;
     }
     int32_t num = data[SEC_LEVEL_STR_LEN - 1] - '0';
-    if (num < CLOUD_CRED_SEC_LEVEL_0 || num > CLOUD_CRED_SEC_LEVEL_MAX) {
+    if (num < CRED_SEC_LEVEL_MIN || num > CRED_SEC_LEVEL_MAX) {
         return ERR_INVALID_PARA;
     }
     *securityLevel = num;
@@ -203,9 +206,14 @@ static int32_t GetCredPayloadInfo(const char *credPayload, DslmCredInfo *credInf
     return ERR_GET_CLOUD_CRED_INFO;
 }
 
-static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCredInfo *info)
+static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *info, uint32_t maxLevel)
 {
     SECURITY_LOG_DEBUG("CheckCredInfo start!");
+    if (info->credLevel > maxLevel) {
+        SECURITY_LOG_ERROR("Cred level = %{public}d check error.", info->credLevel);
+        info->credLevel = 0;
+        return ERR_CHECK_CRED_INFO;
+    }
     if (strlen(info->udid) == 0) {
         SECURITY_LOG_DEBUG("Current cred has no udid, skip CheckCredInfo.");
         return SUCCESS;
@@ -548,7 +556,7 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
         return ret;
     }
 
-    ret = CheckCredInfo(device, credInfo);
+    ret = CheckCredInfo(device, credInfo, CRED_MAX_LEVEL_TYPE_SMALL);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("CheckCredInfo failed!");
         return ret;
@@ -588,7 +596,7 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
             SECURITY_LOG_ERROR("VerifyCredData failed!");
             break;
         }
-        ret = CheckCredInfo(device, credInfo);
+        ret = CheckCredInfo(device, credInfo, CRED_MAX_LEVEL_TYPE_STANDARD);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("CheckCredInfo failed!");
             break;
