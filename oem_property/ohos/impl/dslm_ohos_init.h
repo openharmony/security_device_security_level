@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DSLM_OHOS_REQUEST_H
-#define DSLM_OHOS_REQUEST_H
+#ifndef DSLM_OHOS_INIT_H
+#define DSLM_OHOS_INIT_H
 
 #include <stdint.h>
 
@@ -25,11 +25,10 @@
 extern "C" {
 #endif
 
-int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen);
-int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff);
+int32_t InitOhosDslmCred(DslmCredInfo *credInfo);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // DSLM_OHOS_REQUEST_H
+#endif // DSLM_OHOS_INIT_H

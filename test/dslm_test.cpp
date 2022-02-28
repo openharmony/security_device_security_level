@@ -86,8 +86,7 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level1)
     MessageBuff *msg = nullptr;
     // 0d196608 = 0x030000
     const char *except =
-        "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"0102030405060708\",\"support\":[300]}}";
-
+        "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"0102030405060708\",\"support\":[2000,3000]}}";
     int32_t ret = BuildDeviceSecInfoRequest(random, &msg);
     ASSERT_EQ(0, ret);
     EXPECT_STREQ(except, (const char *)msg->buff);
@@ -531,7 +530,6 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level1)
     mockMsg.MakeSelfDeviceId(&device);
     mockMsg.MakeMsgLoopback();
     EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(AtLeast(1));
     InitSelfDeviceSecureLevel();
 
     info = GetDslmDeviceInfo(&device);

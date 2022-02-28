@@ -203,34 +203,6 @@ static int32_t GetCredPayloadInfo(const char *credPayload, DslmCredInfo *credInf
     return ERR_GET_CLOUD_CRED_INFO;
 }
 
-static int32_t GenerateDeviceUdid(const char *manufacture, const char *productModel, const char *serialNum,
-    char *udidStr, uint32_t MaxLen)
-{
-    uint32_t manufactureLen = strlen(manufacture);
-    uint32_t productModelLen = strlen(productModel);
-    uint32_t serialNumLen = strlen(serialNum);
-
-    uint32_t dataLen = manufactureLen + productModelLen + serialNumLen;
-    char *data = (char *)MALLOC(dataLen + 1);
-
-    if (strcat_s(data, dataLen + 1, manufacture) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-    if (strcat_s(data, dataLen + 1, productModel) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-    if (strcat_s(data, dataLen + 1, serialNum) != EOK) {
-        return ERR_INVALID_PARA;
-    }
-
-    uint8_t hashResult[SHA_256_HASH_RESULT_LEN] = {0};
-    CallHashSha256((uint8_t *)data, dataLen, hashResult);
-
-    ByteToHexString(hashResult, SHA_256_HASH_RESULT_LEN, (uint8_t *)udidStr, UDID_STRING_LENGTH);
-
-    return 0;
-}
-
 static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCredInfo *info)
 {
     SECURITY_LOG_DEBUG("CheckCredInfo start!");
@@ -240,17 +212,6 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, const DslmCred
     }
     if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
         if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
-            return SUCCESS;
-        }
-
-        char udidStr[UDID_STRING_LENGTH] = {0};
-        const char *serialStr = GetSerial();
-        if (serialStr == NULL) {
-            return ERR_INVALID_PARA;
-        }
-
-        GenerateDeviceUdid(info->manufacture, info->model, serialStr, udidStr, UDID_STRING_LENGTH);
-        if (strcasecmp(udidStr, info->udid) == 0) {
             return SUCCESS;
         }
         return ERR_CHECK_CRED_INFO;
@@ -575,49 +536,6 @@ static void FreeCredData(struct CredData *credData)
     (void)memset_s(credData, sizeof(struct CredData), 0, sizeof(struct CredData));
 }
 
-static int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
-{
-    struct CredData credData;
-    (void)memset_s(&credData, sizeof(struct CredData), 0, sizeof(struct CredData));
-
-    int32_t ret = ERR_DEFAULT;
-    do {
-        // 1. Parse Cred.
-        ret = ParseCredData(credStr, &credData);
-        if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("ParseCredData failed!");
-            break;
-        }
-
-        // 2. Verify public key chain, get root public key.
-        ret = VerifyCredPubKeyChain(&credData.pbkChain[0]);
-        if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyCredPubKeyChain failed!");
-            break;
-        }
-
-        // 3. Verify source data by root public key.
-        ret = VerifyCredPayload(credStr, &credData);
-        if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyCredPayload failed!");
-            break;
-        }
-
-        // 4. Parse cred payload.
-        ret = GetCredPayloadInfo(credData.payload, credInfo);
-        if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("VerifyCredData success!");
-            break;
-        }
-    } while (0);
-
-    FreeCredData(&credData);
-    if (ret == SUCCESS) {
-        SECURITY_LOG_INFO("VerifyCredData SUCCESS!");
-    }
-    return ret;
-}
-
 static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
@@ -683,6 +601,52 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
     if (ret == SUCCESS) {
         SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
         SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
+    }
+    return ret;
+}
+
+int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
+{
+    if (credStr == NULL || credInfo == NULL) {
+        return ERR_INVALID_PARA;
+    }
+    struct CredData credData;
+    (void)memset_s(&credData, sizeof(struct CredData), 0, sizeof(struct CredData));
+
+    int32_t ret = ERR_DEFAULT;
+    do {
+        // 1. Parse Cred.
+        ret = ParseCredData(credStr, &credData);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_ERROR("ParseCredData failed!");
+            break;
+        }
+
+        // 2. Verify public key chain, get root public key.
+        ret = VerifyCredPubKeyChain(&credData.pbkChain[0]);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_ERROR("verifyCredPubKeyChain failed!");
+            break;
+        }
+
+        // 3. Verify source data by root public key.
+        ret = VerifyCredPayload(credStr, &credData);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_ERROR("verifyCredPayload failed!");
+            break;
+        }
+
+        // 4. Parse cred payload.
+        ret = GetCredPayloadInfo(credData.payload, credInfo);
+        if (ret != SUCCESS) {
+            SECURITY_LOG_ERROR("VerifyCredData success!");
+            break;
+        }
+    } while (0);
+
+    FreeCredData(&credData);
+    if (ret == SUCCESS) {
+        SECURITY_LOG_INFO("VerifyCredData SUCCESS!");
     }
     return ret;
 }

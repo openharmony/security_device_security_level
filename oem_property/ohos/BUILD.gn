@@ -63,6 +63,7 @@ ohos_shared_library("dslm_service") {
 
 ohos_source_set("dslm_ohos_cred_obj") {
   sources = [
+    "impl/dslm_ohos_init.c",
     "impl/dslm_ohos_request.c",
     "impl/dslm_ohos_verify.c",
     "impl/external_interface_adapter.c",

@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo);
+
 int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
     DslmCredInfo *credInfo);
 
