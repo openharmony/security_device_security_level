@@ -81,11 +81,3 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
     EVP_MD_CTX_free(ctx);
     return ret;
 }
-
-void CallHashSha256(const uint8_t *data, uint32_t dataLen, uint8_t *out)
-{
-    SHA256_CTX sctx;
-    SHA256_Init(&sctx);
-    SHA256_Update(&sctx, data, dataLen);
-    SHA256_Final(out, &sctx);
-}

@@ -33,28 +33,6 @@
 #define DEVAUTH_JSON_KEY_CHALLENGE "challenge"
 #define DEVAUTH_JSON_KEY_PKINFO_LIST "pkInfoList"
 
-static int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
-{
-    FILE *fp = NULL;
-    fp = fopen(DSLM_CRED_CFG_FILE_POSITION, "r");
-    if (fp == NULL) {
-        SECURITY_LOG_ERROR("fopen cred file failed!");
-        return ERR_INVALID_PARA;
-    }
-    int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
-    if (ret == -1) {
-        SECURITY_LOG_ERROR("fscanf_s cred file failed!");
-        ret = ERR_INVALID_PARA;
-    } else {
-        ret = SUCCESS;
-    }
-    if (fclose(fp) != 0) {
-        SECURITY_LOG_ERROR("fclose cred file failed!");
-        ret = ERR_INVALID_PARA;
-    }
-    return ret;
-}
-
 static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListStr, char **nounceStr)
 {
     JsonHandle json = CreateJson(NULL);
@@ -122,17 +100,10 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
 
 static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObject *obj, uint32_t *type)
 {
-    uint32_t devType = 0;
-    const DeviceIdentify *deviceSelf = GetSelfDevice(&devType);
-    if (deviceSelf->length == 0) {
-        SECURITY_LOG_ERROR("SelectDslmCredType, GetSelfDevice failed");
-        return ERR_INVALID_PARA;
-    }
-
-    // is self
-    if (memcmp(device->identity, deviceSelf->identity, deviceSelf->length) == 0) {
+    (void)device;
+    (void)obj;
+    if (HksAttestIsReadyAdapter() != SUCCESS) {
         *type = CRED_TYPE_SMALL;
-        return SUCCESS;
     }
     *type = CRED_TYPE_STANDARD;
     return SUCCESS;
@@ -168,6 +139,31 @@ static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const Reque
     *credBuff = out;
     SECURITY_LOG_INFO("RequestSmallDslmCred success!");
     return SUCCESS;
+}
+
+int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
+{
+    if (credStr == NULL || maxLen == 0) {
+        return ERR_INVALID_PARA;
+    }
+    FILE *fp = NULL;
+    fp = fopen(DSLM_CRED_CFG_FILE_POSITION, "r");
+    if (fp == NULL) {
+        SECURITY_LOG_ERROR("fopen cred file failed!");
+        return ERR_INVALID_PARA;
+    }
+    int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
+    if (ret == -1) {
+        SECURITY_LOG_ERROR("fscanf_s cred file failed!");
+        ret = ERR_INVALID_PARA;
+    } else {
+        ret = SUCCESS;
+    }
+    if (fclose(fp) != 0) {
+        SECURITY_LOG_ERROR("fclose cred file failed!");
+        ret = ERR_INVALID_PARA;
+    }
+    return ret;
 }
 
 int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff)

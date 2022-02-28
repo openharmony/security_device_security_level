@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef DSLM_OHOS_CREDENTIAL_H
 #define DSLM_OHOS_CREDENTIAL_H
 
+#include "impl/dslm_ohos_init.h"
 #include "impl/dslm_ohos_request.h"
 #include "impl/dslm_ohos_verify.h"
 
