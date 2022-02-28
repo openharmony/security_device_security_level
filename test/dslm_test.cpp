@@ -530,7 +530,6 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level1)
     mockMsg.MakeSelfDeviceId(&device);
     mockMsg.MakeMsgLoopback();
     EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
-    EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(AtLeast(1));
     InitSelfDeviceSecureLevel();
 
     info = GetDslmDeviceInfo(&device);
