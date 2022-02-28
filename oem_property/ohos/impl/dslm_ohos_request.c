@@ -125,20 +125,11 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
 
 static int32_t SelectDslmCredType(const DeviceIdentify *device, const RequestObject *obj, uint32_t *type)
 {
-    /*
-    uint32_t devType = 0;
-    const DeviceIdentify *deviceSelf = GetSelfDevice(&devType);
-    if (deviceSelf->length == 0) {
-        SECURITY_LOG_ERROR("SelectDslmCredType, GetSelfDevice failed");
-        return ERR_INVALID_PARA;
-    }
-
-    // is self
-    if (memcmp(device->identity, deviceSelf->identity, deviceSelf->length) == 0) {
+    (void)device;
+    (void)obj;
+    if (HksAttestIsReadyAdapter() != SUCCESS) {
         *type = CRED_TYPE_SMALL;
-        return SUCCESS;
     }
-    */
     *type = CRED_TYPE_STANDARD;
     return SUCCESS;
 }
