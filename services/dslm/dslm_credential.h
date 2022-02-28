@@ -29,7 +29,7 @@ int32_t DefaultRequestDslmCred(const DeviceIdentify *device, const RequestObject
 int32_t DefaultVerifyDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
     DslmCredInfo *credInfo);
 
-int32_t DefaultInitDslmCred(const DeviceIdentify *device, DslmCredInfo *credInfo);
+int32_t DefaultInitDslmCred(DslmCredInfo *credInfo);
 
 int32_t GetSupportedCredTypes(CredType *list, uint32_t len);
 
