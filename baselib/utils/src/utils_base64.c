@@ -61,7 +61,7 @@ static int32_t Base64Encode(const uint8_t *from, uint32_t fromLen, uint8_t *to, 
 
     uint32_t tmpLen = fromLen;
     uint32_t toLen = ((tmpLen + 2) / 3);          /* Base64 encode size, add 2 for padding, and divided by 3 */
-    int padding = tmpLen % 3;                     /* len % 3 to get the padding size. This must be signed type! */
+    int padding = (int)(tmpLen % 3);              /* len % 3 to get the padding size. This must be signed type! */
     padding = (padding == 0) ? 0 : (3 - padding); /* For the padding block out of 3 */
     if (toLen >= (toLen * 4)) {                   /* For integer overflow and toLen can not be 0, with 4X */
         return -1;
