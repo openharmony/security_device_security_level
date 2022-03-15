@@ -71,7 +71,7 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
             free(payload);
             break;
         }
-        packet->type = msgType;
+        packet->type = (uint32_t)msgType;
         packet->payload = (uint8_t *)payload;
         packet->length = strlen(payload) + 1; // for the end flag '\0'
     } while (0);

@@ -225,7 +225,7 @@ static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event
 
     deviceInfo->lastResponseTime = GetMillisecondSinceBoot();
 
-    deviceInfo->result = VerifyDeviceInfoResponse(deviceInfo, buff);
+    deviceInfo->result = (uint32_t)VerifyDeviceInfoResponse(deviceInfo, buff);
     ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneCheker);
 
     if (deviceInfo->result == SUCCESS) {
