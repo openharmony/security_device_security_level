@@ -51,13 +51,13 @@ bool GetDateTimeByMillisecondSince1970(uint64_t input, DateTime *datetime)
     time_t time = (time_t)(input / SEC_TO_MILLISEC);
     localtime_r(&time, &tm);
 
-    datetime->year = tm.tm_year + 1900; // need add 1900
-    datetime->mon = tm.tm_mon + 1;
-    datetime->day = tm.tm_mday;
-    datetime->hour = tm.tm_hour;
-    datetime->min = tm.tm_min;
-    datetime->sec = tm.tm_sec;
-    datetime->msec = input % SEC_TO_MILLISEC;
+    datetime->year = (uint16_t)(tm.tm_year + 1900); // need add 1900
+    datetime->mon = (uint16_t)(tm.tm_mon + 1);
+    datetime->day = (uint16_t)tm.tm_mday;
+    datetime->hour = (uint16_t)tm.tm_hour;
+    datetime->min = (uint16_t)tm.tm_min;
+    datetime->sec = (uint16_t)tm.tm_sec;
+    datetime->msec = (uint16_t)(input % SEC_TO_MILLISEC);
     return true;
 }
 bool GetDateTimeByMillisecondSinceBoot(uint64_t input, DateTime *datetime)
