@@ -43,7 +43,7 @@ typedef struct WorkQueue {
 typedef struct {
     ListNode linkNode;
     WorkProcess process; // callback func
-    int32_t dataLen;
+    uint32_t dataLen;
     uint8_t *dataBuff; // user data ptr
 } Worker;
 
