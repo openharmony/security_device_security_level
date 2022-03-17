@@ -99,7 +99,7 @@ static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t st
         return;
     }
 
-    uint32_t ret = memcpy_s(&data->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
+    uint32_t ret = (uint32_t)memcpy_s(&data->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, memcpy failed");
         FREE(data);

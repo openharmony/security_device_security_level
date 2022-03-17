@@ -126,13 +126,13 @@ static void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t 
         SECURITY_LOG_ERROR("ProcessSessionMessageReceived, malloc result null");
         return;
     }
-    uint32_t ret = memcpy_s(&queueData->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
+    uint32_t ret = (uint32_t)memcpy_s(&queueData->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("ProcessSessionMessageReceived, memcpy failed");
         FREE(queueData);
         return;
     }
-    ret = memcpy_s(queueData->msgdata, msgLen, msg, msgLen);
+    ret = (uint32_t)memcpy_s(queueData->msgdata, msgLen, msg, msgLen);
     if (ret != EOK) {
         SECURITY_LOG_ERROR("ProcessSessionMessageReceived, memcpy failed");
         FREE(queueData);

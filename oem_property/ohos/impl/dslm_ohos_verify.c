@@ -297,8 +297,8 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
         DestroyJson(jsonA);
         return ERR_INVALID_PARA;
     }
-    uint32_t sizeA = GetJsonFieldJsonArraySize(jsonA);
-    uint32_t sizeB = GetJsonFieldJsonArraySize(jsonB);
+    uint32_t sizeA = (uint32_t)GetJsonFieldJsonArraySize(jsonA);
+    uint32_t sizeB = (uint32_t)GetJsonFieldJsonArraySize(jsonB);
 
     for (uint32_t i = 0; i < sizeA; i++) {
         for (uint32_t j = 0; j < sizeB; j++) {
@@ -409,15 +409,15 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
         if (i == 0) {
             pbkMsg = srcMsg;
         }
-        pbkChain[i].src.length = Base64UrlDecodeApp((uint8_t *)srcMsg, &(pbkChain[i].src.data));
+        pbkChain[i].src.length = (uint32_t)Base64UrlDecodeApp((uint8_t *)srcMsg, &(pbkChain[i].src.data));
         if (pbkChain[i].src.data == NULL) {
             break;
         }
-        pbkChain[i].sig.length = Base64UrlDecodeApp((uint8_t *)sigMsg, &(pbkChain[i].sig.data));
+        pbkChain[i].sig.length = (uint32_t)Base64UrlDecodeApp((uint8_t *)sigMsg, &(pbkChain[i].sig.data));
         if (pbkChain[i].sig.data == NULL) {
             break;
         }
-        pbkChain[i].pbk.length = Base64UrlDecodeApp((uint8_t *)pbkMsg, &(pbkChain[i].pbk.data));
+        pbkChain[i].pbk.length = (uint32_t)Base64UrlDecodeApp((uint8_t *)pbkMsg, &(pbkChain[i].pbk.data));
         if (pbkChain[i].pbk.data == NULL) {
             break;
         }
@@ -498,7 +498,7 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
     srcData.length = strlen(srcMsg);
     pbkData.data = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.data;
     pbkData.length = credData->pbkChain[PBK_CHAIN_THIRD_KEY_INDEX].src.length;
-    sigData.length = Base64UrlDecodeApp((uint8_t *)credData->signature, &(sigData.data));
+    sigData.length = (uint32_t)Base64UrlDecodeApp((uint8_t *)credData->signature, &(sigData.data));
     if (sigData.data == NULL) {
         FREE(srcMsg);
         return ERR_MEMORY_ERR;
@@ -546,7 +546,7 @@ static void FreeCredData(struct CredData *credData)
 static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
-    if (memcpy_s(credStr, credBuff->credLen + 1, credBuff->credVal, credBuff->credLen + 1) != EOK) {
+    if (memcpy_s(credStr, DSLM_CRED_STR_LEN_MAX, credBuff->credVal, credBuff->credLen + 1) != EOK) {
         return ERR_MEMORY_ERR;
     }
 
