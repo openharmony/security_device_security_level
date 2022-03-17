@@ -29,7 +29,7 @@ JsonHandle CreateJson(const char *data);
 void DestroyJson(JsonHandle handle);
 
 int32_t GetJsonFieldInt(JsonHandle handle, const char *field);
-int32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen);
+uint32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen);
 const char *GetJsonFieldString(JsonHandle handle, const char *field);
 JsonHandle GetJsonFieldJson(JsonHandle handle, const char *field);
 

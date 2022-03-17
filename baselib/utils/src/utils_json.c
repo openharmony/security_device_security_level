@@ -68,7 +68,7 @@ int32_t GetJsonFieldInt(JsonHandle handle, const char *field)
     return ret;
 }
 
-int32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen)
+uint32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen)
 {
     if (handle == NULL || field == NULL || array == NULL) {
         return 0;
@@ -86,7 +86,7 @@ int32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *arra
     if (size > arrayLen) {
         size = arrayLen;
     }
-    int32_t index = 0;
+    uint32_t index = 0;
     for (int32_t i = 0; i < size; i++) {
         cJSON *item = cJSON_GetArrayItem(objValue, i);
         if (!cJSON_IsNumber(item)) {

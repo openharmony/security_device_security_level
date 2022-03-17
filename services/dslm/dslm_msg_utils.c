@@ -163,12 +163,8 @@ int32_t ParseDeviceSecInfoRequest(const MessageBuff *buff, RequestObject *obj)
         return ERR_NO_CHALLENGE;
     }
 
-    uint32_t verNum = (uint32_t)GetJsonFieldInt(handle, FIELD_VERSION);
-
-    int32_t arraySize = GetJsonFieldIntArray(handle, FIELD_SUPPORT, (int32_t *)obj->credArray, MAX_CRED_ARRAY_SIZE);
-
-    obj->version = verNum;
-    obj->arraySize = arraySize;
+    obj->version = (uint32_t)GetJsonFieldInt(handle, FIELD_VERSION);
+    obj->arraySize = GetJsonFieldIntArray(handle, FIELD_SUPPORT, (int32_t *)obj->credArray, MAX_CRED_ARRAY_SIZE);
 
     DestroyJson(handle);
 
@@ -224,7 +220,7 @@ int32_t ParseDeviceSecInfoResponse(const MessageBuff *msg, uint64_t *challenge, 
     }
 
     uint32_t type = (uint32_t)GetJsonFieldInt(handle, FIELD_CRED_TYPE);
-    uint32_t verNum = GetJsonFieldInt(handle, FIELD_VERSION);
+    uint32_t verNum = (uint32_t)GetJsonFieldInt(handle, FIELD_VERSION);
 
     const char *credStr = GetJsonFieldString(handle, FIELD_CRED_INFO);
     if (credStr == NULL) {
@@ -233,7 +229,7 @@ int32_t ParseDeviceSecInfoResponse(const MessageBuff *msg, uint64_t *challenge, 
     }
 
     uint8_t *credBuf = NULL;
-    uint32_t credLen = Base64DecodeApp((uint8_t *)credStr, &credBuf);
+    uint32_t credLen = (uint32_t)Base64DecodeApp((uint8_t *)credStr, &credBuf);
     if (credBuf == NULL) {
         DestroyJson(handle);
         return ERR_NO_CRED;
