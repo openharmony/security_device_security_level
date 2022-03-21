@@ -1,4 +1,4 @@
-#/*
+/*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,10 @@
 
 int32_t FillHksParamSet(struct HksParamSet *paramSet, struct HksParam *param, int32_t paramNums)
 {
+    if (param == NULL) {
+        SECURITY_LOG_ERROR("param is null");
+        return ERR_INVALID_PARA;
+    }
     int32_t ret = HksInitParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksInitParamSet failed, hks ret = %{public}d", ret);
@@ -57,6 +61,10 @@ int32_t FillHksParamSet(struct HksParamSet *paramSet, struct HksParam *param, in
 
 int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 {
+    if (keyAlias == NULL) {
+        SECURITY_LOG_ERROR("keyAlias is null.");
+        return ret;       
+    }
     struct HksParam tmpParams[] = {
         {.tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT},
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
