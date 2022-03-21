@@ -337,6 +337,7 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level1)
     EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
 }
 
+/*
 HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
 {
     const DeviceIdentify identiy = {DEVICE_ID_MAX_LEN, {0}};
@@ -411,6 +412,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
         mockMsg.MakeDeviceOffline(&device);
     }
 }
+*/
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level1)
 {
@@ -483,6 +485,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level1)
     mockMsg.MakeDeviceOffline(&device);
 }
 
+/*
 HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level1)
 {
     const char *input = "{\"version\":65536,\"challenge\":\"0102030405060708\"}";
@@ -507,6 +510,7 @@ HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level1)
     int32_t ret = OnPeerMsgRequestInfoReceived(&device, (const uint8_t *)input, len);
     EXPECT_EQ(0, (int32_t)ret);
 }
+*/
 
 HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level1)
 {
