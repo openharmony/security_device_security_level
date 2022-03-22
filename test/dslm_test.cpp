@@ -63,7 +63,7 @@ void DslmTest::TearDown()
 static void BlockCheckDeviceStatus(const DeviceIdentify *device, uint32_t status, uint64_t millisec)
 {
     static int sleepTick = 10;
-    uint64_t cnt = millisec / (uint64_t)sleepTick + 1;
+    uint64_t cnt = millisec / static_cast<uint64_t>(sleepTick) + 1;
     do {
         const DslmDeviceInfo *info = GetDslmDeviceInfo(device);
         if (info == nullptr) {
