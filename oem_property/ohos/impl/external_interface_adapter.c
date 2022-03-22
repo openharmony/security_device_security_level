@@ -124,9 +124,10 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
         SECURITY_LOG_ERROR("HksCertChainToHksBlob failed!");
         HksFreeParamSet(&inputParam);
         DestroyHksCertChain(hksCertChain);
+        Free(*certChain);
+        *certChain = NULL;
         return ret;
     }
-
     HksFreeParamSet(&inputParam);
     DestroyHksCertChain(hksCertChain);
     SECURITY_LOG_DEBUG("DslmCredAttestAdapter success, certChainLen = %{public}d ", *certChainLen);
