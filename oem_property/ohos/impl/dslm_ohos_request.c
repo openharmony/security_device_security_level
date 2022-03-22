@@ -125,7 +125,7 @@ static int32_t RequestSmallDslmCred(uint8_t *data, uint32_t dataLen, DslmCredBuf
 static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const RequestObject *obj, char *credStr,
     DslmCredBuff **credBuff)
 {
-    uint8_t *certChain = NULL; // malloc, need free
+    uint8_t *certChain = NULL;
     uint32_t certChainLen = 0;
     int32_t ret = GenerateDslmCertChain(device, obj, credStr, &certChain, &certChainLen);
     if (ret != SUCCESS) {
@@ -134,9 +134,11 @@ static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const Reque
     }
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
     if (out == NULL) {
+        FREE(certChain);
         SECURITY_LOG_ERROR("RequestStandardDslmCred, CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
+    FREE(certChain);
     *credBuff = out;
     SECURITY_LOG_INFO("RequestStandardDslmCred success!");
     return SUCCESS;

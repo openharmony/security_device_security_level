@@ -67,6 +67,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "impl/dslm_ohos_request.c",
     "impl/dslm_ohos_verify.c",
     "impl/external_interface_adapter.c",
+    "impl/hks_adapter.c",
   ]
 
   include_dirs = [
