@@ -33,6 +33,7 @@
 #define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
 #define LIST_MAX_SIZE 10240
 
+// need free
 int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, int32_t paramNums)
 {
     if (param == NULL) {
@@ -90,6 +91,7 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
     return SUCCESS;
 }
 
+// need free
 int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksCertChainInitParams *certChainParam)
 {
     if (certChainParam == NULL || certChainParam->certChainExist == false || certChainParam->certCountValid == false
@@ -119,7 +121,7 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
 
 void DestroyHksCertChain(struct HksCertChain *certChain)
 {
-    if (certChain == NULL || certChain->certs == NULL) {
+    if (certChain == NULL || certChain->certs == NULL || certChain->certsCount <= 0) {
         return;
     }
     for (uint32_t i = 0; i < certChain->certsCount; i++) {
@@ -134,7 +136,7 @@ void DestroyHksCertChain(struct HksCertChain *certChain)
     certChain = NULL;
 }
 
-// data is malloced, need free
+// need free
 int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **data, uint32_t *dataLen)
 {
     if (hksCertChain == NULL) {
@@ -164,6 +166,7 @@ int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **
     return SUCCESS;
 }
 
+// point to exist memory, no need free but can not change data
 int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain)
 {
     if (data == NULL || dataLen == 0) {
