@@ -133,7 +133,6 @@ void DestroyHksCertChain(struct HksCertChain *certChain)
     FREE(certChain->certs);
     certChain->certs = NULL;
     FREE(certChain);
-    certChain = NULL;
 }
 
 // need free
