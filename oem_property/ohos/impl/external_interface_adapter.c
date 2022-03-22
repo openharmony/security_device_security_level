@@ -39,48 +39,46 @@ const char g_dslmKey[] = "dslm_key";
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax);
 
 const char *pkInfoEmpty = "[]";
+const char *pkInfoBase = "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]";
 
 int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
-    SECURITY_LOG_INFO("GetPkInfoListStr start.");
+    SECURITY_LOG_INFO("GetPkInfoListStr start");
 
     char paramJson[HICHIAN_INPUT_PARAM_STRING_LENGTH] = {0};
     char *resultBuffer = NULL;
     uint32_t resultNum = 0;
 
-    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, paramJson, HICHIAN_INPUT_PARAM_STRING_LENGTH);
+    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHIAN_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("GenerateFuncParamJson failed");
+        SECURITY_LOG_INFO("GenerateFuncParamJson failed");
         return ret;
     }
 
     const DeviceGroupManager *interface = GetGmInstance();
     ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("getPkInfoList failed! ret = %{public}d", ret);
+        SECURITY_LOG_INFO("getPkInfoList failed! ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
     if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
-        SECURITY_LOG_ERROR("getPkInfoList result is null.");
-        interface->destroyInfo(&resultBuffer);
-        return ERR_CALL_EXTERNAL_FUNC;       
+        SECURITY_LOG_INFO("Current pkInfoList is null");
+        *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
+        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
+            ret = ERR_MEMORY_ERR;
+        }
+    } else {
+        *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
+        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
+            ret = ERR_MEMORY_ERR;
+        }
     }
-    *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
-    if (*pkInfoList == NULL) {
-        SECURITY_LOG_ERROR("getPkInfoList malloc failed.");
-        interface->destroyInfo(&resultBuffer);
-        return ERR_CALL_EXTERNAL_FUNC;
+    if (ret == SUCCESS) {
+        SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
     }
-    if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
-        SECURITY_LOG_ERROR("getPkInfoList strcpy_s failed.");
-        interface->destroyInfo(&resultBuffer);
-        ret = ERR_MEMORY_ERR;
-    }
-
-    SECURITY_LOG_DEBUG("getPkInfoList sucess, pkinfo = %{public}s", *pkInfoList);
     interface->destroyInfo(&resultBuffer);
-    return ret;
+    return SUCCESS;
 }
 
 int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certChain, uint32_t *certChainLen)
@@ -90,13 +88,13 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
     struct HksBlob keyAlias = {sizeof(g_dslmKey), (uint8_t *)g_dslmKey};
     if (HksGenerateKeyAdapter(&keyAlias) != SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKeyAdapter failed!");
+        return ERR_HUKS_ERR;
     }
     struct HksParam inputData[] = {
         {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(info->nounceStr) + 1, (uint8_t *)info->nounceStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(info->credStr) + 1, (uint8_t *)info->credStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = {strlen(info->udidStr) + 1, (uint8_t *)info->udidStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias},
-
     };
 
     struct HksParamSet *inputParam = NULL;
@@ -109,7 +107,7 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
         SECURITY_LOG_ERROR("ConstructHksCertChain ret = %{public}d ", ret);
         return ret;
     }
-    if (FillHksParamSet(inputParam, inputData, sizeof(inputData) / sizeof(inputData[0])) != SUCCESS) {
+    if (FillHksParamSet(&inputParam, inputData, sizeof(inputData) / sizeof(inputData[0])) != SUCCESS) {
         SECURITY_LOG_ERROR("DslmCredAttestAdapter, FillHksParamSet failed.");
         DestroyHksCertChain(hksCertChain);
         return ERR_CALL_EXTERNAL_FUNC;
@@ -156,7 +154,7 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
         SECURITY_LOG_ERROR("BufferToHksCertChain failed.");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    if (FillHksParamSet(outputParam, outputData, sizeof(outputData) / sizeof(outputData[0])) != SUCCESS) {
+    if (FillHksParamSet(&outputParam, outputData, sizeof(outputData) / sizeof(outputData[0])) != SUCCESS) {
         SECURITY_LOG_ERROR("ValidateCertChainAdapter, FillHksParamSet failed.");
         return ERR_CALL_EXTERNAL_FUNC;
     }

@@ -33,27 +33,27 @@
 #define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
 #define LIST_MAX_SIZE 10240
 
-int32_t FillHksParamSet(struct HksParamSet *paramSet, struct HksParam *param, int32_t paramNums)
+int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, int32_t paramNums)
 {
     if (param == NULL) {
         SECURITY_LOG_ERROR("param is null");
         return ERR_INVALID_PARA;
     }
-    int32_t ret = HksInitParamSet(&paramSet);
+    int32_t ret = HksInitParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksInitParamSet failed, hks ret = %{public}d", ret);
         return ERR_INVALID_PARA;
     }
-    ret = HksAddParams(paramSet, param, paramNums);
+    ret = HksAddParams(*paramSet, param, paramNums);
      if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAddParams failed, hks ret = %{public}d", ret);
-        HksFreeParamSet(&paramSet);
+        HksFreeParamSet(paramSet);
         return ERR_INVALID_PARA;
     }
-    ret = HksBuildParamSet(&paramSet);
+    ret = HksBuildParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksBuildParamSet failed, hks ret = %{public}d", ret);
-        HksFreeParamSet(&paramSet);
+        HksFreeParamSet(paramSet);
         return ERR_INVALID_PARA;
     }
     return SUCCESS; 
@@ -63,7 +63,7 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 {
     if (keyAlias == NULL) {
         SECURITY_LOG_ERROR("keyAlias is null.");
-        return ret;       
+        return ERR_INVALID_PARA;
     }
     struct HksParam tmpParams[] = {
         {.tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT},
@@ -76,21 +76,18 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
         {.tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB},
     };
     struct HksParamSet *paramSet = NULL;
-    int32_t ret = FillHksParamSet(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
-    if (ret != SUCCESS) {
+    if (FillHksParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) != SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKeyAdapter, FillHksParamSet failed.");
-        return ret;
+        return ERR_HUKS_ERR;
     }
-    ret = HksGenerateKey(keyAlias, paramSet, NULL);
+    int32_t ret = HksGenerateKey(keyAlias, paramSet, NULL);
     if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKey failed, hks ret = %{public}d", ret);
         HksFreeParamSet(&paramSet);
-        ret = ERR_HUKS_ERR;
-    } else {
-        ret = SUCCESS;
+        return ERR_HUKS_ERR;
     }
     HksFreeParamSet(&paramSet);
-    return ret;
+    return SUCCESS;
 }
 
 int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksCertChainInitParams *certChainParam)
