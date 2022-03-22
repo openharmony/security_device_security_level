@@ -91,7 +91,7 @@ MessageBuff *SerializeMessage(const MessagePacket *packet)
     if (out == NULL) {
         return NULL;
     }
-    memset_s(out, sizeof(MessageBuff), 0, sizeof(MessageBuff));
+    (void)memset_s(out, sizeof(MessageBuff), 0, sizeof(MessageBuff));
 
     JsonHandle json = CreateJson(NULL);
     if (json == NULL) {

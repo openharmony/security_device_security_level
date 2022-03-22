@@ -251,7 +251,7 @@ bool MessengerGetDeviceNodeBasicInfo(const DeviceIdentify *devId, NodeBasicInfo 
 
         if (IsSameDevice(devId, &curr)) {
             find = true;
-            memcpy_s(info, sizeof(NodeBasicInfo), node, sizeof(NodeBasicInfo));
+            (void)memcpy_s(info, sizeof(NodeBasicInfo), node, sizeof(NodeBasicInfo));
             break;
         }
     }

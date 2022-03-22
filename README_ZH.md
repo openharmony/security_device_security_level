@@ -43,8 +43,7 @@ OpenHarmony系统安全架构如下图所示：
 设备安全等级管理模块的代码目录结构如下：
 
 ```undefined
-//base/security/device_security_level
-.
+base/security/device_security_level
 ├── baselib        # 基础库
 ├── common         # 公共头文件
 ├── interfaces     # inner api接口
