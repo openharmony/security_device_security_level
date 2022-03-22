@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,6 @@ int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
         SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyCredData failed!");
         return ret;
     }
-    SECURITY_LOG_INFO("InitOhosDslmCred success, self level is %{public}d", credInfo->credLevel);
+    SECURITY_LOG_INFO("InitOhosDslmCred success, self security level is %{public}d", credInfo->credLevel);
     return SUCCESS;
 }

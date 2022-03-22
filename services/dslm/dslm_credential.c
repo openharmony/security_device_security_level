@@ -36,7 +36,7 @@ bool InitDslmCredentialFunctions(const ProcessDslmCredFunctions *funcs)
         return false;
     }
     ProcessDslmCredFunctions *cb = GetFunctionCb();
-    memcpy_s(cb, sizeof(ProcessDslmCredFunctions), funcs, sizeof(ProcessDslmCredFunctions));
+    (void)memcpy_s(cb, sizeof(ProcessDslmCredFunctions), funcs, sizeof(ProcessDslmCredFunctions));
     SECURITY_LOG_INFO("InitDslmCredentialFunctions success");
     return true;
 }
@@ -105,7 +105,7 @@ DslmCredBuff *CreateDslmCred(CredType type, uint32_t len, uint8_t *value)
         FREE(outBuff);
         return NULL;
     }
-    memset_s(outValue, len, 0, len);
+    (void)memset_s(outValue, len, 0, len);
     if (memcpy_s(outValue, len, value, len) != EOK) {
         FREE(outBuff);
         FREE(outValue);

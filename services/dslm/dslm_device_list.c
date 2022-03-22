@@ -99,7 +99,7 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device)
     if (info == NULL) {
         return NULL;
     }
-    memset_s(info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+    (void)memset_s(info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
 
     if (memcpy_s(&info->identity, sizeof(DeviceIdentify), device, sizeof(DeviceIdentify)) != EOK) {
         FREE(info);

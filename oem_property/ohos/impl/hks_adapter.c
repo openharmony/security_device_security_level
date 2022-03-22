@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
         if ((*certChain)->certs[i].data == NULL) {
             return ERR_NO_MEMORY;
         }
-        memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
+        (void)memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
     }
     return SUCCESS;
 }
@@ -143,7 +143,7 @@ int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **
     }
 
     TlvCommon tlvs[MAX_ENTRY];
-    memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
+    (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
     uint32_t tlvCnt = 0;
     for (uint32_t i = 0; i < hksCertChain->certsCount; i++) {
         tlvs[tlvCnt].tag = TYPE_CERT_BASE + 1;
@@ -156,7 +156,7 @@ int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **
     if (out == NULL) {
         return ERR_NO_MEMORY;
     }
-    memset_s(out, LIST_MAX_SIZE, 0, LIST_MAX_SIZE);
+    (void)memset_s(out, LIST_MAX_SIZE, 0, LIST_MAX_SIZE);
     if (Serialize(tlvs, tlvCnt, out, LIST_MAX_SIZE, dataLen) != TLV_OK) {
         FREE(out);
         return ERR_NO_MEMORY;
@@ -172,7 +172,7 @@ int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCe
         return ERR_INVALID_PARA;
     }
     TlvCommon tlvs[MAX_ENTRY];
-    memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
+    (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
 
     uint32_t cnt = 0;
     uint32_t ret = Deserialize(data, dataLen, &tlvs[0], MAX_ENTRY, &cnt);
