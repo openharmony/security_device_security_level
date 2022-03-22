@@ -45,7 +45,7 @@ int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, i
         return ERR_INVALID_PARA;
     }
     ret = HksAddParams(*paramSet, param, paramNums);
-     if (ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksAddParams failed, hks ret = %{public}d", ret);
         HksFreeParamSet(paramSet);
         return ERR_INVALID_PARA;
@@ -56,7 +56,7 @@ int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, i
         HksFreeParamSet(paramSet);
         return ERR_INVALID_PARA;
     }
-    return SUCCESS; 
+    return SUCCESS;
 }
 
 int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
