@@ -228,7 +228,7 @@ int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
         SECURITY_LOG_DEBUG("Base64UrlDecodeApp MALLOC fail");
         return 0;
     }
-    memset_s(base64Str, alignLen + 1, '=', alignLen + 1);
+    (void)memset_s(base64Str, alignLen + 1, '=', alignLen + 1);
     for (uint32_t i = 0; i < sourceLen; i++) {
         if (src[i] == '-')
             base64Str[i] = '+';

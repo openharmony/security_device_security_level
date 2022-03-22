@@ -68,7 +68,7 @@ static void TimerProcessSendDeviceInfoRequestTimeOut(const void *context)
     if (context == NULL) {
         return;
     }
-    // the context info will nerver be freed, so feel free use it.
+    // the context info will never be freed, so feel free use it.
     ScheduleDslmStateMachine((DslmDeviceInfo *)context, EVENT_TIME_OUT, NULL);
 }
 
@@ -77,7 +77,7 @@ static void TimerProcessSdkRequestTimeout(const void *context)
     if (context == NULL) {
         return;
     }
-    // the context info will nerver be freed, so feel free use it.
+    // the context info will never be freed, so feel free use it.
     ScheduleDslmStateMachine((DslmDeviceInfo *)context, EVENT_SDK_TIMEOUT, NULL);
 }
 
@@ -234,7 +234,7 @@ static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event
         return true;
     }
 
-    CheckTimesAndSendCredRequest(deviceInfo, false);
+    (void)CheckTimesAndSendCredRequest(deviceInfo, false);
     return false;
 }
 
