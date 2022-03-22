@@ -27,42 +27,42 @@ extern "C" {
 typedef struct DeviceSecurityInfo DeviceSecurityInfo;
 
 /**
- * 设备安全等级等级信息的回调
+ * Callback for requesting device security level information.
  */
 typedef void DeviceSecurityInfoCallback(const DeviceIdentify *identify, struct DeviceSecurityInfo *info);
 
 /**
- * 同步请求获取本机/邻居设备的设备安全
+ * Synchronously requests for the device security level of the local/neighbor devices.
  *
- * @param [in]identify 设备标识符
- * @param [in]option option值
- * @param [out]info, 需要调用者释放
+ * @param [in] identify Device identifier.
+ * @param [in] option Option value.
+ * @param [out] info Information containing the device security level.
  * @return
  */
 int32_t RequestDeviceSecurityInfo(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info);
 
 /**
- * 异步请求获取本机/邻居设备的设备安全
+ * Asynchronously requests for the device security level of the local/neighbor devices.
  *
- * @param [in]identify 设备标识符
- * @param [in]option option值
- * @param [in]callback
+ * @param [in] identify Identify Device identifier.
+ * @param [in] option Option value.
+ * @param [in] info Callback used to return the device security level information.
  * @return
  */
 int32_t RequestDeviceSecurityInfoAsync(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfoCallback callback);
 
 /**
- * 释放设备安全等级信息
- * @param info RequestDeviceSecLevelInfo函数返回的设备安全等级信息
+ * Releases device security level information.
+ * @param info Device security level information in RequestDeviceSecurityInfo.
  */
 void FreeDeviceSecurityInfo(DeviceSecurityInfo *info);
 
 /**
- * 提取DeviceSecLevelInfo中的设备安全等级
- * @param info [in]设备安全等级信息
- * @param level [out]设备安全等级。
+ * Gets the device security level from DeviceSecurityInfo.
+ * @param [in] info Device security level information.
+ * @param [out] level Device security level.
  * @return
  */
 int32_t GetDeviceSecurityLevelValue(const DeviceSecurityInfo *info, int32_t *level);

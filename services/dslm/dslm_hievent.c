@@ -28,7 +28,7 @@ void ReportHiEventInfoSync(const DslmDeviceInfo *info)
         return;
     }
     SecurityInfoSyncEvent event;
-    memset_s(&event, sizeof(SecurityInfoSyncEvent), 0, sizeof(SecurityInfoSyncEvent));
+    (void)memset_s(&event, sizeof(SecurityInfoSyncEvent), 0, sizeof(SecurityInfoSyncEvent));
 
     if (info->lastResponseTime >= info->lastRequestTime) {
         event.costTime = info->lastResponseTime - info->lastRequestTime;
@@ -39,7 +39,7 @@ void ReportHiEventInfoSync(const DslmDeviceInfo *info)
     event.localVersion = GetCurrentVersion();
     event.targetVersion = info->version;
     if (memcpy_s(event.targetModel, MODEL_MAX_LEN, info->credInfo.model, CRED_INFO_MODEL_LEN) != EOK) {
-        memset_s(event.targetModel, MODEL_MAX_LEN, 0, MODEL_MAX_LEN);
+        (void)memset_s(event.targetModel, MODEL_MAX_LEN, 0, MODEL_MAX_LEN);
     }
 
     event.credType = info->credInfo.credType;
@@ -56,7 +56,7 @@ void ReportHiEventAppInvoke(const DslmDeviceInfo *info)
         return;
     }
     AppInvokeEvent event;
-    memset_s(&event, sizeof(AppInvokeEvent), 0, sizeof(AppInvokeEvent));
+    (void)memset_s(&event, sizeof(AppInvokeEvent), 0, sizeof(AppInvokeEvent));
     event.costTime = 0;
     if (info->lastResponseTime >= info->lastRequestTime) {
         event.costTime = info->lastResponseTime - info->lastRequestTime;
@@ -67,7 +67,7 @@ void ReportHiEventAppInvoke(const DslmDeviceInfo *info)
     event.retMode = (info->result == ERR_NEED_COMPATIBLE) ? 1 : 0;
 
     if (memcpy_s(event.targetModel, MODEL_MAX_LEN, info->credInfo.model, CRED_INFO_MODEL_LEN) != EOK) {
-        memset_s(event.targetModel, MODEL_MAX_LEN, 0, MODEL_MAX_LEN);
+        (void)memset_s(event.targetModel, MODEL_MAX_LEN, 0, MODEL_MAX_LEN);
     }
 
     ReportAppInvokeEvent(&event);

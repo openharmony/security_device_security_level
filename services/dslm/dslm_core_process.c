@@ -47,7 +47,7 @@ int32_t OnPeerMsgRequestInfoReceived(const DeviceIdentify *deviceId, const uint8
     MessageBuff buff = {.length = len, .buff = (uint8_t *)msg};
 
     RequestObject reqObject;
-    memset_s(&reqObject, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&reqObject, sizeof(RequestObject), 0, sizeof(RequestObject));
 
     // Parse the msg
     int32_t ret = ParseDeviceSecInfoRequest(&buff, &reqObject);
@@ -255,7 +255,7 @@ static const DeviceIdentify *RefreshDeviceOnlineStatus(const DeviceIdentify *dev
     }
 
     if (GetPeerDeviceOnlineStatus(deviceId, &devType)) {
-        OnPeerStatusReceiver(deviceId, ONLINE_STATUS_ONLINE, devType);
+        (void)OnPeerStatusReceiver(deviceId, ONLINE_STATUS_ONLINE, devType);
     }
 
     return deviceId;

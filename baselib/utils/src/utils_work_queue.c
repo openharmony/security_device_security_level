@@ -92,7 +92,7 @@ WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name)
     if (queue == NULL) {
         return NULL;
     }
-    memset_s(queue, sizeof(WorkQueue), 0, sizeof(WorkQueue));
+    (void)memset_s(queue, sizeof(WorkQueue), 0, sizeof(WorkQueue));
 
     InitListHead(&(queue->head));
     queue->state = RUN;

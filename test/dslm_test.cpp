@@ -63,7 +63,7 @@ void DslmTest::TearDown()
 static void BlockCheckDeviceStatus(const DeviceIdentify *device, uint32_t status, uint64_t millisec)
 {
     static int sleepTick = 10;
-    uint64_t cnt = millisec / sleepTick + 1;
+    uint64_t cnt = millisec / (uint64_t)sleepTick + 1;
     do {
         const DslmDeviceInfo *info = GetDslmDeviceInfo(device);
         if (info == nullptr) {
@@ -160,7 +160,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
 
     // 3351057 = 0x332211
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
@@ -179,7 +179,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case2, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
 
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
@@ -193,7 +193,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case3, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
@@ -206,7 +206,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case4, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
@@ -219,7 +219,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case5, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
 
     // 3351057 = 0x332211
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
@@ -241,7 +241,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level1)
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     RequestObject obj;
-    memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
 
     // 3351057 = 0x332211
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
@@ -313,11 +313,11 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case3, TestSize.Level1)
 HWTEST_F(DslmTest, RandomValue_case1, TestSize.Level1)
 {
     RandomValue rand1 = {0, {0}};
-    memset_s(&rand1, sizeof(RandomValue), 0, sizeof(RandomValue));
+    (void)memset_s(&rand1, sizeof(RandomValue), 0, sizeof(RandomValue));
     GenerateRandom(&rand1, sizeof(uint64_t));
 
     RandomValue rand2 = {0, {0}};
-    memset_s(&rand2, sizeof(RandomValue), 0, sizeof(RandomValue));
+    (void)memset_s(&rand2, sizeof(RandomValue), 0, sizeof(RandomValue));
     GenerateRandom(&rand2, sizeof(uint64_t));
 
     EXPECT_EQ(sizeof(uint64_t), rand1.length);
@@ -331,7 +331,7 @@ HWTEST_F(DslmTest, RandomValue_case1, TestSize.Level1)
 HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level1)
 {
     RandomValue rand = {0, {0}};
-    memset_s(&rand, sizeof(RandomValue), 0, sizeof(RandomValue));
+    (void)memset_s(&rand, sizeof(RandomValue), 0, sizeof(RandomValue));
 
     GenerateRandom(&rand, 1024);
     EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
@@ -354,7 +354,7 @@ HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
     ASSERT_EQ(SUCCESS, (int32_t)ret);
 
     DslmCredInfo info;
-    memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+    (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
     ret = DefaultVerifyDslmCred(&identiy, object.challenge, cred, &info);
     EXPECT_EQ(SUCCESS, ret);

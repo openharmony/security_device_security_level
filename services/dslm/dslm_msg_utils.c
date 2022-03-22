@@ -127,7 +127,7 @@ int32_t BuildDeviceSecInfoRequest(uint64_t challenge, MessageBuff **msg)
     if (out == NULL) {
         return ERR_NO_MEMORY;
     }
-    memset_s(out, sizeof(MessageBuff), 0, sizeof(MessageBuff));
+    (void)memset_s(out, sizeof(MessageBuff), 0, sizeof(MessageBuff));
 
     out->buff = GenerateSecInfoRequestJson(challenge);
     if (out->buff == NULL) {

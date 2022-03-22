@@ -38,7 +38,8 @@ typedef struct RequestOption {
 #define DEFAULT_OPTION NULL
 
 /**
- * The error code is synchronized with that in the JAVA, the JAVA code needs to be modified if C code changed.
+ * The error code is synchronized with that in the JAVA file.
+ * The JAVA code needs to be modified if C code is changeded.
  * An error code can be added only at the end of the list.
  */
 enum {

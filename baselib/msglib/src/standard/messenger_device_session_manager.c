@@ -168,7 +168,7 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
 
     *maskId = MaskDeviceIdentity(udid, DEVICE_ID_MAX_LEN);
     identity->length = DEVICE_ID_MAX_LEN;
-    memcpy_s(&identity->identity, DEVICE_ID_MAX_LEN, udid, DEVICE_ID_MAX_LEN);
+    (void)memcpy_s(&identity->identity, DEVICE_ID_MAX_LEN, udid, DEVICE_ID_MAX_LEN);
     return true;
 }
 
@@ -200,7 +200,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
     }
     sessionInfo->sessionId = sessionId;
     sessionInfo->maskId = maskId;
-    memcpy_s(&sessionInfo->identity, sizeof(DeviceIdentify), &identity, sizeof(DeviceIdentify));
+    (void)memcpy_s(&sessionInfo->identity, sizeof(DeviceIdentify), &identity, sizeof(DeviceIdentify));
 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     LockMutex(&instance->mutex);
@@ -370,8 +370,8 @@ static void PushMsgDataToPendingList(uint32_t transNo, const DeviceIdentify *dev
     }
     data->transNo = transNo;
     data->msgLen = msgLen;
-    memcpy_s(&data->destIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
-    memcpy_s(data->msgdata, msgLen, msg, msgLen);
+    (void)memcpy_s(&data->destIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
+    (void)memcpy_s(data->msgdata, msgLen, msg, msgLen);
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     LockMutex(&instance->mutex);
     AddListNodeBefore(&data->link, &instance->pendingSendList);
