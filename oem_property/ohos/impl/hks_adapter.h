@@ -34,7 +34,7 @@ struct HksCertChainInitParams {
     uint32_t certDataSize;
 };
 
-int32_t FillHksParamSet(struct HksParamSet *paramSet, struct HksParam *param, int32_t paramNums);
+int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, int32_t paramNums);
 int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias);
 int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksCertChainInitParams *certChainParam);
 void DestroyHksCertChain(struct HksCertChain *certChain);
