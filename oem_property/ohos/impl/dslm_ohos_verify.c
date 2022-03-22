@@ -422,7 +422,7 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
             break;
         }
         if (GetAlgorithmType(algMsg, strlen(algMsg), &(pbkChain[i].algorithm)) != SUCCESS) {
-            SECURITY_LOG_DEBUG("ParsePubKeyChain get type error");
+            SECURITY_LOG_ERROR("ParsePubKeyChain get type error");
             break;
         }
 
@@ -474,13 +474,13 @@ static int32_t VerifyCredPubKeyChain(const struct PbkChain *pbkChain)
             return ERR_ECC_VERIFY_ERR;
         }
     }
-    SECURITY_LOG_ERROR("verifyCredPubKeyChain sucess!");
+    SECURITY_LOG_INFO("verifyCredPubKeyChain sucess!");
     return SUCCESS;
 }
 
 static int32_t VerifyCredPayload(const char *cred, const struct CredData *credData)
 {
-    SECURITY_LOG_ERROR("VerifyCredPayload start!");
+    SECURITY_LOG_INFO("VerifyCredPayload start!");
 
     uint32_t srcMsgLen = strlen(credData->header) + strlen(credData->payload) + 1;
     char *srcMsg = (char *)MALLOC(srcMsgLen + 1);
@@ -504,17 +504,16 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
         return ERR_MEMORY_ERR;
     }
 
-    int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, TYPE_ECDSA_SHA_384);
-    if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("EcdsaVerify failed!");
-        ret = ERR_ECC_VERIFY_ERR;
-    } else {
-        SECURITY_LOG_ERROR("VerifyCredPayload success!");
-        ret = SUCCESS;
+    if (EcdsaVerify(&srcData, &sigData, &pbkData, TYPE_ECDSA_SHA_384) == SUCCESS ||
+        EcdsaVerify(&srcData, &sigData, &pbkData, TYPE_ECDSA_SHA_256) == SUCCESS) {
+        SECURITY_LOG_INFO("VerifyCredPayload success!");
+        FREE(srcMsg);
+        FREE(sigData.data);
+        return SUCCESS;
     }
     FREE(srcMsg);
     FREE(sigData.data);
-    return ret;
+    return ERR_ECC_VERIFY_ERR;
 }
 
 static void FreeCredData(struct CredData *credData)
