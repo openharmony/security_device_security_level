@@ -197,8 +197,6 @@ int32_t HksAttestIsReadyAdapter(void)
     return SUCCESS;
 }
 
-
-
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax)
 {
     JsonHandle json = CreateJson(NULL);
