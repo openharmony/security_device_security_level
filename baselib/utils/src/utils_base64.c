@@ -217,25 +217,27 @@ int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to)
 
 int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
 {
-    if ((src == NULL) || to == NULL) {
+    if ((src == NULL) || (to == NULL)) {
         SECURITY_LOG_DEBUG("Unexpected nullptr!");
         return 0;
     }
-    uint32_t sourceLen = strlen((char*)src);
+
+    uint32_t sourceLen = (uint32_t)strlen((char*)src);
     uint32_t alignLen = RESIZE4(sourceLen);
-    uint8_t *base64Str = (uint8_t*)malloc(alignLen + 1);
+    uint8_t *base64Str = (uint8_t *)malloc(alignLen + 1);
     if (base64Str == NULL) {
         SECURITY_LOG_DEBUG("Base64UrlDecodeApp MALLOC fail");
         return 0;
     }
     (void)memset_s(base64Str, alignLen + 1, '=', alignLen + 1);
     for (uint32_t i = 0; i < sourceLen; i++) {
-        if (src[i] == '-')
+        if (src[i] == '-') {
             base64Str[i] = '+';
-        else if (src[i] == '_')
+        } else if (src[i] == '_') {
             base64Str[i] = '/';
-        else
+        } else {
             base64Str[i] = src[i];
+        }
     }
     base64Str[alignLen] = '\0';
     const uint8_t *from = base64Str;
