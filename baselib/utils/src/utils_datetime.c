@@ -60,6 +60,7 @@ bool GetDateTimeByMillisecondSince1970(uint64_t input, DateTime *datetime)
     datetime->msec = (uint16_t)(input % SEC_TO_MILLISEC);
     return true;
 }
+
 bool GetDateTimeByMillisecondSinceBoot(uint64_t input, DateTime *datetime)
 {
     if (datetime == NULL) {

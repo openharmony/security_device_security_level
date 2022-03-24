@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef WORKQUEUE_WORK_QUEUE_H
-#define WORKQUEUE_WORK_QUEUE_H
-
 #include "utils_work_queue.h"
 
 #include <pthread.h>
@@ -179,4 +176,3 @@ uint32_t QueueWork(WorkQueue *queue, WorkProcess process, uint8_t *data, uint32_
     (void)pthread_cond_broadcast(&queue->cond);
     return WORK_QUEUE_OK;
 }
-#endif

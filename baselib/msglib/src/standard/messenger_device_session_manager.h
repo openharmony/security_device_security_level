@@ -27,7 +27,7 @@ extern "C" {
 bool InitDeviceSessionManager(WorkQueue *queue, const char *pkgName, const char *sessionName,
     DeviceMessageReceiver messageReceiver, MessageSendResultNotifier sendResultNotifier);
 
-bool DeInitDeviceSessionManager();
+bool DeInitDeviceSessionManager(void);
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen);
 

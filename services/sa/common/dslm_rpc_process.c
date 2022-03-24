@@ -96,5 +96,4 @@ void UnInitService(void)
 {
     DeinitDslmProcess();
     DeinitMessenger();
-    return;
 }
