@@ -299,7 +299,7 @@ bool InitDeviceSessionManager(WorkQueue *queue, const char *pkgName, const char 
     return true;
 }
 
-bool DeInitDeviceSessionManager()
+bool DeInitDeviceSessionManager(void)
 {
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     int ret = RemoveSessionServer(instance->pkgName, instance->sessionName);

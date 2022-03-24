@@ -81,7 +81,6 @@ void DestroyMessengerImpl(Messenger *messenger)
     messenger->magicHead = 0;
     DestroyWorkQueue(messenger->processQueue);
     FREE(messenger);
-    return;
 }
 
 bool IsMessengerReadyImpl(const Messenger *messenger)

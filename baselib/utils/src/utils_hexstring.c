@@ -16,6 +16,7 @@
 #include "utils_hexstring.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "utils_log.h"
 
@@ -36,7 +37,7 @@ static char HexToChar(uint8_t hex)
 
 void ByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t strLen)
 {
-    if (strLen < hexLen * BYTE_TO_HEX_OPER_LENGTH) {
+    if ((hex == NULL) || (str == NULL) || (strLen < hexLen * BYTE_TO_HEX_OPER_LENGTH)) {
         return;
     }
 
@@ -48,7 +49,7 @@ void ByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t
 
 int32_t HexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t hexLen)
 {
-    if (strLen % BYTE_TO_HEX_OPER_LENGTH) { /* even number or not */
+    if ((str == NULL) || (hex == NULL) || (strLen % BYTE_TO_HEX_OPER_LENGTH)) { /* even number or not */
         return ERR;
     }
     uint32_t outLen = strLen / BYTE_TO_HEX_OPER_LENGTH;
