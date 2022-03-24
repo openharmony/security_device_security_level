@@ -27,7 +27,7 @@
 
 const char g_dslmKey[] = "dslm_key";
 
-#define HICHIAN_INPUT_PARAM_STRING_LENGTH 512
+#define HICHAIN_INPUT_PARAM_STRING_LENGTH 512
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 #define DSLM_INFO_MAX_LEN_UDID 68
@@ -45,11 +45,11 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
     SECURITY_LOG_INFO("GetPkInfoListStr start");
 
-    char paramJson[HICHIAN_INPUT_PARAM_STRING_LENGTH] = {0};
+    char paramJson[HICHAIN_INPUT_PARAM_STRING_LENGTH] = {0};
     char *resultBuffer = NULL;
     uint32_t resultNum = 0;
 
-    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHIAN_INPUT_PARAM_STRING_LENGTH);
+    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHAIN_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS) {
         SECURITY_LOG_INFO("GenerateFuncParamJson failed");
         return ret;
