@@ -469,7 +469,7 @@ static int32_t ParseCredData(const char *credStr, struct CredData *credData)
 
 static int32_t VerifyCredPubKeyChain(const struct PbkChain *pbkChain)
 {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < PBK_CHAIN_LEVEL; i++) {
         if (EcdsaVerify(&(pbkChain[i].src), &(pbkChain[i].sig), &(pbkChain[i].pbk), pbkChain[i].algorithm) != SUCCESS) {
             return ERR_ECC_VERIFY_ERR;
         }
