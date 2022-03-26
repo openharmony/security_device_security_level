@@ -94,8 +94,8 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 // need free
 int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksCertChainInitParams *certChainParam)
 {
-    if (certChainParam == NULL || certChainParam->certChainExist == false || certChainParam->certCountValid == false
-        || certChainParam->certDataExist == false) {
+    if (certChainParam == NULL || certChainParam->certChainExist == false ||
+        certChainParam->certCountValid == false || certChainParam->certDataExist == false) {
         return ERR_INVALID_PARA;
     }
 
@@ -106,12 +106,14 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
     (*certChain)->certsCount = CERT_CHAIN_CERT_NUM;
     (*certChain)->certs = (struct HksBlob *)MALLOC(sizeof(struct HksBlob) * ((*certChain)->certsCount));
     if ((*certChain)->certs == NULL) {
+        FREE(*certChain);
         return ERR_NO_MEMORY;
     }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = certChainParam->certDataSize;
         (*certChain)->certs[i].data = (uint8_t *)MALLOC((*certChain)->certs[i].size);
         if ((*certChain)->certs[i].data == NULL) {
+            DestroyHksCertChain(*certChain);
             return ERR_NO_MEMORY;
         }
         (void)memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
