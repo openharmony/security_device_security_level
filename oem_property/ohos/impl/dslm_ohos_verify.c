@@ -623,7 +623,7 @@ int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
 
     struct CredData credData;
     int32_t ret = InitCredData(credStr, &credData);
-    if(ret != SUCCESS) {
+    if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("InitCredData failed!");
         return ret;
     }
