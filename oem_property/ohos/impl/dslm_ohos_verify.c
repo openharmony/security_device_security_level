@@ -438,15 +438,6 @@ static int32_t ParsePubKeyChain(const char *credAttestionInfo, uint32_t length, 
 
 static int32_t ParseCredData(const char *credStr, struct CredData *credData)
 {
-    credData->credPtr = (char *)MALLOC(strlen(credStr) + 1);
-    if (credData->credPtr == NULL) {
-        return ERR_NO_MEMORY;
-    }
-    if (strcpy_s(credData->credPtr, strlen(credStr) + 1, credStr) != EOK) {
-        credData->credPtr = NULL;
-        return ERR_MEMORY_ERR;
-    }
-
     char *context = NULL;
     credData->header = strtok_s(credData->credPtr, ".", &context);
     if (context == NULL) {
@@ -514,6 +505,20 @@ static int32_t VerifyCredPayload(const char *cred, const struct CredData *credDa
     FREE(srcMsg);
     FREE(sigData.data);
     return ERR_ECC_VERIFY_ERR;
+}
+
+static int32_t InitCredData(const char* credStr, struct CredData *credData)
+{
+    (void)memset_s(credData, sizeof(struct CredData), 0, sizeof(struct CredData));
+    credData->credPtr = (char *)MALLOC(strlen(credStr) + 1);
+    if (credData->credPtr == NULL) {
+        return ERR_NO_MEMORY;
+    }
+    if (strcpy_s(credData->credPtr, strlen(credStr) + 1, credStr) != EOK) {
+        FREE(credData->credPtr);
+        return ERR_MEMORY_ERR;
+    }
+    return SUCCESS;
 }
 
 static void FreeCredData(struct CredData *credData)
@@ -615,10 +620,14 @@ int32_t VerifyCredData(const char *credStr, DslmCredInfo *credInfo)
     if (credStr == NULL || credInfo == NULL) {
         return ERR_INVALID_PARA;
     }
-    struct CredData credData;
-    (void)memset_s(&credData, sizeof(struct CredData), 0, sizeof(struct CredData));
 
-    int32_t ret = ERR_DEFAULT;
+    struct CredData credData;
+    int32_t ret = InitCredData(credStr, &credData);
+    if(ret != SUCCESS) {
+        SECURITY_LOG_ERROR("InitCredData failed!");
+        return ret;
+    }
+
     do {
         // 1. Parse Cred.
         ret = ParseCredData(credStr, &credData);
