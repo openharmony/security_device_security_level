@@ -18,7 +18,11 @@
             "SystemCapability.Security.DeviceSecurityLevel"
         ],
         "features": [
-            "device_security_level_dslm"
+            "device_security_level_feature_cred_file_sl1",
+            "device_security_level_feature_cred_file_sl2",
+            "device_security_level_feature_cred_file_sl3",
+            "device_security_level_feature_cred_file_sl4",
+            "device_security_level_feature_cred_file_sl5"
         ],
         "adapted_system_type": [
             "standard"
@@ -42,6 +46,7 @@
             "sub_component": [
                 "//base/security/device_security_level/interfaces/inner_api:dslm_sdk",
                 "//base/security/device_security_level/oem_property/ohos:dslm_service",
+                "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cred_file",
                 "//base/security/device_security_level/profile:dslm_service.rc"
             ],
             "inner_kits": [
