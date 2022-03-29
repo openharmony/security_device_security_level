@@ -13,27 +13,6 @@
 
 import("//build/ohos.gni")
 
-# generate dlsm's cred
-action("gen_ohos_dslm_cred_file") {
-  file_name = "dslm_finger.cfg"
-
-  script = rebase_path("dslm_cred_tool.py")
-  outputs = [ "$target_gen_dir/$file_name" ]
-
-  out_dir = rebase_path("$target_gen_dir")
-  args = [
-    "create",
-    "--artifacts-dir=$out_dir/artifacts",
-    "--field-manufacture=ohos",
-    "--field-brand=$device_name",
-    "--field-model=$product_name",
-    "--field-software-version=3.0.0",
-    "--field-security-level=SL1",
-    "--cred-file=$out_dir/$file_name",
-    "--strict=true",
-  ]
-}
-
 # sa lib
 ohos_shared_library("dslm_service") {
   sources = [ "dslm_ohos_credential.c" ]
@@ -48,9 +27,6 @@ ohos_shared_library("dslm_service") {
     "//base/security/device_security_level/baselib/utils:utils_static",
     "//base/security/device_security_level/services/sa:service_sa_static",
   ]
-
-  # generate the cred file
-  deps += [ ":dslm_ohos_cred_file" ]
 
   external_deps = [
     "hilog_native:libhilog",
@@ -92,6 +68,72 @@ ohos_source_set("dslm_ohos_cred_obj") {
 
   part_name = "device_security_level"
   subsystem_name = "security"
+}
+
+# dslm cred
+declare_args() {
+  device_security_level_feature_cred_file_sl1 = false
+  device_security_level_feature_cred_file_sl2 = false
+  device_security_level_feature_cred_file_sl3 = false
+  device_security_level_feature_cred_file_sl4 = false
+  device_security_level_feature_cred_file_sl5 = false
+}
+
+template("make_dslm_cred") {
+  forward_variables_from(invoker, "*")
+
+  if (!defined(device_name)) {
+    device_name = "default"
+  }
+  if (!defined(product_name)) {
+    product_name = "default"
+  }
+
+  product_level = target_name
+  product_manufacture = "OHOS"
+  product_version = "3.0.0"
+
+  action("gen_ohos_dslm_cred_file") {
+    script = "dslm_cred_tool.py"
+    cred_file = target_gen_dir + "/dslm_finger.cfg"
+    outputs = [ cred_file ]
+    args = [
+      "create",
+      "--artifacts-dir",
+      rebase_path(target_gen_dir + "/artifacts"),
+      "--field-manufacture",
+      product_manufacture,
+      "--field-brand",
+      device_name,
+      "--field-model",
+      product_name,
+      "--field-software-version",
+      product_version,
+      "--field-security-level",
+      product_level,
+      "--cred-file",
+      rebase_path(cred_file),
+      "--strict",
+      "true",
+    ]
+  }
+}
+
+if (device_security_level_feature_cred_file_sl5) {
+  make_dslm_cred("SL5") {
+  }
+} else if (device_security_level_feature_cred_file_sl4) {
+  make_dslm_cred("SL4") {
+  }
+} else if (device_security_level_feature_cred_file_sl3) {
+  make_dslm_cred("SL3") {
+  }
+} else if (device_security_level_feature_cred_file_sl2) {
+  make_dslm_cred("SL2") {
+  }
+} else {
+  make_dslm_cred("SL1") {
+  }
 }
 
 ohos_prebuilt_etc("dslm_ohos_cred_file") {
