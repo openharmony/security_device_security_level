@@ -31,9 +31,9 @@
 typedef bool DslmInfoChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result);
 
-static bool SdkTimeoutCheker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
+static bool SdkTimeoutChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result);
-static bool RequestDoneCheker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
+static bool RequestDoneChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result);
 
 static uint32_t GenerateMachineId(const DeviceIdentify *identity);
@@ -54,10 +54,10 @@ static bool ProcessSdkTimeout(const StateMachine *machine, uint32_t event, const
 
 static uint32_t GenerateMachineId(const DeviceIdentify *identity)
 {
-#define MASK_LOW 0x00ff
-#define MACHINE_ID_LENGTH 4
-#define SHIFT_LENGTH 8
-#define MASK_HIGH 0xff00
+#define MASK_LOW 0x00ffU
+#define MACHINE_ID_LENGTH 4U
+#define SHIFT_LENGTH 8U
+#define MASK_HIGH 0xff00U
     uint16_t machineId = 0;
     HexStringToByte((const char *)identity->identity, MACHINE_ID_LENGTH, (uint8_t *)&machineId, sizeof(machineId));
     return ((machineId & MASK_HIGH) >> SHIFT_LENGTH) | ((machineId & MASK_LOW) << SHIFT_LENGTH);
@@ -169,7 +169,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
     }
 
     if (notify->cookie == 0 || notify->requestCallback == NULL) {
-        SECURITY_LOG_ERROR("ProcessSdkRequest invalied cookie or callback.");
+        SECURITY_LOG_ERROR("ProcessSdkRequest invalid cookie or callback.");
         FREE(notify);
         return false;
     }
@@ -180,7 +180,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         deviceInfo->machine.machineId, notify->owner, notify->cookie, notify->keep);
     uint32_t state = GetCurrentMachineState(deviceInfo);
     if (state == STATE_SUCCESS || state == STATE_FAILED || deviceInfo->credInfo.credLevel != 0) {
-        ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneCheker);
+        ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneChecker);
         return true;
     }
 
@@ -201,7 +201,7 @@ static bool ProcessSendRequestFailed(const StateMachine *machine, uint32_t event
     if (reason == ERR_SESSION_OPEN_FAILED) {
         info->result = ERR_MSG_OPEN_SESSION;
         StopSendDeviceInfoRequestTimer(info);
-        ProcessSendDeviceInfoCallback(info, RequestDoneCheker);
+        ProcessSendDeviceInfoCallback(info, RequestDoneChecker);
         return false;
     }
 
@@ -226,7 +226,7 @@ static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event
     deviceInfo->lastResponseTime = GetMillisecondSinceBoot();
 
     deviceInfo->result = (uint32_t)VerifyDeviceInfoResponse(deviceInfo, buff);
-    ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneCheker);
+    ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneChecker);
 
     if (deviceInfo->result == SUCCESS) {
         SECURITY_LOG_INFO("ProcessVerifyCredMessage success, level is %{public}u", deviceInfo->credInfo.credLevel);
@@ -241,11 +241,11 @@ static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event
 static bool ProcessSdkTimeout(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *info = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
-    ProcessSendDeviceInfoCallback(info, SdkTimeoutCheker);
+    ProcessSendDeviceInfoCallback(info, SdkTimeoutChecker);
     return true;
 }
 
-static bool SdkTimeoutCheker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
+static bool SdkTimeoutChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result)
 {
     uint64_t curr = GetMillisecondSinceBoot();
@@ -263,7 +263,7 @@ static bool SdkTimeoutCheker(const DslmDeviceInfo *devInfo, const DslmNotifyList
     return true;
 }
 
-static bool RequestDoneCheker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
+static bool RequestDoneChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result)
 {
     *result = devInfo->result;
