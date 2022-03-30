@@ -52,9 +52,9 @@ typedef struct SecurityInfoSyncEvent {
 extern "C" {
 #endif
 
-void ReportAppInvokeEvent(const AppInvokeEvent *event) __attribute__((weak));
+void ReportAppInvokeEvent(const AppInvokeEvent *event);
 
-void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event) __attribute__((weak));
+void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event);
 
 #ifdef __cplusplus
 }
