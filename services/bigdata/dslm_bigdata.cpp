@@ -18,12 +18,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-__attribute__((weak)) void ReportAppInvokeEvent(const AppInvokeEvent *event)
+void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
     return;
 }
 
-__attribute__((weak)) void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
+void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
 {
     return;
 }
