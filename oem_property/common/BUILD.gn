@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-# service_msg object
+# oem_common_obj object
 ohos_source_set("oem_common_obj") {
   sources = [ "dslm_credential_utils.c" ]
 
@@ -24,8 +24,9 @@ ohos_source_set("oem_common_obj") {
 
   deps = [
     "//base/security/device_security_level/baselib/utils:utils_static",
-    "//third_party/boringssl:crypto",
+    "//third_party/openssl:libcrypto_shared",
   ]
+
   external_deps = [
     "hilog_native:libhilog",
     "utils_base:utils",

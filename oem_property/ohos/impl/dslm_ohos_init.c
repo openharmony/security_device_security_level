@@ -14,8 +14,8 @@
  */
 
 #include "dslm_ohos_init.h"
+#include "dslm_credential_utils.h"
 #include "dslm_ohos_request.h"
-#include "dslm_ohos_verify.h"
 
 #include <string.h>
 
@@ -33,7 +33,7 @@ int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
         return ret;
     }
 
-    ret = VerifyCredData(credStr, credInfo);
+    ret = VerifyDslmCredential(credStr, credInfo, NULL);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyCredData failed!");
         return ret;
