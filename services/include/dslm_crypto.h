@@ -33,14 +33,7 @@ typedef struct RandomValue {
     uint8_t value[RAMDOM_MAX_LEN];
 } RandomValue;
 
-struct DataBuffer {
-    uint8_t *data;
-    uint32_t length;
-};
-
 void GenerateRandom(RandomValue *rand, uint32_t length);
-int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
-    const struct DataBuffer *pbkData, uint32_t algorithm);
 
 #ifdef __cplusplus
 }
