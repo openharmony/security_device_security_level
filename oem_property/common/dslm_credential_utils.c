@@ -15,13 +15,12 @@
 
 #include "dslm_credential_utils.h"
 
+#include <securec.h>
 #include <stdbool.h>
 #include <stddef.h>
 
 #include <openssl/evp.h>
-#include <openssl/rand.h>
 #include <openssl/x509.h>
-#include <securec.h>
 
 #include "utils_base64.h"
 #include "utils_json.h"
@@ -79,7 +78,7 @@ static bool CreateCredentialCb(const char *credentialString, CredentialCb *credC
 static bool VerifyCredentialCb(const CredentialCb *credCb);
 
 static void MovePublicKeysToAttestationList(CredentialCb *credCb, AttestationList *list);
-static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credInfo);
+static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credInfo, bool verified);
 
 static void DestroyCredentialCb(CredentialCb *credCb);
 
@@ -95,7 +94,7 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
 
 int32_t VerifyDslmCredential(const char *credentialString, DslmCredInfo *credentialInfo, AttestationList *list)
 {
-    if (credentialString == NULL || credentialInfo == NULL || list == NULL) {
+    if (credentialString == NULL || credentialInfo == NULL) {
         SECURITY_LOG_ERROR("VerifyDslmCredential input error");
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
@@ -106,8 +105,9 @@ int32_t VerifyDslmCredential(const char *credentialString, DslmCredInfo *credent
         SECURITY_LOG_ERROR("CredentialStringToCredentialCb error");
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
-    CredentialCbToDslmCredInfo(&credentialCb, credentialInfo);
+
     ret = VerifyCredentialCb(&credentialCb);
+    CredentialCbToDslmCredInfo(&credentialCb, credentialInfo, ret);
     if (!ret) {
         SECURITY_LOG_ERROR("VerifyCredentialCb error");
         DestroyCredentialCb(&credentialCb);
@@ -153,6 +153,7 @@ static bool CreateCredentialCb(const char *credentialString, CredentialCb *credC
             SECURITY_LOG_ERROR("SplitCredentialAttestationList failed");
             break;
         }
+        SECURITY_LOG_INFO("CreateCredentialCb success");
         result = true;
     } while (0);
 
@@ -470,7 +471,7 @@ static int32_t GetDataFromJson(JsonHandle json, const char *paramKey, char *dest
     return SUCCESS;
 }
 
-static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credInfo)
+static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credInfo, bool verified)
 {
     if (credCb == NULL || credInfo == NULL) {
         return;
@@ -499,6 +500,10 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
     (void)GetDataFromJson(json, CRED_KEY_SIGN_TIME, credInfo->signTime, CRED_INFO_SIGNTIME_LEN);
     (void)GetDataFromJson(json, CRED_KEY_SECURITY_LEVEL, credInfo->securityLevel, CRED_INFO_LEVEL_LEN);
 
+    if (verified) {
+        (void)sscanf_s(credInfo->securityLevel, "SL%d", &credInfo->credLevel);
+    }
+
     FREE(buffer);
     DestroyJson(json);
 }
@@ -517,35 +522,38 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
         return ERR_INVALID_PARA;
     }
 
-    int32_t ret = ERR_ECC_VERIFY_ERR;
-    uint8_t *publicKey = pbkData->data;
+    const unsigned char *publicKey = (const unsigned char *)pbkData->data;
     const EVP_MD *type = (algorithm == TYPE_ECDSA_SHA_256) ? EVP_sha256() : EVP_sha384();
-    EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&(publicKey), pbkData->length);
+    EVP_PKEY *pkey = d2i_PUBKEY(NULL, &publicKey, pbkData->length);
     if (pkey == NULL) {
-        return ret;
+        SECURITY_LOG_ERROR("EcdsaVerify d2i_PUBKEY failed, length = %{public}d", pbkData->length);
+        return ERR_ECC_VERIFY_ERR;
     }
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     if (ctx == NULL) {
+        SECURITY_LOG_ERROR("EcdsaVerify EVP_MD_CTX_new failed");
         EVP_PKEY_free(pkey);
-        return ret;
+        return ERR_ECC_VERIFY_ERR;
     }
 
     do {
-        ret = EVP_DigestVerifyInit(ctx, NULL, type, NULL, pkey);
-        if (ret != 1) {
+        if (EVP_DigestVerifyInit(ctx, NULL, type, NULL, pkey) <= 0) {
+            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestVerifyInit failed");
             break;
         }
-        ret = EVP_DigestUpdate(ctx, srcData->data, srcData->length);
-        if (ret != 1) {
+
+        if (EVP_DigestUpdate(ctx, srcData->data, srcData->length) <= 0) {
+            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestUpdate failed");
             break;
         }
+
         if (EVP_DigestVerifyFinal(ctx, sigData->data, sigData->length) <= 0) {
+            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestVerifyFinal failed");
             break;
         }
-        ret = SUCCESS;
     } while (0);
 
     EVP_PKEY_free(pkey);
     EVP_MD_CTX_free(ctx);
-    return ret;
+    return SUCCESS;
 }
