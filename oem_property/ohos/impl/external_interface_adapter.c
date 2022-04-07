@@ -27,7 +27,7 @@
 
 const char g_dslmKey[] = "dslm_key";
 
-#define HICHAIN_INPUT_PARAM_STRING_LENGTH 512
+#define DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH 512
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 #define DSLM_INFO_MAX_LEN_UDID 68
@@ -45,13 +45,13 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
     SECURITY_LOG_INFO("GetPkInfoListStr start");
 
-    char paramJson[HICHAIN_INPUT_PARAM_STRING_LENGTH] = {0};
+    char paramJson[DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH] = {0};
     char *resultBuffer = NULL;
     uint32_t resultNum = 0;
 
-    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHAIN_INPUT_PARAM_STRING_LENGTH);
+    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS) {
-        SECURITY_LOG_INFO("GenerateFuncParamJson failed");
+        SECURITY_LOG_ERROR("GenerateFuncParamJson failed");
         return ret;
     }
 
@@ -63,19 +63,18 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
     }
 
     if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
-        SECURITY_LOG_INFO("Current pkInfoList is null");
-        *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
-        if (*pkInfoList == NULL) {
-
-        }
-        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
-            ret = ERR_MEMORY_ERR;
-        }
-    } else {
-        *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
-        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
-            ret = ERR_MEMORY_ERR;
-        }
+        SECURITY_LOG_ERROR("Current pkInfoList is null");
+        interface->destroyInfo(&resultBuffer);
+        return ERR_PARSE_PUBKEY_CHAIN;
+    }
+    *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
+    if (*pkInfoList == NULL) {
+        interface->destroyInfo(&resultBuffer);
+        return ERR_NO_MEMORY;
+    }
+    if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
+        interface->destroyInfo(&resultBuffer);
+        return ERR_MEMORY_ERR;
     }
     interface->destroyInfo(&resultBuffer);
     return SUCCESS;
