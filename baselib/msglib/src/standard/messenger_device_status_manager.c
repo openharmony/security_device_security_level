@@ -17,12 +17,12 @@
 
 #include <stdlib.h>
 
+#include "messenger_utils.h"
 #include "securec.h"
 #include "softbus_bus_center.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 
-#include "messenger_utils.h"
 static void MessengerOnNodeOnline(NodeBasicInfo *info);
 static void MessengerOnNodeOffline(NodeBasicInfo *info);
 static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *info);
@@ -119,14 +119,14 @@ static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t st
 static void MessengerOnNodeStateChange(NodeBasicInfo *info, uint32_t state)
 {
     if (info == NULL) {
-        SECURITY_LOG_ERROR("MessengerOnNodeStateChange procee null input.");
+        SECURITY_LOG_ERROR("MessengerOnNodeStateChange process input is null.");
         return;
     }
     DeviceStatusManager *instance = GetDeviceManagerInstance();
 
     char udid[UDID_BUF_LEN] = {0};
     if (GetNodeKeyInfo(instance->pkgName, info->networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
-        SECURITY_LOG_ERROR("MessengerOnNodeStateChange procee get device identity error.");
+        SECURITY_LOG_ERROR("MessengerOnNodeStateChange process get device identity error.");
         return;
     }
 
