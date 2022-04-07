@@ -37,7 +37,7 @@ static void MessengerOnMessageReceived(int sessionId, const void *data, unsigned
 typedef struct DeviceSessionManager {
     const ISessionListener listener;
     ListHead pendingSendList;
-    ListHead opendSessionList;
+    ListHead openedSessionList;
     DeviceMessageReceiver messageReceiver;
     MessageSendResultNotifier sendResultNotifier;
     const char *pkgName;
@@ -77,7 +77,7 @@ static DeviceSessionManager *GetDeviceSessionManagerInstance(void)
             .OnMessageReceived = MessengerOnMessageReceived,
         },
         .pendingSendList = INIT_LIST(manager.pendingSendList),
-        .opendSessionList = INIT_LIST(manager.opendSessionList),
+        .openedSessionList = INIT_LIST(manager.openedSessionList),
         .messageReceiver = NULL,
         .sendResultNotifier = NULL,
         .queue = NULL,
@@ -204,7 +204,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     LockMutex(&instance->mutex);
-    AddListNodeBefore(&sessionInfo->link, &instance->opendSessionList);
+    AddListNodeBefore(&sessionInfo->link, &instance->openedSessionList);
 
     ListNode *node = NULL;
     ListNode *temp = NULL;
@@ -218,7 +218,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
         RemoveListNode(node);
         int ret = SendBytes(sessionId, MsgData->msgdata, MsgData->msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{publc}d", ret);
+            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{public}d", ret);
         }
         FREE(MsgData);
     }
@@ -241,7 +241,7 @@ static void MessengerOnSessionClosed(int sessionId)
     LockMutex(&instance->mutex);
     ListNode *node = NULL;
     ListNode *temp = NULL;
-    FOREACH_LIST_NODE_SAFE (node, &instance->opendSessionList, temp) {
+    FOREACH_LIST_NODE_SAFE (node, &instance->openedSessionList, temp) {
         SessionInfo *info = LIST_ENTRY(node, SessionInfo, link);
         if (info->sessionId == sessionId) {
             SECURITY_LOG_INFO("MessengerOnSessionClosed device=%{public}x", info->maskId);
@@ -323,7 +323,7 @@ bool DeInitDeviceSessionManager(void)
         FREE(MsgData);
     }
 
-    FOREACH_LIST_NODE_SAFE (node, &instance->opendSessionList, temp) {
+    FOREACH_LIST_NODE_SAFE (node, &instance->openedSessionList, temp) {
         SessionInfo *info = LIST_ENTRY(node, SessionInfo, link);
         RemoveListNode(node);
         FREE(info);
@@ -348,7 +348,7 @@ static bool GetOpenedSessionId(const DeviceIdentify *devId, int32_t *sessionId)
     ListNode *node = NULL;
     uint32_t mask = MaskDeviceIdentity((const char *)&devId->identity[0], devId->length);
 
-    FOREACH_LIST_NODE (node, &instance->opendSessionList) {
+    FOREACH_LIST_NODE (node, &instance->openedSessionList) {
         SessionInfo *sessionInfo = LIST_ENTRY(node, SessionInfo, link);
         if (IsSameDevice(&sessionInfo->identity, devId)) {
             *sessionId = sessionInfo->sessionId;
@@ -422,7 +422,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     if (find) {
         int ret = SendBytes(sessionId, msg, msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{publc}d", ret);
+            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{public}d", ret);
         }
     } else {
         PushMsgDataToPendingList(transNo, devId, msg, msgLen);

@@ -74,9 +74,6 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
             ret = ERR_MEMORY_ERR;
         }
     }
-    if (ret == SUCCESS) {
-        SECURITY_LOG_INFO("pkinfo = %{public}s", *pkInfoList);
-    }
     interface->destroyInfo(&resultBuffer);
     return SUCCESS;
 }

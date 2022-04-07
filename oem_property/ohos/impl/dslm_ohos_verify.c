@@ -252,7 +252,7 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
             break;
         }
 
-        // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and vefity it.
+        // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and verify it.
         ret = VerifyDslmCredential(resultInfo.credStr, credInfo, NULL);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("VerifyCredData failed!");
