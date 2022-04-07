@@ -37,7 +37,7 @@
 
 #define DSLM_CRED_STR_LEN_MAX 4096
 
-struct NounceOfCertChain {
+struct NonceOfCertChain {
     uint64_t challenge;
     uint8_t *pbkInfoList;
     uint32_t pbkInfoListLen;
@@ -65,7 +65,7 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *
     return SUCCESS;
 }
 
-static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCertChain *nonce)
+static int32_t ParseNonceOfCertChain(const char *jsonBuffer, struct NonceOfCertChain *nonce)
 {
     JsonHandle json = CreateJson(jsonBuffer);
     if (json == NULL) {
@@ -108,7 +108,7 @@ static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCer
     return SUCCESS;
 }
 
-static void FreeNounceOfCertChain(struct NounceOfCertChain *nonce)
+static void FreeNonceOfCertChain(struct NonceOfCertChain *nonce)
 {
     if (nonce == NULL) {
         return;
@@ -117,7 +117,7 @@ static void FreeNounceOfCertChain(struct NounceOfCertChain *nonce)
         FREE(nonce->pbkInfoList);
         nonce->pbkInfoList = NULL;
     }
-    (void)memset_s(nonce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
+    (void)memset_s(nonce, sizeof(struct NonceOfCertChain), 0, sizeof(struct NonceOfCertChain));
 }
 
 static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
@@ -151,7 +151,7 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
     return ERR_NOEXIST_COMMON_PK_INFO;
 }
 
-static int32_t CheckNounceOfCertChain(const struct NounceOfCertChain *nonce, uint64_t challenge,
+static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint64_t challenge,
     const char *pbkInfoList)
 {
     if (challenge != nonce->challenge) {
@@ -167,11 +167,11 @@ static int32_t CheckNounceOfCertChain(const struct NounceOfCertChain *nonce, uin
     return SUCCESS;
 }
 
-static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceIdentify *device, uint64_t challenge)
+static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceIdentify *device, uint64_t challenge)
 {
     char *pkInfoListStr = NULL;
-    struct NounceOfCertChain nonce;
-    (void)memset_s(&nonce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
+    struct NonceOfCertChain nonce;
+    (void)memset_s(&nonce, sizeof(struct NonceOfCertChain), 0, sizeof(struct NonceOfCertChain));
 
     char udidStr[UDID_STRING_LENGTH] = {0};
     if (memcpy_s(udidStr, UDID_STRING_LENGTH, device->identity, device->length) != EOK) {
@@ -180,9 +180,9 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
 
     int32_t ret = ERR_DEFAULT;
     do {
-        ret = ParseNounceOfCertChain(jsonStr, &nonce);
+        ret = ParseNonceOfCertChain(jsonStr, &nonce);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("ParseNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("ParseNonceOfCertChain failed!");
             break;
         }
 
@@ -192,15 +192,15 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
             break;
         }
 
-        ret = CheckNounceOfCertChain(&nonce, challenge, pkInfoListStr);
+        ret = CheckNonceOfCertChain(&nonce, challenge, pkInfoListStr);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("CheckNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("CheckNonceOfCertChain failed!");
             break;
         }
-        SECURITY_LOG_DEBUG("VerifyNounceOfCertChain success!");
+        SECURITY_LOG_DEBUG("VerifyNonceOfCertChain success!");
     } while (0);
 
-    FreeNounceOfCertChain(&nonce);
+    FreeNonceOfCertChain(&nonce);
     FREE(pkInfoListStr);
     return ret;
 }
@@ -246,9 +246,9 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
         }
 
         // 2. Parses the NONCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
-        ret = VerifyNounceOfCertChain(resultInfo.nonceStr, device, challenge);
+        ret = VerifyNonceOfCertChain(resultInfo.nonceStr, device, challenge);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("verifyNonceOfCertChain failed!");
             break;
         }
 
