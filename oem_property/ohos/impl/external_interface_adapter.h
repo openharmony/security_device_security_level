@@ -26,7 +26,7 @@ extern "C" {
 struct DslmInfoInCertChain {
     char *udidStr;
     char *credStr;
-    char *nounceStr; // challenge + pkInfoList
+    char *nonceStr; // challenge + pkInfoList
 };
 
 int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList);
