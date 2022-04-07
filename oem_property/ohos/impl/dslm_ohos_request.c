@@ -33,7 +33,7 @@
 #define DEVAUTH_JSON_KEY_CHALLENGE "challenge"
 #define DEVAUTH_JSON_KEY_PKINFO_LIST "pkInfoList"
 
-static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListStr, char **nounceStr)
+static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListStr, char **nonceStr)
 {
     JsonHandle json = CreateJson(NULL);
     if (json == NULL) {
@@ -47,8 +47,8 @@ static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListSt
     AddFieldStringToJson(json, DEVAUTH_JSON_KEY_PKINFO_LIST, pkInfoListStr);
 
     // tran to json
-    *nounceStr = (char *)ConvertJsonToString(json);
-    if (*nounceStr == NULL) {
+    *nonceStr = (char *)ConvertJsonToString(json);
+    if (*nonceStr == NULL) {
         DestroyJson(json);
         return ERR_JSON_ERR;
     }
@@ -60,7 +60,7 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
     uint8_t **certChain, uint32_t *certChainLen)
 {
     char *pkInfoListStr = NULL;
-    char *nounceStr = NULL;
+    char *nonceStr = NULL;
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     ByteToHexString((uint8_t *)&(obj->challenge), sizeof(obj->challenge), (uint8_t *)challengeStr,
         CHALLENGE_STRING_LENGTH);
@@ -76,12 +76,12 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
             break;
         }
 
-        ret = TransToJsonStr(challengeStr, pkInfoListStr, &nounceStr);
+        ret = TransToJsonStr(challengeStr, pkInfoListStr, &nonceStr);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("TransToJsonStr failed");
             break;
         }
-        struct DslmInfoInCertChain saveInfo = {.credStr = credStr, .nounceStr = nounceStr, .udidStr = udidStr};
+        struct DslmInfoInCertChain saveInfo = {.credStr = credStr, .nonceStr = nonceStr, .udidStr = udidStr};
         ret = DslmCredAttestAdapter(&saveInfo, certChain, certChainLen);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("DslmCredAttestAdapter failed");
@@ -92,8 +92,8 @@ static int32_t GenerateDslmCertChain(const DeviceIdentify *device, const Request
     if (pkInfoListStr != NULL) {
         FREE(pkInfoListStr);
     }
-    if (nounceStr != NULL) {
-        FREE(nounceStr);
+    if (nonceStr != NULL) {
+        FREE(nonceStr);
     }
     return ret;
 }
