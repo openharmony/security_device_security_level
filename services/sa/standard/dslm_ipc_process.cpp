@@ -28,7 +28,7 @@ namespace {
 constexpr uint32_t DFT_TIMEOUT = 45;
 constexpr uint32_t MAX_TIMEOUT = 60;
 constexpr uint32_t MIN_TIMEOUT = 1;
-constexpr uint32_t WARAING_GATE = 64;
+constexpr uint32_t WARNING_GATE = 64;
 constexpr uint32_t COOKIE_SHIFT = 32;
 } // namespace
 
@@ -161,7 +161,7 @@ bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const s
     std::lock_guard<std::mutex> lock(mutex_);
     uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
     map_[key] = object;
-    if (map_.size() > WARAING_GATE) {
+    if (map_.size() > WARNING_GATE) {
         SECURITY_LOG_WARN("DslmIpcProcess remote objects max warning");
     }
     return true;

@@ -151,17 +151,17 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
         SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo input device not online");
         return ERR_NOT_ONLINE;
     }
-    DslmNotifyListNode *nofityNode = MALLOC(sizeof(DslmNotifyListNode));
-    if (nofityNode == NULL) {
+    DslmNotifyListNode *notifyNode = MALLOC(sizeof(DslmNotifyListNode));
+    if (notifyNode == NULL) {
         SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo malloc error");
         return ERR_NO_MEMORY;
     }
-    nofityNode->owner = owner;
-    nofityNode->cookie = cookie;
-    nofityNode->requestCallback = callback;
-    nofityNode->start = GetMillisecondSinceBoot();
-    nofityNode->keep = option->timeout * 1000; // 1000 ms per second
-    ScheduleDslmStateMachine(deviceInfo, EVENT_SDK_GET, nofityNode);
+    notifyNode->owner = owner;
+    notifyNode->cookie = cookie;
+    notifyNode->requestCallback = callback;
+    notifyNode->start = GetMillisecondSinceBoot();
+    notifyNode->keep = option->timeout * 1000; // 1000 ms per second
+    ScheduleDslmStateMachine(deviceInfo, EVENT_SDK_GET, notifyNode);
     return SUCCESS;
 }
 
