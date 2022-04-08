@@ -27,14 +27,14 @@
 
 const char g_dslmKey[] = "dslm_key";
 
-#define HICHAIN_INPUT_PARAM_STRING_LENGTH 512
+#define DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH 512
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
 
 #define DSLM_INFO_MAX_LEN_UDID 68
 #define DSLM_INFO_MAX_LEN_SERIAL 68
 #define DSLM_INFO_MAX_LEN_VERSION 128
 #define DSLM_INFO_MAX_LEN_CRED 2048
-#define DSLM_INFO_MAX_LEN_NOUNCE 2048
+#define DSLM_INFO_MAX_LEN_NONCE 2048
 
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax);
 
@@ -45,13 +45,13 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
     SECURITY_LOG_INFO("GetPkInfoListStr start");
 
-    char paramJson[HICHAIN_INPUT_PARAM_STRING_LENGTH] = {0};
+    char paramJson[DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH] = {0};
     char *resultBuffer = NULL;
     uint32_t resultNum = 0;
 
-    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], HICHAIN_INPUT_PARAM_STRING_LENGTH);
+    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS) {
-        SECURITY_LOG_INFO("GenerateFuncParamJson failed");
+        SECURITY_LOG_ERROR("GenerateFuncParamJson failed");
         return ret;
     }
 
@@ -88,14 +88,14 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
         return ERR_HUKS_ERR;
     }
     struct HksParam inputData[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(info->nounceStr) + 1, (uint8_t *)info->nounceStr}},
+        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {strlen(info->nonceStr) + 1, (uint8_t *)info->nonceStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {strlen(info->credStr) + 1, (uint8_t *)info->credStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = {strlen(info->udidStr) + 1, (uint8_t *)info->udidStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias},
     };
 
     struct HksParamSet *inputParam = NULL;
-    uint32_t certChainMaxLen = strlen(info->credStr) + strlen(info->nounceStr) + DSLM_CERT_CHAIN_BASE_LENGTH;
+    uint32_t certChainMaxLen = strlen(info->credStr) + strlen(info->nonceStr) + DSLM_CERT_CHAIN_BASE_LENGTH;
     struct HksCertChain *hksCertChain = NULL;
     const struct HksCertChainInitParams certParam = {true, true, true, certChainMaxLen};
 
@@ -135,11 +135,11 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
 {
     SECURITY_LOG_INFO("ValidateCertChainAdapter start");
 
-    char nounceStr[DSLM_INFO_MAX_LEN_NOUNCE] = {0};
+    char nonceStr[DSLM_INFO_MAX_LEN_NONCE] = {0};
     char credStr[DSLM_INFO_MAX_LEN_CRED] = {0};
     char udidStr[DSLM_INFO_MAX_LEN_UDID] = {0};
     struct HksParam outputData[] = {
-        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {DSLM_INFO_MAX_LEN_NOUNCE, (uint8_t *)nounceStr}},
+        {.tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = {DSLM_INFO_MAX_LEN_NONCE, (uint8_t *)nonceStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {DSLM_INFO_MAX_LEN_CRED, (uint8_t *)credStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = {DSLM_INFO_MAX_LEN_UDID, (uint8_t *)udidStr}},
     };
@@ -163,7 +163,7 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
         return ERR_CALL_EXTERNAL_FUNC;
     }
     uint32_t cnt = 0;
-    if (memcpy_s(resultInfo->nounceStr, DSLM_INFO_MAX_LEN_NOUNCE, outputParam->params[cnt].blob.data,
+    if (memcpy_s(resultInfo->nonceStr, DSLM_INFO_MAX_LEN_NONCE, outputParam->params[cnt].blob.data,
         outputParam->params[cnt].blob.size) != EOK) {
         HksFreeParamSet(&outputParam);
         return ERR_MEMORY_ERR;
@@ -226,20 +226,20 @@ int32_t InitDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
     if (saveInfo == NULL) {
         return ERR_INVALID_PARA;
     }
-    saveInfo->nounceStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_NOUNCE);
-    if (saveInfo->nounceStr == NULL) {
+    saveInfo->nonceStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_NONCE);
+    if (saveInfo->nonceStr == NULL) {
         return ERR_NO_MEMORY;
     }
     saveInfo->credStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_CRED);
     if (saveInfo->credStr == NULL) {
-        FREE(saveInfo->nounceStr);
-        saveInfo->nounceStr = NULL;
+        FREE(saveInfo->nonceStr);
+        saveInfo->nonceStr = NULL;
         return ERR_NO_MEMORY;
     }
     saveInfo->udidStr = (char *)MALLOC(DSLM_INFO_MAX_LEN_UDID);
     if (saveInfo->udidStr == NULL) {
-        FREE(saveInfo->nounceStr);
-        saveInfo->nounceStr = NULL;
+        FREE(saveInfo->nonceStr);
+        saveInfo->nonceStr = NULL;
         FREE(saveInfo->credStr);
         saveInfo->credStr = NULL;
         return ERR_NO_MEMORY;
@@ -252,9 +252,9 @@ void DestroyDslmInfoInCertChain(struct DslmInfoInCertChain *saveInfo)
     if (saveInfo == NULL) {
         return;
     }
-    if (saveInfo->nounceStr != NULL) {
-        FREE(saveInfo->nounceStr);
-        saveInfo->nounceStr = NULL;
+    if (saveInfo->nonceStr != NULL) {
+        FREE(saveInfo->nonceStr);
+        saveInfo->nonceStr = NULL;
     }
     if (saveInfo->credStr != NULL) {
         FREE(saveInfo->credStr);
