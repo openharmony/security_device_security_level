@@ -267,8 +267,7 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
 
     DestroyDslmInfoInCertChain(&resultInfo);
     if (ret == SUCCESS) {
-        SECURITY_LOG_INFO("cred level = %{public}d", credInfo->credLevel);
-        SECURITY_LOG_INFO("VerifyOhosDslmCred SUCCESS!");
+        SECURITY_LOG_INFO("VerifyOhosDslmCred success, cred level = %{public}d", credInfo->credLevel);
     }
     return ret;
 }

@@ -89,14 +89,15 @@ void DslmMsgInterfaceMock::MakeMsgReceivedFrom(const DeviceIdentify *devId, cons
 }
 
 extern "C" {
-Messenger *CreateMessengerImpl(const MessengerConfig *cfg)
+Messenger *CreateMessengerImpl(const MessengerConfig *config)
 {
+    (void)config;
     return nullptr;
 }
 
 void DestroyMessengerImpl(Messenger *messenger)
 {
-    return;
+    (void)messenger;
 }
 
 bool IsMessengerReadyImpl(const Messenger *messenger)

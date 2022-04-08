@@ -33,10 +33,10 @@ extern "C" {
 
 static inline uint32_t MaskDeviceIdentity(const char *deviceId, uint32_t length)
 {
-#define MASK_LEN 4
-#define SHIFT_LENGTH 8
-#define MASK_LOW 0x00ff
-#define MASK_HIGH 0xff00
+#define MASK_LEN 4U
+#define SHIFT_LENGTH 8U
+#define MASK_LOW 0x00ffU
+#define MASK_HIGH 0xff00U
     if (deviceId == NULL || length < MASK_LEN) {
         return 0;
     }

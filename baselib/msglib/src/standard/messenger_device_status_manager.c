@@ -349,6 +349,4 @@ void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para)
     if (infoList != NULL) {
         FreeNodeInfo(infoList);
     }
-
-    return;
 }

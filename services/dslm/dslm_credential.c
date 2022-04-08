@@ -88,7 +88,7 @@ int32_t GetSupportedCredTypes(CredType *list, uint32_t len)
     for (uint32_t i = 0; i < outLen; i++) {
         *(list + i) = cb->credTypeArray[i];
     }
-    return outLen;
+    return (int32_t)outLen;
 }
 
 DslmCredBuff *CreateDslmCred(CredType type, uint32_t len, uint8_t *value)
