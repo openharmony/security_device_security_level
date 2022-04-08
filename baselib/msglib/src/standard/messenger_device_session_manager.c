@@ -318,9 +318,9 @@ bool DeInitDeviceSessionManager(void)
     ListNode *temp = NULL;
 
     FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
-        PendingMsgData *MsgData = LIST_ENTRY(node, PendingMsgData, link);
+        PendingMsgData *msgData = LIST_ENTRY(node, PendingMsgData, link);
         RemoveListNode(node);
-        FREE(MsgData);
+        FREE(msgData);
     }
 
     FOREACH_LIST_NODE_SAFE (node, &instance->openedSessionList, temp) {

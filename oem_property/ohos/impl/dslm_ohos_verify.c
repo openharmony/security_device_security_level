@@ -37,7 +37,7 @@
 
 #define DSLM_CRED_STR_LEN_MAX 4096
 
-struct NounceOfCertChain {
+struct NonceOfCertChain {
     uint64_t challenge;
     uint8_t *pbkInfoList;
     uint32_t pbkInfoListLen;
@@ -65,7 +65,7 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *
     return SUCCESS;
 }
 
-static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCertChain *nounce)
+static int32_t ParseNonceOfCertChain(const char *jsonBuffer, struct NonceOfCertChain *nonce)
 {
     JsonHandle json = CreateJson(jsonBuffer);
     if (json == NULL) {
@@ -76,31 +76,31 @@ static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCer
     const char *challengeStr = GetJsonFieldString(json, "challenge");
     if (challengeStr == NULL) {
         DestroyJson(json);
-        return ERR_PARSE_NOUNCE;
+        return ERR_PARSE_NONCE;
     }
     int32_t ret =
-        HexStringToByte(challengeStr, strlen(challengeStr), (uint8_t *)&nounce->challenge, sizeof(nounce->challenge));
+        HexStringToByte(challengeStr, strlen(challengeStr), (uint8_t *)&nonce->challenge, sizeof(nonce->challenge));
     if (ret != SUCCESS) {
         DestroyJson(json);
-        return ERR_PARSE_NOUNCE;
+        return ERR_PARSE_NONCE;
     }
 
     // 2. Get PublicKey Info.
     const char *pkInfoListStr = GetJsonFieldString(json, "pkInfoList");
     if (pkInfoListStr == NULL) {
         DestroyJson(json);
-        return ERR_PARSE_NOUNCE;
+        return ERR_PARSE_NONCE;
     }
-    nounce->pbkInfoList = (uint8_t *)MALLOC(strlen(pkInfoListStr) + 1);
-    if (nounce->pbkInfoList == NULL) {
+    nonce->pbkInfoList = (uint8_t *)MALLOC(strlen(pkInfoListStr) + 1);
+    if (nonce->pbkInfoList == NULL) {
         DestroyJson(json);
         return ERR_NO_MEMORY;
     }
 
-    ret = strcpy_s((char *)nounce->pbkInfoList, strlen(pkInfoListStr) + 1, pkInfoListStr);
+    ret = strcpy_s((char *)nonce->pbkInfoList, strlen(pkInfoListStr) + 1, pkInfoListStr);
     if (ret != EOK) {
-        FREE(nounce->pbkInfoList);
-        nounce->pbkInfoList = NULL;
+        FREE(nonce->pbkInfoList);
+        nonce->pbkInfoList = NULL;
         DestroyJson(json);
         return ERR_MEMORY_ERR;
     }
@@ -108,16 +108,16 @@ static int32_t ParseNounceOfCertChain(const char *jsonBuffer, struct NounceOfCer
     return SUCCESS;
 }
 
-static void FreeNounceOfCertChain(struct NounceOfCertChain *nounce)
+static void FreeNonceOfCertChain(struct NonceOfCertChain *nonce)
 {
-    if (nounce == NULL) {
+    if (nonce == NULL) {
         return;
     }
-    if (nounce->pbkInfoList != NULL) {
-        FREE(nounce->pbkInfoList);
-        nounce->pbkInfoList = NULL;
+    if (nonce->pbkInfoList != NULL) {
+        FREE(nonce->pbkInfoList);
+        nonce->pbkInfoList = NULL;
     }
-    (void)memset_s(nounce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
+    (void)memset_s(nonce, sizeof(struct NonceOfCertChain), 0, sizeof(struct NonceOfCertChain));
 }
 
 static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
@@ -151,27 +151,27 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
     return ERR_NOEXIST_COMMON_PK_INFO;
 }
 
-static int32_t CheckNounceOfCertChain(const struct NounceOfCertChain *nounce, uint64_t challenge,
+static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint64_t challenge,
     const char *pbkInfoList)
 {
-    if (challenge != nounce->challenge) {
-        SECURITY_LOG_ERROR("compare nounce challenge failed!");
+    if (challenge != nonce->challenge) {
+        SECURITY_LOG_ERROR("compare nonce challenge failed!");
         return ERR_CHALLENGE_ERR;
     }
 
-    int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char *)nounce->pbkInfoList);
+    int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char *)nonce->pbkInfoList);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("compare nounce public key info failed!");
+        SECURITY_LOG_ERROR("compare nonce public key info failed!");
         return ret;
     }
     return SUCCESS;
 }
 
-static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceIdentify *device, uint64_t challenge)
+static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceIdentify *device, uint64_t challenge)
 {
     char *pkInfoListStr = NULL;
-    struct NounceOfCertChain nounce;
-    (void)memset_s(&nounce, sizeof(struct NounceOfCertChain), 0, sizeof(struct NounceOfCertChain));
+    struct NonceOfCertChain nonce;
+    (void)memset_s(&nonce, sizeof(struct NonceOfCertChain), 0, sizeof(struct NonceOfCertChain));
 
     char udidStr[UDID_STRING_LENGTH] = {0};
     if (memcpy_s(udidStr, UDID_STRING_LENGTH, device->identity, device->length) != EOK) {
@@ -180,9 +180,9 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
 
     int32_t ret = ERR_DEFAULT;
     do {
-        ret = ParseNounceOfCertChain(jsonStr, &nounce);
+        ret = ParseNonceOfCertChain(jsonStr, &nonce);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("ParseNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("ParseNonceOfCertChain failed!");
             break;
         }
 
@@ -192,15 +192,15 @@ static int32_t VerifyNounceOfCertChain(const char *jsonStr, const struct DeviceI
             break;
         }
 
-        ret = CheckNounceOfCertChain(&nounce, challenge, pkInfoListStr);
+        ret = CheckNonceOfCertChain(&nonce, challenge, pkInfoListStr);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("CheckNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("CheckNonceOfCertChain failed!");
             break;
         }
-        SECURITY_LOG_DEBUG("VerifyNounceOfCertChain success!");
+        SECURITY_LOG_DEBUG("VerifyNonceOfCertChain success!");
     } while (0);
 
-    FreeNounceOfCertChain(&nounce);
+    FreeNonceOfCertChain(&nonce);
     FREE(pkInfoListStr);
     return ret;
 }
@@ -238,17 +238,17 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
     }
 
     do {
-        // 1. Verify the certificate chain, get data in the certificate chain(nounce + UDID + cred).
+        // 1. Verify the certificate chain, get data in the certificate chain(nonce + UDID + cred).
         ret = ValidateCertChainAdapter(credBuff->credVal, credBuff->credLen, &resultInfo);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("ValidateCertChainAdapter failed!");
             break;
         }
 
-        // 2. Parses the NOUNCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
-        ret = VerifyNounceOfCertChain(resultInfo.nounceStr, device, challenge);
+        // 2. Parses the NONCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
+        ret = VerifyNonceOfCertChain(resultInfo.nonceStr, device, challenge);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyNounceOfCertChain failed!");
+            SECURITY_LOG_ERROR("verifyNonceOfCertChain failed!");
             break;
         }
 

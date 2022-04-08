@@ -28,7 +28,7 @@
 #include "utils_tlv.h"
 
 #define MAX_ENTRY 8
-#define TYPE_NOUNCE 0x200
+#define TYPE_NONCE 0x200
 #define TYPE_CERT_BASE 0x100
 #define TYPE_CERT_END (TYPE_CERT_BASE + MAX_ENTRY)
 #define LIST_MAX_SIZE 10240
