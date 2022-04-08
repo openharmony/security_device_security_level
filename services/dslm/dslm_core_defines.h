@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-#define VERSION_MAJOR 3
-#define VERSION_MINOR 0
-#define VERSION_PATCH 0
+#define VERSION_MAJOR 3U
+#define VERSION_MINOR 0U
+#define VERSION_PATCH 0U
 
 typedef struct DslmDeviceInfo {
     ListNode linkNode;
@@ -59,19 +59,19 @@ typedef struct DslmDeviceInfo {
 static inline uint32_t GetCurrentVersion(void)
 {
     // shift major 16 bit, shift minor 8 bit
-    return (VERSION_MAJOR << 16) + (VERSION_MINOR << 8) + VERSION_PATCH;
+    return (VERSION_MAJOR << 16U) + (VERSION_MINOR << 8U) + VERSION_PATCH;
 }
 
 static inline uint8_t VersionToMajor(uint32_t version)
 {
     // shift 16 bit to get version first 8 bit data as the main version
-    return (version & 0xFF0000) >> 16;
+    return (version & 0xFF0000U) >> 16U;
 }
 
 static inline uint8_t VersionToMinor(uint32_t version)
 {
     // get version middle 8 bit data as the minor version
-    return (version & 0xFF00) >> 8;
+    return (version & 0xFF00U) >> 8U;
 }
 
 static inline uint8_t VersionToPatch(uint32_t version)
