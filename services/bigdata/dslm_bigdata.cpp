@@ -20,12 +20,12 @@ extern "C" {
 #endif
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
-    return;
+    (void)event;
 }
 
 void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
 {
-    return;
+    (void)event;
 }
 
 #ifdef __cplusplus

@@ -34,9 +34,9 @@ typedef struct Messenger {
     WorkQueue *processQueue;
 } Messenger;
 
-Messenger *CreateMessengerImpl(const MessengerConfig *cfg)
+Messenger *CreateMessengerImpl(const MessengerConfig *config)
 {
-    if (cfg == NULL) {
+    if (config == NULL) {
         SECURITY_LOG_ERROR("CreateMessengerImpl error para");
         return NULL;
     }
@@ -46,14 +46,14 @@ Messenger *CreateMessengerImpl(const MessengerConfig *cfg)
         return NULL;
     }
 
-    bool result = InitDeviceSessionManager(processQueue, cfg->pkgName, cfg->sessName, cfg->messageReceiver,
-        cfg->sendResultNotifier);
+    bool result = InitDeviceSessionManager(processQueue, config->pkgName, config->sessName, config->messageReceiver,
+        config->sendResultNotifier);
     if (result == false) {
         DestroyWorkQueue(processQueue);
         return NULL;
     }
 
-    result = InitDeviceStatusManager(processQueue, cfg->pkgName, cfg->statusReceiver);
+    result = InitDeviceStatusManager(processQueue, config->pkgName, config->statusReceiver);
     if (result == false) {
         DestroyWorkQueue(processQueue);
         return NULL;
@@ -138,5 +138,7 @@ bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify
         SECURITY_LOG_ERROR("GetDeviceStatisticInfoImpl error para");
         return false;
     }
+    (void)devId;
+    (void)info;
     return true;
 }

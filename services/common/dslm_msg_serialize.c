@@ -23,9 +23,11 @@
 #include "utils_log.h"
 #include "utils_mem.h"
 
+#define ASCII_MAX 0x7fU
+
 static inline bool IsAscii(const uint8_t ch)
 {
-    return (((ch) & (~0x7f)) == 0);
+    return (((ch) & (~ASCII_MAX)) == 0);
 }
 
 bool CheckMessage(const uint8_t *msg, uint32_t length)
@@ -99,7 +101,7 @@ MessageBuff *SerializeMessage(const MessagePacket *packet)
         return NULL;
     }
 
-    AddFieldIntToJson(json, FIELD_MESSAGE, packet->type);
+    AddFieldIntToJson(json, FIELD_MESSAGE, (int32_t)packet->type);
     AddFieldStringToJson(json, FIELD_PAYLOAD, (const char *)packet->payload);
 
     out->buff = (uint8_t *)ConvertJsonToString(json);
