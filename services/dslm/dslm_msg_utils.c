@@ -49,7 +49,7 @@ static uint8_t *GenerateSecInfoResponseJson(uint64_t challenge, const DslmCredBu
     AddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_RESPONSE);
     AddFieldJsonToJson(head, FIELD_PAYLOAD, body);
 
-    AddFieldIntToJson(body, FIELD_VERSION, GetCurrentVersion());
+    AddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
     AddFieldIntToJson(body, FIELD_CRED_TYPE, cred->type);
 
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
@@ -96,7 +96,7 @@ static uint8_t *GenerateSecInfoRequestJson(uint64_t challenge)
 
     AddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_REQUEST);
     AddFieldJsonToJson(head, FIELD_PAYLOAD, body);
-    AddFieldIntToJson(body, FIELD_VERSION, GetCurrentVersion());
+    AddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
 
     AddFieldStringToJson(body, FIELD_CHALLENGE, nonce);
 
@@ -139,14 +139,14 @@ int32_t BuildDeviceSecInfoRequest(uint64_t challenge, MessageBuff **msg)
     return SUCCESS;
 }
 
-int32_t ParseDeviceSecInfoRequest(const MessageBuff *buff, RequestObject *obj)
+int32_t ParseDeviceSecInfoRequest(const MessageBuff *msg, RequestObject *obj)
 {
-    if (buff == NULL || obj == NULL || buff->buff == NULL) {
+    if (msg == NULL || obj == NULL || msg->buff == NULL) {
         return ERR_INVALID_PARA;
     }
-    SECURITY_LOG_DEBUG("ParseDeviceSecInfoRequest msg is %s", (char *)buff->buff);
+    SECURITY_LOG_DEBUG("ParseDeviceSecInfoRequest msg is %s", (char *)msg->buff);
 
-    JsonHandle handle = CreateJson((const char *)buff->buff);
+    JsonHandle handle = CreateJson((const char *)msg->buff);
     if (handle == NULL) {
         return ERR_INVALID_PARA;
     }
@@ -181,7 +181,7 @@ int32_t BuildDeviceSecInfoResponse(uint64_t challenge, const DslmCredBuff *cred,
         return ERR_NO_MEMORY;
     }
 
-    out->buff = (uint8_t *)GenerateSecInfoResponseJson(challenge, cred);
+    out->buff = GenerateSecInfoResponseJson(challenge, cred);
     if (out->buff == NULL) {
         FREE(out);
         return ERR_JSON_ERR;

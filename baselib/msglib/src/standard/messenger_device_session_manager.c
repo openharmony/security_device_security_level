@@ -210,17 +210,17 @@ static int MessengerOnSessionOpened(int sessionId, int result)
     ListNode *temp = NULL;
 
     FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
-        PendingMsgData *MsgData = LIST_ENTRY(node, PendingMsgData, link);
-        if (!IsSameDevice(&MsgData->destIdentity, &identity)) {
+        PendingMsgData *msgData = LIST_ENTRY(node, PendingMsgData, link);
+        if (!IsSameDevice(&msgData->destIdentity, &identity)) {
             continue;
         }
 
         RemoveListNode(node);
-        int ret = SendBytes(sessionId, MsgData->msgdata, MsgData->msgLen);
+        int ret = SendBytes(sessionId, msgData->msgdata, msgData->msgLen);
         if (ret != 0) {
             SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{public}d", ret);
         }
-        FREE(MsgData);
+        FREE(msgData);
     }
 
     UnlockMutex(&instance->mutex);

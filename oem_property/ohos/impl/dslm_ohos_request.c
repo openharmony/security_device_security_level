@@ -31,7 +31,7 @@
 #define UDID_STRING_LENGTH 65
 
 #define DEVAUTH_JSON_KEY_CHALLENGE "challenge"
-#define DEVAUTH_JSON_KEY_PKINFO_LIST "pkInfoList"
+#define DEVAUTH_JSON_KEY_PK_INFO_LIST "pkInfoList"
 
 static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListStr, char **nonceStr)
 {
@@ -44,10 +44,10 @@ static int32_t TransToJsonStr(const char *challengeStr, const char *pkInfoListSt
     AddFieldStringToJson(json, DEVAUTH_JSON_KEY_CHALLENGE, challengeStr);
 
     // add pkInfoList
-    AddFieldStringToJson(json, DEVAUTH_JSON_KEY_PKINFO_LIST, pkInfoListStr);
+    AddFieldStringToJson(json, DEVAUTH_JSON_KEY_PK_INFO_LIST, pkInfoListStr);
 
     // tran to json
-    *nonceStr = (char *)ConvertJsonToString(json);
+    *nonceStr = ConvertJsonToString(json);
     if (*nonceStr == NULL) {
         DestroyJson(json);
         return ERR_JSON_ERR;
