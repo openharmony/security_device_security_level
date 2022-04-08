@@ -63,18 +63,16 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
     }
 
     if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
-        SECURITY_LOG_ERROR("Current pkInfoList is null");
-        interface->destroyInfo(&resultBuffer);
-        return ERR_PARSE_PUBKEY_CHAIN;
-    }
-    *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
-    if (*pkInfoList == NULL) {
-        interface->destroyInfo(&resultBuffer);
-        return ERR_NO_MEMORY;
-    }
-    if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
-        interface->destroyInfo(&resultBuffer);
-        return ERR_MEMORY_ERR;
+        SECURITY_LOG_INFO("Current pkInfoList is null");
+        *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
+        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
+            ret = ERR_MEMORY_ERR;
+        }
+    } else {
+        *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
+        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
+            ret = ERR_MEMORY_ERR;
+        }
     }
     interface->destroyInfo(&resultBuffer);
     return SUCCESS;
