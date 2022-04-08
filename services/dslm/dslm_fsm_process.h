@@ -47,6 +47,9 @@ enum {
 void InitDslmStateMachine(DslmDeviceInfo *info);
 void ScheduleDslmStateMachine(DslmDeviceInfo *info, uint32_t event, const void *para);
 uint32_t GetCurrentMachineState(const DslmDeviceInfo *info);
+void LockDslmStateMachine(DslmDeviceInfo *info);
+void UnLockDslmStateMachine(DslmDeviceInfo *info);
+
 #ifdef __cplusplus
 }
 #endif
