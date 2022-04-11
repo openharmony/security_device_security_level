@@ -48,7 +48,7 @@ base/security/device_security_level
 ## Constraints
 
 - Only C and C++ are supported.
-- The default security level of OpenHarmony devices is SL1. Device vendors can [customize](https://gitee.com/openharmony/docs/blob/master/en/device-dev/subsystems/subsys-security-devicesecuritylevel.md#Customizing Device Security Levels) a higher security level as required.
+- The default security level of OpenHarmony devices is SL1. Device vendors can [customize](https://gitee.com/openharmony/docs/blob/master/en/device-dev/subsystems/subsys-security-devicesecuritylevel.md) a higher security level as required.
 
 ## Description
 
