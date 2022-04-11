@@ -16,11 +16,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "securec.h"
+
+#include "utils_datetime.h"
+#include "utils_log.h"
+
 #include "dslm_device_list.h"
+#include "dslm_fsm_process.h"
 #include "dslm_hidumper.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
 #define END_LINE "\n"
+
+#define TIME_STRING_LEN 256
+
+static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
+{
+    static char timeBuff[TIME_STRING_LEN] = {0};
+    DateTime dateTime = {0};
+    bool success = false;
+    do {
+        (void)memset_s(timeBuff, TIME_STRING_LEN, 0, TIME_STRING_LEN);
+        if (timeStamp == 0) {
+            break;
+        }
+        if (!GetDateTimeByMillisecondSinceBoot(timeStamp, &dateTime)) {
+            SECURITY_LOG_ERROR("GetTimeStringFromTimeStamp GetDateTimeByMillisecondSinceBoot error");
+            break;
+        }
+        int ret = snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+            dateTime.year, dateTime.mon, dateTime.day, dateTime.hour, dateTime.min, dateTime.sec, dateTime.msec);
+        if (ret < 0) {
+            break;
+        }
+        success = true;
+    } while (0);
+
+    if (!success) {
+        if (snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1, "-") < 0) {
+            SECURITY_LOG_ERROR("GetTimeStringFromTimeStamp snprintf_s error");
+        }
+    }
+    return timeBuff;
+}
+
+static const char *GetMachineState(const DslmDeviceInfo *info)
+{
+    uint32_t state = GetCurrentMachineState(info);
+    switch (state) {
+        case STATE_INIT:
+            return "STATE_INIT";
+        case STATE_WAITING_CRED_RSP:
+            return "STATE_WAITING_CRED_RSP";
+        case STATE_SUCCESS:
+            return "STATE_SUCCESS";
+        case STATE_FAILED:
+            return "STATE_FAILED";
+        default:
+            return "STATE_UNKOWN";
+    }
+}
+
+static int32_t GetPendingNotifyNodeCnt(const DslmDeviceInfo *info)
+{
+    int result = 0;
+    LockDslmStateMachine((DslmDeviceInfo *)info);
+    ListNode *node = NULL;
+    FOREACH_LIST_NODE (node, &info->notifyList) {
+        result++;
+    }
+    UnLockDslmStateMachine((DslmDeviceInfo *)info);
+    return result;
+}
 
 static void PrintBanner(int fd)
 {
@@ -35,13 +102,25 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     if (info == NULL) {
         return;
     }
+
     dprintf(fd, SPLIT_LINE END_LINE);
     dprintf(fd, "DEVICE_ID                 : %x" END_LINE, info->machine.machineId);
     dprintf(fd, "DEVICE_TYPE               : %d" END_LINE, info->deviceType);
+    dprintf(fd, END_LINE);
+
     dprintf(fd, "DEVICE_ONLINE_STATUS      : %s" END_LINE, info->onlineStatus ? "online" : "offline");
-    dprintf(fd, "DEVICE_MACHINE_STATUS     : %d" END_LINE, info->machine.currState);
+    dprintf(fd, "DEVICE_ONLINE_TIME        : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOnlineTime));
+    dprintf(fd, "DEVICE_OFFLINE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOfflineTime));
+    dprintf(fd, "DEVICE_REQUEST_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastRequestTime));
+    dprintf(fd, "DEVICE_RESPONE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime));
+    dprintf(fd, END_LINE);
+
+    dprintf(fd, "DEVICE_PENDING_NODE       : %d" END_LINE, GetPendingNotifyNodeCnt(info));
+    dprintf(fd, "DEVICE_MACHINE_STATUS     : %s" END_LINE, GetMachineState(info));
     dprintf(fd, "DEVICE_VERIFIED_LEVEL     : %d" END_LINE, info->credInfo.credLevel);
-    dprintf(fd, "DEVICE_VERIFIED_RESULT    : %d" END_LINE, info->result);
+    dprintf(fd, "DEVICE_VERIFIED_RESULT    : %s" END_LINE, info->result == 0 ? "success" : "failed");
+    dprintf(fd, END_LINE);
+
     dprintf(fd, "CRED_TYPE                 : %d" END_LINE, info->credInfo.credType);
     dprintf(fd, "CRED_SIGNTIME             : %s" END_LINE, info->credInfo.signTime);
     dprintf(fd, "CRED_MANUFACTURE          : %s" END_LINE, info->credInfo.manufacture);

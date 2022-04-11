@@ -21,6 +21,7 @@
 #include "utils_hexstring.h"
 #include "utils_log.h"
 #include "utils_mem.h"
+#include "utils_mutex.h"
 #include "utils_state_machine.h"
 #include "utils_timer.h"
 
@@ -325,4 +326,14 @@ uint32_t GetCurrentMachineState(const DslmDeviceInfo *info)
         return STATE_FAILED;
     }
     return info->machine.currState;
+}
+
+void LockDslmStateMachine(DslmDeviceInfo *info)
+{
+    LockMutex(&info->machine.mutex);
+}
+
+void UnLockDslmStateMachine(DslmDeviceInfo *info)
+{
+    UnlockMutex(&info->machine.mutex);
 }
