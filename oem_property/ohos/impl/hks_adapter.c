@@ -183,10 +183,10 @@ int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCe
     }
     for (uint32_t i = 0; i < cnt; i++) {
         if ((tlvs[i].tag >= TYPE_CERT_BASE) && (tlvs[i].tag <= TYPE_CERT_END)) {
-            hksCertChain->certs[certCnt].data = tlvs[i].value;
-            hksCertChain->certs[certCnt].size = tlvs[i].len;
+            hksCertChain->certs[i].data = tlvs[i].value;
+            hksCertChain->certs[i].size = tlvs[i].len;
         }
     }
-    hksCertChain->certsCount = certCnt;
+    hksCertChain->certsCount = cnt;
     return SUCCESS;
 }
