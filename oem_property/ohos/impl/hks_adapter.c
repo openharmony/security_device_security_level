@@ -178,7 +178,7 @@ int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCe
 
     uint32_t cnt = 0;
     uint32_t ret = Deserialize(data, dataLen, &tlvs[0], MAX_ENTRY, &cnt);
-    if (ret != TLV_OK || cnt == 0 || cnt >= MAX_ENTRY) {
+    if (ret != TLV_OK || cnt == 0 || cnt > MAX_ENTRY) {
         return ERR_INVALID_PARA;
     }
     uint32_t certCnt = 0;
