@@ -240,12 +240,12 @@ class CredInitialization:
             return
 
 
-class CredCreatationException(Exception):
+class CredCreationException(Exception):
     """raised when CredInitialization execution failed"""
     pass
 
 
-class CredCreatation:
+class CredCreation:
     def __init__(self, store_dir: str, file: str, payload: dict):
         self.ssl = OpenSslWrapper(store_dir)
         self.payload = payload
@@ -256,7 +256,7 @@ class CredCreatation:
         head = {"typ": "DSL"}
         return base64.b64encode(json.dumps(head, ensure_ascii=True).encode('utf8')).decode('utf8')
 
-    def _gene_atteastation(self, root_pk: str, root_sign: str,
+    def _gene_attestation(self, root_pk: str, root_sign: str,
                            oem_pk: str, oem_sign: str,
                            device_pk: str, device_sign: str):
         data = [
@@ -303,7 +303,7 @@ class CredCreatation:
             device_pub_signed_str = base64.b64encode(device_pub_signed_bytes).decode('utf8')
             device_pub_str = base64.b64encode(device_pub_bytes).decode('utf8')
 
-            attestation = self._gene_atteastation(root_pub_str, root_pub_self_sign_str,
+            attestation = self._gene_attestation(root_pub_str, root_pub_self_sign_str,
                                                   oem_pub_str, oem_pub_signed_str,
                                                   device_pub_str, device_pub_signed_str)
 
@@ -315,7 +315,7 @@ class CredCreatation:
                 CredInitialization.KEY_ALIAS_DEVICE, head_payload.encode('utf8'))
             head_payload_signed_string = base64.b64encode(head_payload_signed_bytes).decode('utf8')
             cred = '{}.{}.{}'.format(head_payload, head_payload_signed_string, attestation)
-        except (CredCreatationException, OpenSslWrapperException):
+        except (CredCreationException, OpenSslWrapperException):
             _error_message('cred create failed, please init first')
             return
 
@@ -418,24 +418,24 @@ class CredVerification:
         return base64.urlsafe_b64decode(content + '=' * (4 - len(content) % 4))
 
 
-def init_creds(input_args: argparse.Namespace):
-    aciton = CredInitialization(input_args.dir)
-    aciton.process()
+def init_cred(input_args: argparse.Namespace):
+    action = CredInitialization(input_args.dir)
+    action.process()
 
 
-def create_creds(input_args):
+def create_cred(input_args):
     payload = {k: v for k, v in input_args.__dict__.items() if k not in ['dir', 'cred', 'process', 'strict'] and v}
     if input_args.strict:
-        init_creds(input_args)
-    aciton = CredCreatation(input_args.dir, input_args.cred, payload)
-    aciton.process()
+        init_cred(input_args)
+    acton = CredCreation(input_args.dir, input_args.cred, payload)
+    acton.process()
     if input_args.strict:
         shutil.rmtree(input_args.dir)
 
 
-def verify_creds(input_args):
-    aciton = CredVerification(input_args.dir, input_args.cred)
-    aciton.process()
+def verify_cred(input_args):
+    acton = CredVerification(input_args.dir, input_args.cred)
+    acton.process()
 
 
 class CredCommand:
@@ -455,7 +455,7 @@ class CredCommand:
             'action': {
                 'name': 'init',
                 'help': 'initialization tool for device security level credential',
-                'process': init_creds
+                'process': init_cred
             },
             'arguments': {
                 'dir': {
@@ -474,7 +474,7 @@ class CredCommand:
             'action': {
                 'name': 'create',
                 'help': 'creatation tool for device security level credential',
-                'process': create_creds,
+                'process': create_cred,
             },
             'arguments': {
                 'dir': {
@@ -558,7 +558,7 @@ class CredCommand:
             'action': {
                 'name': 'verify',
                 'help': 'verification tool for device security level credential',
-                'process': verify_creds
+                'process': verify_cred
             },
             'arguments': {
                 'cred': {
