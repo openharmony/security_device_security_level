@@ -39,8 +39,8 @@ typedef enum {
 } CredType;
 
 typedef struct DslmCredInfo {
-    char version[CRED_INFO_VERSION_LEN]; // the cred version
-    char type[CRED_INFO_TYPE_LEN];       // debug or release
+    char version[CRED_INFO_VERSION_LEN];  // the cred version
+    char releaseType[CRED_INFO_TYPE_LEN]; // debug or release
     char signTime[CRED_INFO_SIGNTIME_LEN];
     char udid[CRED_INFO_UDID_LEN];
     char manufacture[CRED_INFO_MANU_LEN];
