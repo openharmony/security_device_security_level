@@ -490,7 +490,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
         return;
     }
 
-    (void)GetDataFromJson(json, CRED_KEY_TYPE, credInfo->type, CRED_INFO_TYPE_LEN);
+    (void)GetDataFromJson(json, CRED_KEY_TYPE, credInfo->releaseType, CRED_INFO_TYPE_LEN);
     (void)GetDataFromJson(json, CRED_KEY_MANUFACTURE, credInfo->manufacture, CRED_INFO_MANU_LEN);
     (void)GetDataFromJson(json, CRED_KEY_BRAND, credInfo->brand, CRED_INFO_BRAND_LEN);
     (void)GetDataFromJson(json, CRED_KEY_MODEL_NAME, credInfo->model, CRED_INFO_MODEL_LEN);
