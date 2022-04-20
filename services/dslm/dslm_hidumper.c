@@ -77,6 +77,22 @@ static const char *GetMachineState(const DslmDeviceInfo *info)
     }
 }
 
+static const char *GetCreadType(const DslmDeviceInfo *info)
+{
+    switch (info->credInfo.credType) {
+        case CRED_TYPE_MINI:
+            return "mini";
+        case CRED_TYPE_SMALL:
+            return "small";
+        case CRED_TYPE_STANDARD:
+            return "standard";
+        case CRED_TYPE_LARGE:
+            return "large";
+        default:
+            return "default";
+    }
+}
+
 static int32_t GetPendingNotifyNodeCnt(const DslmDeviceInfo *info)
 {
     int result = 0;
@@ -115,13 +131,14 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_RESPONE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime));
     dprintf(fd, END_LINE);
 
-    dprintf(fd, "DEVICE_PENDING_NODE       : %d" END_LINE, GetPendingNotifyNodeCnt(info));
+    dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));
     dprintf(fd, "DEVICE_MACHINE_STATUS     : %s" END_LINE, GetMachineState(info));
     dprintf(fd, "DEVICE_VERIFIED_LEVEL     : %d" END_LINE, info->credInfo.credLevel);
     dprintf(fd, "DEVICE_VERIFIED_RESULT    : %s" END_LINE, info->result == 0 ? "success" : "failed");
     dprintf(fd, END_LINE);
 
-    dprintf(fd, "CRED_TYPE                 : %d" END_LINE, info->credInfo.credType);
+    dprintf(fd, "CRED_TYPE                 : %s" END_LINE, GetCreadType(info));
+    dprintf(fd, "CRED_RELEASE_TYPE         : %s" END_LINE, info->credInfo.releaseType);
     dprintf(fd, "CRED_SIGNTIME             : %s" END_LINE, info->credInfo.signTime);
     dprintf(fd, "CRED_MANUFACTURE          : %s" END_LINE, info->credInfo.manufacture);
     dprintf(fd, "CRED_BAND                 : %s" END_LINE, info->credInfo.brand);
