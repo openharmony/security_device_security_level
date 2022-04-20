@@ -55,7 +55,7 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *
         SECURITY_LOG_DEBUG("Current cred has no udid, skip CheckCredInfo.");
         return SUCCESS;
     }
-    if (strncmp(info->type, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
+    if (strncmp(info->releaseType, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
         if (memcmp((char *)device->identity, info->udid, strlen(info->udid)) == 0) {
             return SUCCESS;
         }
@@ -151,8 +151,7 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
     return ERR_NOEXIST_COMMON_PK_INFO;
 }
 
-static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint64_t challenge,
-    const char *pbkInfoList)
+static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint64_t challenge, const char *pbkInfoList)
 {
     if (challenge != nonce->challenge) {
         SECURITY_LOG_ERROR("compare nonce challenge failed!");
@@ -275,8 +274,12 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
 int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
     DslmCredInfo *credInfo)
 {
-    SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
+    if (device == NULL || credBuff == NULL || credInfo == NULL) {
+        return ERR_INVALID_PARA;
+    }
 
+    SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
+    credInfo->credType = credBuff->type;
     switch (credBuff->type) {
         case CRED_TYPE_SMALL:
             return verifySmallDslmCred(device, credBuff, credInfo);
