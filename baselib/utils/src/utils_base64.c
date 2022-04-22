@@ -159,24 +159,24 @@ static int32_t Base64Decode(const uint8_t *from, uint8_t *to, uint32_t toCheckLe
 uint8_t *Base64EncodeApp(const uint8_t *from, uint32_t fromLen)
 {
     if (from == NULL) {
-        SECURITY_LOG_DEBUG("Unexpected nullptr!");
+        SECURITY_LOG_DEBUG("invalid param, from is null");
         return NULL;
     }
 
     uint32_t outSize = (fromLen + 2) / 3 * 4; // get base64 encode size
     if (outSize + 1 > MAX_MALLOC_LEN) {
-        SECURITY_LOG_DEBUG("Invalid MALLOC length!");
+        SECURITY_LOG_DEBUG("invalid MALLOC length");
         return NULL;
     }
     uint8_t *out = (uint8_t *)MALLOC(outSize + 1);
     if (out == NULL) {
-        SECURITY_LOG_DEBUG("Memory allocation failed!");
+        SECURITY_LOG_DEBUG("malloc failed, out is null");
         return NULL;
     }
 
     int realLen = Base64Encode(from, fromLen, out, outSize);
     if (realLen < 0) {
-        SECURITY_LOG_DEBUG("Base64EncodeApp fail");
+        SECURITY_LOG_DEBUG("Base64EncodeApp failed");
         FREE(out);
         return NULL;
     }
@@ -187,25 +187,25 @@ uint8_t *Base64EncodeApp(const uint8_t *from, uint32_t fromLen)
 int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to)
 {
     if ((src == NULL) || (to == NULL)) {
-        SECURITY_LOG_DEBUG("Unexpected nullptr!");
+        SECURITY_LOG_DEBUG("invalid params");
         return 0;
     }
 
     uint32_t decodedLen = strlen((char *)src) / 4 * 3; /* Base64 Decode size */
     if (decodedLen + 1 > MAX_MALLOC_LEN) {
-        SECURITY_LOG_DEBUG("Base64DecodeApp decodedLen err");
+        SECURITY_LOG_DEBUG("decodedLen error");
         return 0;
     }
 
     uint8_t *decoded = (uint8_t *)MALLOC(decodedLen + 1);
     if (decoded == NULL) {
-        SECURITY_LOG_DEBUG("Base64DecodeApp MALLOC fail");
+        SECURITY_LOG_DEBUG("malloc failed, decoded is null");
         return 0;
     }
 
     int realLen = Base64Decode(src, decoded, decodedLen);
     if (realLen < 0) {
-        SECURITY_LOG_DEBUG("Base64DecodeApp fail");
+        SECURITY_LOG_DEBUG("Base64Decode failed");
         FREE(decoded);
         return 0;
     }
@@ -218,7 +218,7 @@ int32_t Base64DecodeApp(const uint8_t *src, uint8_t **to)
 int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
 {
     if ((src == NULL) || (to == NULL)) {
-        SECURITY_LOG_DEBUG("Unexpected nullptr!");
+        SECURITY_LOG_DEBUG("invalid params");
         return 0;
     }
 
@@ -226,7 +226,7 @@ int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
     uint32_t alignLen = RESIZE4(sourceLen);
     uint8_t *base64Str = (uint8_t *)malloc(alignLen + 1);
     if (base64Str == NULL) {
-        SECURITY_LOG_DEBUG("Base64UrlDecodeApp MALLOC fail");
+        SECURITY_LOG_DEBUG("Base64UrlDecodeApp malloc failed");
         return 0;
     }
     (void)memset_s(base64Str, alignLen + 1, '=', alignLen + 1);

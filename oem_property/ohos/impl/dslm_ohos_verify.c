@@ -45,14 +45,14 @@ struct NonceOfCertChain {
 
 static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *info, uint32_t maxLevel)
 {
-    SECURITY_LOG_DEBUG("CheckCredInfo start!");
+    SECURITY_LOG_DEBUG("start");
     if (info->credLevel > maxLevel) {
-        SECURITY_LOG_ERROR("Cred level = %{public}d check error.", info->credLevel);
+        SECURITY_LOG_ERROR("cred level = %{public}d check error", info->credLevel);
         info->credLevel = 0;
         return ERR_CHECK_CRED_INFO;
     }
     if (strlen(info->udid) == 0) {
-        SECURITY_LOG_DEBUG("Current cred has no udid, skip CheckCredInfo.");
+        SECURITY_LOG_DEBUG("current cred has no udid, skip CheckCredInfo");
         return SUCCESS;
     }
     if (strncmp(info->releaseType, CRED_VALUE_TYPE_DEBUG, strlen(CRED_VALUE_TYPE_DEBUG)) == 0) {
@@ -61,7 +61,7 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *
         }
         return ERR_CHECK_CRED_INFO;
     }
-    SECURITY_LOG_DEBUG("CheckCredInfo SUCCESS!");
+    SECURITY_LOG_DEBUG("success");
     return SUCCESS;
 }
 
@@ -154,13 +154,13 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
 static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint64_t challenge, const char *pbkInfoList)
 {
     if (challenge != nonce->challenge) {
-        SECURITY_LOG_ERROR("compare nonce challenge failed!");
+        SECURITY_LOG_ERROR("compare nonce challenge failed");
         return ERR_CHALLENGE_ERR;
     }
 
     int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char *)nonce->pbkInfoList);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("compare nonce public key info failed!");
+        SECURITY_LOG_ERROR("compare nonce public key info failed");
         return ret;
     }
     return SUCCESS;
@@ -181,22 +181,22 @@ static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceId
     do {
         ret = ParseNonceOfCertChain(jsonStr, &nonce);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("ParseNonceOfCertChain failed!");
+            SECURITY_LOG_ERROR("ParseNonceOfCertChain failed");
             break;
         }
 
         ret = GetPkInfoListStr(false, udidStr, &pkInfoListStr);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("GetPkInfoListStr failed!");
+            SECURITY_LOG_ERROR("GetPkInfoListStr failed");
             break;
         }
 
         ret = CheckNonceOfCertChain(&nonce, challenge, pkInfoListStr);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("CheckNonceOfCertChain failed!");
+            SECURITY_LOG_ERROR("CheckNonceOfCertChain failed");
             break;
         }
-        SECURITY_LOG_DEBUG("VerifyNonceOfCertChain success!");
+        SECURITY_LOG_DEBUG("success");
     } while (0);
 
     FreeNonceOfCertChain(&nonce);
@@ -213,13 +213,13 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
 
     int32_t ret = VerifyDslmCredential(credStr, credInfo, NULL);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("VerifyCredData failed!");
+        SECURITY_LOG_ERROR("VerifyDslmCredential failed");
         return ret;
     }
 
     ret = CheckCredInfo(device, credInfo, CRED_MAX_LEVEL_TYPE_SMALL);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("CheckCredInfo failed!");
+        SECURITY_LOG_ERROR("CheckCredInfo failed");
         return ret;
     }
 
@@ -232,7 +232,7 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
     struct DslmInfoInCertChain resultInfo;
     int32_t ret = InitDslmInfoInCertChain(&resultInfo);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitDslmInfoInCertChain failed!");
+        SECURITY_LOG_ERROR("InitDslmInfoInCertChain failed");
         return ret;
     }
 
@@ -240,33 +240,33 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
         // 1. Verify the certificate chain, get data in the certificate chain(nonce + UDID + cred).
         ret = ValidateCertChainAdapter(credBuff->credVal, credBuff->credLen, &resultInfo);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("ValidateCertChainAdapter failed!");
+            SECURITY_LOG_ERROR("ValidateCertChainAdapter failed");
             break;
         }
 
         // 2. Parses the NONCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
         ret = VerifyNonceOfCertChain(resultInfo.nonceStr, device, challenge);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("verifyNonceOfCertChain failed!");
+            SECURITY_LOG_ERROR("verifyNonceOfCertChain failed");
             break;
         }
 
         // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and verify it.
         ret = VerifyDslmCredential(resultInfo.credStr, credInfo, NULL);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("VerifyCredData failed!");
+            SECURITY_LOG_ERROR("VerifyDslmCredential failed");
             break;
         }
         ret = CheckCredInfo(device, credInfo, CRED_MAX_LEVEL_TYPE_STANDARD);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("CheckCredInfo failed!");
+            SECURITY_LOG_ERROR("CheckCredInfo failed");
             break;
         }
     } while (0);
 
     DestroyDslmInfoInCertChain(&resultInfo);
     if (ret == SUCCESS) {
-        SECURITY_LOG_INFO("VerifyOhosDslmCred success, cred level = %{public}d", credInfo->credLevel);
+        SECURITY_LOG_INFO("success, cred level = %{public}d", credInfo->credLevel);
     }
     return ret;
 }
@@ -278,7 +278,7 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
         return ERR_INVALID_PARA;
     }
 
-    SECURITY_LOG_INFO("Invoke VerifyOhosDslmCred");
+    SECURITY_LOG_INFO("start");
     credInfo->credType = credBuff->type;
     switch (credBuff->type) {
         case CRED_TYPE_SMALL:
@@ -286,7 +286,7 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
         case CRED_TYPE_STANDARD:
             return verifyStandardDslmCred(device, challenge, credBuff, credInfo);
         default:
-            SECURITY_LOG_ERROR("Invalid cred type!");
+            SECURITY_LOG_ERROR("invalid cred type");
             break;
     }
     return ERR_INVALID_PARA;

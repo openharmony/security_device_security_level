@@ -93,14 +93,14 @@ static void ProcessSessionMessageReceived(const uint8_t *data, uint32_t len)
     }
     QueueMsgData *queueData = (QueueMsgData *)data;
     if (queueData->msgLen + sizeof(QueueMsgData) != len) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, invalid input");
+        SECURITY_LOG_ERROR("invalid input");
         return;
     }
 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     DeviceMessageReceiver messageReceiver = instance->messageReceiver;
     if (messageReceiver == NULL) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, messageReceiver is null");
+        SECURITY_LOG_ERROR("messageReceiver is null");
         return;
     }
     messageReceiver(&queueData->srcIdentity, queueData->msgdata, queueData->msgLen);
@@ -112,36 +112,36 @@ static void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     WorkQueue *queue = instance->queue;
     if (queue == NULL) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, queue is null");
+        SECURITY_LOG_ERROR("queue is null");
         return;
     }
     DeviceMessageReceiver messageReceiver = instance->messageReceiver;
     if (messageReceiver == NULL) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, messageReceiver is null");
+        SECURITY_LOG_ERROR("messageReceiver is null");
         return;
     }
     uint32_t queueDataLen = sizeof(QueueMsgData) + msgLen;
     QueueMsgData *queueData = MALLOC(queueDataLen);
     if (queueData == NULL) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, malloc result null");
+        SECURITY_LOG_ERROR("malloc result null");
         return;
     }
     uint32_t ret = (uint32_t)memcpy_s(&queueData->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
     if (ret != EOK) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, memcpy failed");
+        SECURITY_LOG_ERROR("memcpy failed");
         FREE(queueData);
         return;
     }
     ret = (uint32_t)memcpy_s(queueData->msgdata, msgLen, msg, msgLen);
     if (ret != EOK) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, memcpy failed");
+        SECURITY_LOG_ERROR("memcpy failed");
         FREE(queueData);
         return;
     }
     queueData->msgLen = msgLen;
     ret = QueueWork(queue, ProcessSessionMessageReceived, (uint8_t *)queueData, queueDataLen);
     if (ret != WORK_QUEUE_OK) {
-        SECURITY_LOG_ERROR("ProcessSessionMessageReceived, QueueWork failed, ret is %{public}u", ret);
+        SECURITY_LOG_ERROR("QueueWork failed, ret is %{public}u", ret);
         FREE(queueData);
         return;
     }
@@ -155,14 +155,14 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
     char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
     int ret = GetPeerDeviceId(sessionId, deviceName, DEVICE_ID_MAX_LEN + 1);
     if (ret != 0) {
-        SECURITY_LOG_INFO("GetDeviceIdentityFromSessionId %{public}d failed, result is %{public}d", sessionId, ret);
+        SECURITY_LOG_INFO("GetPeerDeviceId failed, sessionId is %{public}d, result is %{public}d", sessionId, ret);
         return false;
     }
 
     char udid[UDID_BUF_LEN] = {0};
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     if (GetNodeKeyInfo(instance->pkgName, deviceName, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
-        SECURITY_LOG_ERROR("MessengerGetSelfDeviceIdentify GetNodeKeyInfo error.");
+        SECURITY_LOG_ERROR("GetNodeKeyInfo failed");
         return false;
     }
 
@@ -175,7 +175,7 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
 static int MessengerOnSessionOpened(int sessionId, int result)
 {
     int side = GetSessionSide(sessionId);
-    SECURITY_LOG_INFO("MessengerOnSessionOpened id=%{public}d, side=%{public}s, result=%{public}d", sessionId,
+    SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s, result=%{public}d", sessionId,
         (side == IS_SERVER) ? "server" : "client", result);
 
     if (side == IS_SERVER) {
@@ -189,13 +189,13 @@ static int MessengerOnSessionOpened(int sessionId, int result)
     uint32_t maskId;
     bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
     if (ret == false) {
-        SECURITY_LOG_ERROR("MessengerOnSessionOpened GetDeviceIdentityFromSessionId failed");
+        SECURITY_LOG_ERROR("GetDeviceIdentityFromSessionId failed");
         return 0;
     }
 
     SessionInfo *sessionInfo = MALLOC(sizeof(SessionInfo));
     if (sessionInfo == NULL) {
-        SECURITY_LOG_ERROR("MessengerOnSessionOpened malloc failed");
+        SECURITY_LOG_ERROR("malloc failed, sessionInfo is null");
         return 0;
     }
     sessionInfo->sessionId = sessionId;
@@ -218,7 +218,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
         RemoveListNode(node);
         int ret = SendBytes(sessionId, msgData->msgdata, msgData->msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{public}d", ret);
+            SECURITY_LOG_ERROR("SendBytes error code = %{public}d", ret);
         }
         FREE(msgData);
     }
@@ -230,7 +230,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
 static void MessengerOnSessionClosed(int sessionId)
 {
     int side = GetSessionSide(sessionId);
-    SECURITY_LOG_INFO("MessengerOnSessionClosed id=%{public}d, side=%{public}s", sessionId,
+    SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s", sessionId,
         (side == IS_SERVER) ? "server" : "client");
 
     if (side == IS_SERVER) {
@@ -244,7 +244,7 @@ static void MessengerOnSessionClosed(int sessionId)
     FOREACH_LIST_NODE_SAFE (node, &instance->openedSessionList, temp) {
         SessionInfo *info = LIST_ENTRY(node, SessionInfo, link);
         if (info->sessionId == sessionId) {
-            SECURITY_LOG_INFO("MessengerOnSessionClosed device=%{public}x", info->maskId);
+            SECURITY_LOG_INFO("device=%{public}x", info->maskId);
             RemoveListNode(node);
             FREE(info);
         }
@@ -261,7 +261,7 @@ static void MessengerOnBytesReceived(int sessionId, const void *data, unsigned i
     if (ret == false) {
         return;
     }
-    SECURITY_LOG_INFO("MessengerOnBytesReceived from device(%{public}x***, data length is %{public}u", maskId, dataLen);
+    SECURITY_LOG_INFO("device=%{public}x***, data length is %{public}u", maskId, dataLen);
     OnSessionMessageReceived(&identity, (const uint8_t *)data, (uint32_t)dataLen);
 }
 
@@ -291,11 +291,11 @@ bool InitDeviceSessionManager(WorkQueue *queue, const char *pkgName, const char 
     }
 
     if (ret != 0) {
-        SECURITY_LOG_ERROR("InitSessionManager CreateSessionServer failed = %{public}d", ret);
+        SECURITY_LOG_ERROR("CreateSessionServer failed = %{public}d", ret);
         return false;
     }
 
-    SECURITY_LOG_INFO("InitSessionManager CreateSessionServer success");
+    SECURITY_LOG_INFO("CreateSessionServer success");
     return true;
 }
 
@@ -304,7 +304,7 @@ bool DeInitDeviceSessionManager(void)
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     int ret = RemoveSessionServer(instance->pkgName, instance->sessionName);
     if (ret != 0) {
-        SECURITY_LOG_ERROR("DeInitSessionManager RemoveSessionServer failed = %{public}d", ret);
+        SECURITY_LOG_ERROR("RemoveSessionServer failed = %{public}d", ret);
         return false;
     }
     LockMutex(&instance->mutex);
@@ -332,7 +332,7 @@ bool DeInitDeviceSessionManager(void)
     DestroyWorkQueue(instance->queue);
     UnlockMutex(&instance->mutex);
 
-    SECURITY_LOG_INFO("DeInitSessionManager RemoveSessionServer success");
+    SECURITY_LOG_INFO("RemoveSessionServer success");
     return true;
 }
 
@@ -357,7 +357,7 @@ static bool GetOpenedSessionId(const DeviceIdentify *devId, int32_t *sessionId)
         }
     }
     UnlockMutex(&instance->mutex);
-    SECURITY_LOG_DEBUG("GetOpenedSessionId for device %{public}x %{public}s", mask, find ? "exist" : "no exist");
+    SECURITY_LOG_DEBUG("device %{public}x %{public}s", mask, find ? "exist" : "no exist");
     return find;
 }
 
@@ -365,7 +365,7 @@ static void PushMsgDataToPendingList(uint32_t transNo, const DeviceIdentify *dev
 {
     PendingMsgData *data = MALLOC(sizeof(PendingMsgData) + msgLen);
     if (data == NULL) {
-        SECURITY_LOG_ERROR("PushMsgDataToPendingList malloc error");
+        SECURITY_LOG_ERROR("malloc failed, data is null");
         return;
     }
     data->transNo = transNo;
@@ -384,7 +384,7 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
     char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
     bool succ = MessengerGetDeviceNetworkId(devId, deviceName, DEVICE_ID_MAX_LEN + 1);
     if (!succ) {
-        SECURITY_LOG_ERROR("CreateNewDeviceSession get network id error");
+        SECURITY_LOG_ERROR("get network id failed");
         return;
     }
 
@@ -397,13 +397,13 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
         // open failed, need to try again.
         ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
     }
-    SECURITY_LOG_INFO("CreateNewDeviceSession for device %{public}x ret is %{public}d", mask, ret);
+    SECURITY_LOG_INFO("device %{public}x ret is %{public}d", mask, ret);
 }
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
 {
     if (devId == NULL || msg == NULL || msgLen == 0) {
-        SECURITY_LOG_ERROR("MessengerSendMsgTo error for invalid para");
+        SECURITY_LOG_ERROR("invalid params");
         return;
     }
 
@@ -412,7 +412,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     MessengerGetSelfDeviceIdentify(&self, &devType);
 
     if (IsSameDevice(&self, devId)) {
-        SECURITY_LOG_DEBUG("MessengerSendMsgTo loopback msg");
+        SECURITY_LOG_DEBUG("loopback msg");
         OnSessionMessageReceived(devId, msg, msgLen);
         return;
     }
@@ -422,7 +422,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     if (find) {
         int ret = SendBytes(sessionId, msg, msgLen);
         if (ret != 0) {
-            SECURITY_LOG_ERROR("MessengerSendMsgTo SendBytes error code = %{public}d", ret);
+            SECURITY_LOG_ERROR("SendBytes error code = %{public}d", ret);
         }
     } else {
         PushMsgDataToPendingList(transNo, devId, msg, msgLen);

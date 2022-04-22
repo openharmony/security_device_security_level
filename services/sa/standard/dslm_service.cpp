@@ -30,19 +30,19 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DslmService, DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, 
 
 DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate)
 {
-    SECURITY_LOG_INFO("DslmService::DslmService");
+    SECURITY_LOG_INFO("object initialization");
 }
 
 void DslmService::OnStart()
 {
-    SECURITY_LOG_INFO("DslmService::OnStart service");
+    SECURITY_LOG_INFO("start");
     if (!Publish(this)) {
-        SECURITY_LOG_ERROR("DslmService::OnStart Publish service failed.");
+        SECURITY_LOG_ERROR("publish service failed");
     }
 
     std::thread t([this]() {
         if (InitService() == SUCCESS) {
-            SECURITY_LOG_INFO("DslmService::OnStart InitService success.");
+            SECURITY_LOG_INFO("init service success");
             return;
         }
     });
@@ -52,7 +52,7 @@ void DslmService::OnStart()
 void DslmService::OnStop()
 {
     UnInitService();
-    SECURITY_LOG_INFO("DslmService::OnStop service stop.");
+    SECURITY_LOG_INFO("stop service");
 }
 
 int32_t DslmService::Dump(int fd, const std::vector<std::u16string> &args)

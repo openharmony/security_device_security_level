@@ -43,7 +43,7 @@ int32_t OnPeerMsgRequestInfoReceived(const DeviceIdentify *deviceId, const uint8
         return ERR_INVALID_PARA;
     }
 
-    SECURITY_LOG_DEBUG("OnPeerMsgRequestInfoReceived msg is %s", (char *)msg);
+    SECURITY_LOG_DEBUG("msg is %s", (char *)msg);
     MessageBuff buff = {.length = len, .buff = (uint8_t *)msg};
 
     RequestObject reqObject;
@@ -79,11 +79,11 @@ int32_t OnPeerMsgResponseInfoReceived(const DeviceIdentify *deviceId, const uint
     if (deviceId == NULL || msg == NULL || len == 0) {
         return ERR_INVALID_PARA;
     }
-    SECURITY_LOG_DEBUG("OnPeerMsgResponseInfoReceived msg is %s", (char *)msg);
+    SECURITY_LOG_DEBUG("msg is %s", (char *)msg);
 
     DslmDeviceInfo *deviceInfo = GetDslmDeviceInfo(deviceId);
     if (deviceInfo == NULL) {
-        SECURITY_LOG_ERROR("OnPeerMsgResponseInfoReceived no existed device");
+        SECURITY_LOG_ERROR("no existed device");
         return ERR_NOEXIST_DEVICE;
     }
 
@@ -99,7 +99,7 @@ int32_t OnPeerMsgResponseInfoReceived(const DeviceIdentify *deviceId, const uint
 
 int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo, uint32_t result)
 {
-    SECURITY_LOG_INFO("OnMsgSendResultNotifier msg trans is %{public}u result %{public}u", (uint32_t)transNo, result);
+    SECURITY_LOG_INFO("msg trans is %{public}u result %{public}u", (uint32_t)transNo, result);
 
     if (result == SUCCESS) {
         return SUCCESS;
@@ -128,12 +128,12 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
     uint32_t cookie, RequestCallback callback)
 {
     if (deviceId == NULL || option == NULL || callback == NULL) {
-        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo invalid para");
+        SECURITY_LOG_ERROR("invalid params");
         return ERR_INVALID_PARA;
     }
 
     if (GetMessengerStatus() != true) {
-        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo softbus service not startup complete");
+        SECURITY_LOG_ERROR("softbus service not startup complete");
         return ERR_MSG_NOT_INIT;
     }
 
@@ -141,19 +141,19 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
 
     DslmDeviceInfo *deviceInfo = GetDslmDeviceInfo(curr);
     if (deviceInfo == NULL) {
-        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo input device not exist");
+        SECURITY_LOG_ERROR("input device not exist");
         return ERR_NOEXIST_DEVICE;
     }
 
     ReportHiEventAppInvoke(deviceInfo);
 
     if (deviceInfo->onlineStatus != ONLINE_STATUS_ONLINE) {
-        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo input device not online");
+        SECURITY_LOG_ERROR("input device not online");
         return ERR_NOT_ONLINE;
     }
     DslmNotifyListNode *notifyNode = MALLOC(sizeof(DslmNotifyListNode));
     if (notifyNode == NULL) {
-        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo malloc error");
+        SECURITY_LOG_ERROR("malloc failed, notifyNode is null");
         return ERR_NO_MEMORY;
     }
     notifyNode->owner = owner;
@@ -186,13 +186,13 @@ bool InitSelfDeviceSecureLevel(void)
     uint32_t devType = 0;
     const DeviceIdentify *device = GetSelfDevice(&devType);
     if (device->length == 0) {
-        SECURITY_LOG_ERROR("InitDeviceSecLevel, GetSelfDevice failed");
+        SECURITY_LOG_ERROR("GetSelfDevice failed");
         return false;
     }
 
     DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(device);
     if (info == NULL) {
-        SECURITY_LOG_ERROR("InitDeviceSecLevel, CreatOrGetDslmDeviceInfo failed");
+        SECURITY_LOG_ERROR("CreatOrGetDslmDeviceInfo failed");
         return false;
     }
 
@@ -215,7 +215,7 @@ bool InitSelfDeviceSecureLevel(void)
 
     ret = OnPeerStatusReceiver(device, ONLINE_STATUS_ONLINE, devType);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitDeviceSecLevel, make self online failed");
+        SECURITY_LOG_ERROR("make self online failed");
     }
     return true;
 }
