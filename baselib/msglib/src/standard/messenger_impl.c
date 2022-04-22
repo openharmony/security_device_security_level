@@ -37,7 +37,7 @@ typedef struct Messenger {
 Messenger *CreateMessengerImpl(const MessengerConfig *config)
 {
     if (config == NULL) {
-        SECURITY_LOG_ERROR("CreateMessengerImpl error para");
+        SECURITY_LOG_ERROR("config is null");
         return NULL;
     }
 
@@ -73,7 +73,7 @@ Messenger *CreateMessengerImpl(const MessengerConfig *config)
 void DestroyMessengerImpl(Messenger *messenger)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("DestroyMessengerImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return;
     }
     DeInitDeviceStatusManager();
@@ -86,7 +86,7 @@ void DestroyMessengerImpl(Messenger *messenger)
 bool IsMessengerReadyImpl(const Messenger *messenger)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("IsMessengerReadyImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return false;
     }
     return true;
@@ -96,7 +96,7 @@ void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIde
     uint32_t msgLen)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("SendMsgToImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return;
     }
     MessengerSendMsgTo(transNo, devId, msg, msgLen);
@@ -105,7 +105,7 @@ void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIde
 bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("GetDeviceOnlineStatusImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return false;
     }
 
@@ -115,7 +115,7 @@ bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify 
 bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("GetSelfDeviceIdentifyImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return false;
     }
 
@@ -125,7 +125,7 @@ bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId
 void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("ForEachDeviceProcessImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return;
     }
 
@@ -135,7 +135,7 @@ void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor 
 bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
-        SECURITY_LOG_ERROR("GetDeviceStatisticInfoImpl error para");
+        SECURITY_LOG_ERROR("invalid params");
         return false;
     }
     (void)devId;

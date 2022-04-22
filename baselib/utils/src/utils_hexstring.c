@@ -55,7 +55,7 @@ int32_t HexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t
     uint32_t outLen = strLen / BYTE_TO_HEX_OPER_LENGTH;
 
     if (hexLen < outLen) { /* test the length */
-        SECURITY_LOG_DEBUG("HexStringToByte length error");
+        SECURITY_LOG_DEBUG("length error");
         return ERR;
     }
 

@@ -114,11 +114,11 @@ static int32_t RequestSmallDslmCred(uint8_t *data, uint32_t dataLen, DslmCredBuf
 {
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_SMALL, dataLen, data);
     if (out == NULL) {
-        SECURITY_LOG_ERROR("RequestSmallDslmCred, CreateDslmCred failed");
+        SECURITY_LOG_ERROR("CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
     *credBuff = out;
-    SECURITY_LOG_INFO("RequestSmallDslmCred success!");
+    SECURITY_LOG_INFO("success");
     return SUCCESS;
 }
 
@@ -129,18 +129,18 @@ static int32_t RequestStandardDslmCred(const DeviceIdentify *device, const Reque
     uint32_t certChainLen = 0;
     int32_t ret = GenerateDslmCertChain(device, obj, credStr, &certChain, &certChainLen);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("RequestStandardDslmCred, GenerateDslmCertChain failed");
+        SECURITY_LOG_ERROR("GenerateDslmCertChain failed");
         return ret;
     }
     DslmCredBuff *out = CreateDslmCred(CRED_TYPE_STANDARD, certChainLen, certChain);
     if (out == NULL) {
         FREE(certChain);
-        SECURITY_LOG_ERROR("RequestStandardDslmCred, CreateDslmCred failed");
+        SECURITY_LOG_ERROR("CreateDslmCred failed");
         return ERR_MEMORY_ERR;
     }
     FREE(certChain);
     *credBuff = out;
-    SECURITY_LOG_INFO("RequestStandardDslmCred success!");
+    SECURITY_LOG_INFO("success");
     return SUCCESS;
 }
 
@@ -152,18 +152,18 @@ int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
     FILE *fp = NULL;
     fp = fopen(DSLM_CRED_CFG_FILE_POSITION, "r");
     if (fp == NULL) {
-        SECURITY_LOG_ERROR("fopen cred file failed!");
+        SECURITY_LOG_ERROR("fopen cred file failed");
         return ERR_INVALID_PARA;
     }
     int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
     if (ret == -1) {
-        SECURITY_LOG_ERROR("fscanf_s cred file failed!");
+        SECURITY_LOG_ERROR("fscanf_s cred file failed");
         ret = ERR_INVALID_PARA;
     } else {
         ret = SUCCESS;
     }
     if (fclose(fp) != 0) {
-        SECURITY_LOG_ERROR("fclose cred file failed!");
+        SECURITY_LOG_ERROR("fclose cred file failed");
         ret = ERR_INVALID_PARA;
     }
     return ret;
@@ -171,17 +171,17 @@ int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
 
 int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff)
 {
-    SECURITY_LOG_INFO("Invoke RequestOhosDslmCred");
+    SECURITY_LOG_INFO("start");
     uint32_t credType = 0;
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     int32_t ret = GetCredFromCurrentDevice(credStr, DSLM_CRED_STR_LEN_MAX);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("Read cred data from file failed!");
+        SECURITY_LOG_ERROR("read cred data from file failed");
         return ret;
     }
     ret = SelectDslmCredType(device, obj, &credType);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("SelectDslmCredType failed!");
+        SECURITY_LOG_ERROR("SelectDslmCredType failed");
         return ret;
     }
     switch (credType) {
@@ -190,7 +190,7 @@ int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *o
         case CRED_TYPE_STANDARD:
             return RequestStandardDslmCred(device, obj, credStr, credBuff);
         default:
-            SECURITY_LOG_ERROR("Invalid cred type!");
+            SECURITY_LOG_ERROR("invalid cred type");
             return ERR_INVALID_PARA;
     }
 

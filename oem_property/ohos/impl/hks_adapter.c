@@ -63,7 +63,7 @@ int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, i
 int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
 {
     if (keyAlias == NULL) {
-        SECURITY_LOG_ERROR("keyAlias is null.");
+        SECURITY_LOG_ERROR("keyAlias is null");
         return ERR_INVALID_PARA;
     }
     struct HksParam tmpParams[] = {
@@ -78,7 +78,7 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
     };
     struct HksParamSet *paramSet = NULL;
     if (FillHksParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) != SUCCESS) {
-        SECURITY_LOG_ERROR("HksGenerateKeyAdapter, FillHksParamSet failed.");
+        SECURITY_LOG_ERROR("FillHksParamSet failed");
         return ERR_HUKS_ERR;
     }
     int32_t ret = HksGenerateKey(keyAlias, paramSet, NULL);
