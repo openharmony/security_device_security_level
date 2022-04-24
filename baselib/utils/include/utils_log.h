@@ -29,20 +29,25 @@
 #endif
 #define LOG_DOMAIN 0xD002F00
 
-#define SECURITY_LOG_DEBUG(fmt, ...) HILOG_DEBUG(LOG_CORE, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_WARN(fmt, ...) HILOG_WARN(LOG_CORE, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_ERROR(fmt, ...) HILOG_ERROR(LOG_CORE, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_FATAL(fmt, ...) HILOG_FATAL(LOG_CORE, fmt, ##__VA_ARGS__)
+#define SECURITY_LOG_DEBUG(fmt, ...) HILOG_DEBUG(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_WARN(fmt, ...) HILOG_WARN(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_ERROR(fmt, ...) HILOG_ERROR(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_FATAL(fmt, ...) HILOG_FATAL(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
 
 #else // __cplusplus
 static constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0xD002F00, "DSLM_SERVICE"};
 
-#define SECURITY_LOG_DEBUG(fmt, ...) OHOS::HiviewDFX::HiLog::Debug(LABEL, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_INFO(fmt, ...) OHOS::HiviewDFX::HiLog::Info(LABEL, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_WARN(fmt, ...) OHOS::HiviewDFX::HiLog::Warn(LABEL, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_ERROR(fmt, ...) OHOS::HiviewDFX::HiLog::Error(LABEL, fmt, ##__VA_ARGS__)
-#define SECURITY_LOG_FATAL(fmt, ...) OHOS::HiviewDFX::HiLog::Fatal(LABEL, fmt, ##__VA_ARGS__)
+#define SECURITY_LOG_DEBUG(fmt, ...) \
+    OHOS::HiviewDFX::HiLog::Debug(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_INFO(fmt, ...) \
+    OHOS::HiviewDFX::HiLog::Info(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_WARN(fmt, ...) \
+    OHOS::HiviewDFX::HiLog::Warn(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_ERROR(fmt, ...) \
+    OHOS::HiviewDFX::HiLog::Error(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
+#define SECURITY_LOG_FATAL(fmt, ...) \
+    OHOS::HiviewDFX::HiLog::Fatal(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
 
 #endif // __cplusplus
 #endif // SEC_UTILS_LOG_H

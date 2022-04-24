@@ -37,7 +37,7 @@ bool InitDslmCredentialFunctions(const ProcessDslmCredFunctions *funcs)
     }
     ProcessDslmCredFunctions *cb = GetFunctionCb();
     (void)memcpy_s(cb, sizeof(ProcessDslmCredFunctions), funcs, sizeof(ProcessDslmCredFunctions));
-    SECURITY_LOG_INFO("InitDslmCredentialFunctions success");
+    SECURITY_LOG_INFO("success");
     return true;
 }
 
@@ -48,7 +48,7 @@ int32_t DefaultRequestDslmCred(const DeviceIdentify *device, const RequestObject
     if (request != NULL) {
         return request(device, obj, credBuff);
     }
-    SECURITY_LOG_INFO("invoke DefaultRequestDslmCred");
+    SECURITY_LOG_INFO("failed");
     return -1;
 }
 

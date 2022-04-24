@@ -25,21 +25,21 @@
 
 int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
 {
-    SECURITY_LOG_INFO("Invoke InitOhosDslmCred");
+    SECURITY_LOG_INFO("start");
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     int32_t ret = GetCredFromCurrentDevice(credStr, DSLM_CRED_STR_LEN_MAX);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitOhosDslmCred, Read cred data from file failed!");
+        SECURITY_LOG_ERROR("read cred data from file failed");
         return ret;
     }
 
     ret = VerifyDslmCredential(credStr, credInfo, NULL);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitOhosDslmCred, VerifyCredData failed!");
+        SECURITY_LOG_ERROR("verifyCredData failed!");
         return ret;
     }
     credInfo->credType = CRED_TYPE_STANDARD;
 
-    SECURITY_LOG_INFO("InitOhosDslmCred success, self security level is %{public}d", credInfo->credLevel);
+    SECURITY_LOG_INFO("success, self security level is %{public}d", credInfo->credLevel);
     return SUCCESS;
 }

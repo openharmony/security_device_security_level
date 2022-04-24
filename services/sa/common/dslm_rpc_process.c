@@ -28,7 +28,7 @@
 int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len)
 {
     if (devId == NULL || msg == NULL || len == 0) {
-        SECURITY_LOG_ERROR("OnPeerMsgReceived params is NULL, len = %{public}u", len);
+        SECURITY_LOG_ERROR("invalid params, len = %{public}u", len);
         return ERR_INVALID_PARA;
     }
 
@@ -36,12 +36,12 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
     int32_t ret = SUCCESS;
     MessagePacket *packet = ParseMessage(&buff);
     if (packet == NULL) {
-        SECURITY_LOG_ERROR("OnPeerMsgReceived packet is NULL");
+        SECURITY_LOG_ERROR("packet is null");
         return ERR_INVALID_PARA;
     }
     if (packet->payload == NULL) {
         FreeMessagePacket(packet);
-        SECURITY_LOG_ERROR("OnPeerMsgReceived packet->payload is NULL");
+        SECURITY_LOG_ERROR("packet->payload is null");
         return ERR_INVALID_PARA;
     }
 
@@ -56,7 +56,7 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
             break;
     }
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("OnPeerMsgReceived ret = %{public}d, packet->type = %{public}u", ret, packet->type);
+        SECURITY_LOG_ERROR("ret = %{public}d, packet->type = %{public}u", ret, packet->type);
     }
     FreeMessagePacket(packet);
     return ret;
@@ -72,7 +72,7 @@ uint32_t InitService(void)
     uint32_t times = 0;
     uint32_t ret = InitMessenger(OnPeerMsgReceived, OnPeerStatusReceiver, OnSendResultNotifier);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("InitService InitMessenger ret = %{public}u", ret);
+        SECURITY_LOG_ERROR("InitMessenger ret = %{public}u", ret);
         return ret;
     }
 

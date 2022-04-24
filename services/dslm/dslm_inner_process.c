@@ -65,8 +65,8 @@ int32_t SendDeviceInfoRequest(DslmDeviceInfo *device)
     device->transNum++;
     SendMsgToDevice(device->transNum, &device->identity, buff->buff, buff->length);
 
-    SECURITY_LOG_DEBUG("SendDeviceInfoRequest %s", (char *)buff->buff);
-    SECURITY_LOG_INFO("SendDeviceInfoRequest challenge is %{public}x***, transNum is %{public}u.",
+    SECURITY_LOG_DEBUG("buff is %s", (char *)buff->buff);
+    SECURITY_LOG_INFO("challenge is %{public}x***, transNum is %{public}u",
         (uint32_t)device->nonce, (uint32_t)device->transNum);
     FreeMessageBuff(buff);
     return SUCCESS;
@@ -87,20 +87,20 @@ int32_t VerifyDeviceInfoResponse(DslmDeviceInfo *device, const MessageBuff *buff
         // Parse the msg
         ret = ParseDeviceSecInfoResponse(buff, &nonce, &version, &cred);
         if (ret != SUCCESS) {
-            SECURITY_LOG_ERROR("VerifyDeviceInfoResponse error %{public}d.", ret);
+            SECURITY_LOG_ERROR("ParseDeviceSecInfoResponse failed, ret is %{public}d", ret);
             break;
         }
         device->version = version;
         if (nonce != device->nonce || nonce == 0) {
             ret = ERR_CHALLENGE_ERR;
-            SECURITY_LOG_ERROR("VerifyDeviceInfoResponse nonce not equal.");
+            SECURITY_LOG_ERROR("nonce not equal");
             DestroyDslmCred(cred);
             break;
         }
         uint64_t curr = GetMillisecondSinceBoot();
         if ((curr <= device->nonceTimeStamp) || (curr - device->nonceTimeStamp > NONCE_ALIVE_TIME)) {
             ret = ERR_CHALLENGE_ERR;
-            SECURITY_LOG_ERROR("VerifyDeviceInfoResponse nonce expired.");
+            SECURITY_LOG_ERROR("nonce expired");
             DestroyDslmCred(cred);
             break;
         }
@@ -109,7 +109,7 @@ int32_t VerifyDeviceInfoResponse(DslmDeviceInfo *device, const MessageBuff *buff
         DestroyDslmCred(cred);
     } while (0);
 
-    SECURITY_LOG_INFO("VerifyDeviceInfoResponse challenge is %{public}x***, ret is %{public}d.", (uint32_t)nonce, ret);
+    SECURITY_LOG_INFO("challenge is %{public}x***, ret is %{public}d", (uint32_t)nonce, ret);
     return ret;
 }
 
