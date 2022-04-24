@@ -95,14 +95,14 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
 int32_t VerifyDslmCredential(const char *credentialString, DslmCredInfo *credentialInfo, AttestationList *list)
 {
     if (credentialString == NULL || credentialInfo == NULL) {
-        SECURITY_LOG_ERROR("VerifyDslmCredential input error");
+        SECURITY_LOG_ERROR("invalid prams, credentialString or credentialInfo is null");
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
     CredentialCb credentialCb = {0};
 
     bool ret = CreateCredentialCb(credentialString, &credentialCb);
     if (!ret) {
-        SECURITY_LOG_ERROR("CredentialStringToCredentialCb error");
+        SECURITY_LOG_ERROR("CreateCredentialCb error");
         return ERR_PARSE_CLOUD_CRED_DATA;
     }
 
@@ -153,7 +153,6 @@ static bool CreateCredentialCb(const char *credentialString, CredentialCb *credC
             SECURITY_LOG_ERROR("SplitCredentialAttestationList failed");
             break;
         }
-        SECURITY_LOG_INFO("CreateCredentialCb success");
         result = true;
     } while (0);
 
@@ -161,6 +160,7 @@ static bool CreateCredentialCb(const char *credentialString, CredentialCb *credC
         DestroyCredentialCb(credCb);
     }
 
+    SECURITY_LOG_INFO("success");
     return result;
 }
 
@@ -174,26 +174,26 @@ static bool VerifyCredentialCb(const CredentialCb *credCb)
     // rootkey, signed by self
     int32_t ret = EcdsaVerify(&root->publicKey, &root->signature, &root->publicKey, root->algorithm);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("VerifyCredentialCb root not success, ret is %{public}d", ret);
+        SECURITY_LOG_ERROR("verify root key failed, ret is %{public}d", ret);
         return false;
     }
-    SECURITY_LOG_INFO("VerifyCredentialCb root success");
+    SECURITY_LOG_INFO("verify root success");
 
     // intermediate key, signed by root key
     ret = EcdsaVerify(&intermediate->publicKey, &intermediate->signature, &root->publicKey, intermediate->algorithm);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("VerifyCredentialCb intermediate not success, ret is %{public}d", ret);
+        SECURITY_LOG_ERROR("verify intermediate key failed, ret is %{public}d", ret);
         return false;
     }
-    SECURITY_LOG_INFO("VerifyCredentialCb intermediate success");
+    SECURITY_LOG_INFO("verify intermediate success");
 
     // last key, signed by intermediate key
     ret = EcdsaVerify(&last->publicKey, &last->signature, &intermediate->publicKey, last->algorithm);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("VerifyCredentialCb last not success, ret is %{public}d", ret);
+        SECURITY_LOG_ERROR("verify last key failed, ret is %{public}d", ret);
         return false;
     }
-    SECURITY_LOG_INFO("VerifyCredentialCb last success");
+    SECURITY_LOG_INFO("verify last success");
 
     // payload, signed by last key
     ret = EcdsaVerify(&payload->payload, &payload->signature, &last->publicKey, TYPE_ECDSA_SHA_384);
@@ -201,11 +201,11 @@ static bool VerifyCredentialCb(const CredentialCb *credCb)
         ret = EcdsaVerify(&payload->payload, &payload->signature, &last->publicKey, TYPE_ECDSA_SHA_256);
     }
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("VerifyCredentialCb payload not success, ret is %{public}d", ret);
+        SECURITY_LOG_ERROR("verify payload failed, ret is %{public}d", ret);
         return false;
     }
-
-    SECURITY_LOG_INFO("VerifyCredentialCb payload success");
+    SECURITY_LOG_INFO("verify payload success");
+    
     return true;
 }
 
@@ -398,12 +398,12 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
     bool result = false;
     do {
         if (!ParsePayloadAttestation(credCb, &credCb->load)) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList ParsePayloadAttestation failed");
+            SECURITY_LOG_ERROR("ParsePayloadAttestation failed");
             break;
         }
         Base64DecodeApp((uint8_t *)credCb->attestionInfo, &buffer);
         if (buffer == NULL) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList Base64DecodeApp failed");
+            SECURITY_LOG_ERROR("Base64DecodeApp failed");
             break;
         }
         json = CreateJson((char *)buffer);
@@ -411,19 +411,19 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
             break;
         }
         if (GetJsonFieldJsonArraySize(json) != PK_ATTEST_LIST_LEN) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList GetJsonFieldJsonArraySize failed");
+            SECURITY_LOG_ERROR("GetJsonFieldJsonArraySize failed");
             break;
         }
         if (!ParsePublicKeyAttestation(json, PK_ATTEST_INDEX_ROOT, &credCb->root)) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList ParsePublicKeyAttestation root failed");
+            SECURITY_LOG_ERROR("ParsePublicKeyAttestation root failed");
             break;
         }
         if (!ParsePublicKeyAttestation(json, PK_ATTEST_INDEX_INTER, &credCb->intermediate)) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList ParsePublicKeyAttestation intermediate failed");
+            SECURITY_LOG_ERROR("ParsePublicKeyAttestation intermediate failed");
             break;
         }
         if (!ParsePublicKeyAttestation(json, PK_ATTEST_INDEX_LAST, &credCb->last)) {
-            SECURITY_LOG_ERROR("SplitCredentialAttestationList ParsePublicKeyAttestation last failed");
+            SECURITY_LOG_ERROR("ParsePublicKeyAttestation last failed");
             break;
         }
 
@@ -528,29 +528,29 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
     const EVP_MD *type = (algorithm == TYPE_ECDSA_SHA_256) ? EVP_sha256() : EVP_sha384();
     EVP_PKEY *pkey = d2i_PUBKEY(NULL, &publicKey, pbkData->length);
     if (pkey == NULL) {
-        SECURITY_LOG_ERROR("EcdsaVerify d2i_PUBKEY failed, length = %{public}d", pbkData->length);
+        SECURITY_LOG_ERROR("d2i_PUBKEY failed, length = %{public}d", pbkData->length);
         return ERR_ECC_VERIFY_ERR;
     }
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     if (ctx == NULL) {
-        SECURITY_LOG_ERROR("EcdsaVerify EVP_MD_CTX_new failed");
+        SECURITY_LOG_ERROR("EVP_MD_CTX_new failed");
         EVP_PKEY_free(pkey);
         return ERR_ECC_VERIFY_ERR;
     }
 
     do {
         if (EVP_DigestVerifyInit(ctx, NULL, type, NULL, pkey) <= 0) {
-            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestVerifyInit failed");
+            SECURITY_LOG_ERROR("EVP_DigestVerifyInit failed");
             break;
         }
 
         if (EVP_DigestUpdate(ctx, srcData->data, srcData->length) <= 0) {
-            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestUpdate failed");
+            SECURITY_LOG_ERROR("EVP_DigestUpdate failed");
             break;
         }
 
         if (EVP_DigestVerifyFinal(ctx, sigData->data, sigData->length) <= 0) {
-            SECURITY_LOG_ERROR("EcdsaVerify EVP_DigestVerifyFinal failed");
+            SECURITY_LOG_ERROR("EVP_DigestVerifyFinal failed");
             break;
         }
     } while (0);

@@ -45,7 +45,7 @@ inline static void InitMutex(Mutex *mutex)
 {
     int ret = pthread_mutex_init(&mutex->mutex, NULL);
     if (ret != 0) {
-        SECURITY_LOG_ERROR("InitMutex pthread_mutex_init error");
+        SECURITY_LOG_ERROR("pthread_mutex_init error");
     }
 }
 
@@ -56,7 +56,7 @@ inline static void InitRecursiveMutex(Mutex *mutex)
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     int ret = pthread_mutex_init(&mutex->mutex, &attr);
     if (ret != 0) {
-        SECURITY_LOG_ERROR("InitRecursiveMutex pthread_mutex_init error");
+        SECURITY_LOG_ERROR("pthread_mutex_init error");
     }
 }
 
@@ -64,7 +64,7 @@ inline static void LockMutex(Mutex *mutex)
 {
     int ret = pthread_mutex_lock(&(mutex->mutex));
     if (ret != 0) {
-        SECURITY_LOG_ERROR("LockMutex pthread_mutex_lock error");
+        SECURITY_LOG_ERROR("pthread_mutex_lock error");
     }
 }
 
@@ -72,7 +72,7 @@ inline static void UnlockMutex(Mutex *mutex)
 {
     int ret = pthread_mutex_unlock(&(mutex->mutex));
     if (ret != 0) {
-        SECURITY_LOG_ERROR("UnlockMutex pthread_mutex_unlock error");
+        SECURITY_LOG_ERROR("pthread_mutex_unlock error");
     }
 }
 

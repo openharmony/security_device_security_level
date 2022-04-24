@@ -77,7 +77,7 @@ void ScheduleMachine(const StateNode *nodes, uint32_t nodeCnt, StateMachine *mac
 {
     // EventPara could be null, need not to check
     if ((nodes == NULL) || (nodeCnt == 0) || (machine == NULL)) {
-        SECURITY_LOG_ERROR("nodes or context is null");
+        SECURITY_LOG_ERROR("invlid params, nodes or context is null");
         return;
     }
     LockMutex(&machine->mutex);

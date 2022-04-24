@@ -42,13 +42,13 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
     }
     auto object = Singleton<DslmIpcProcess::RemoteHolder>::GetInstance().Pop(owner, cookie);
     if (object == nullptr) {
-        SECURITY_LOG_ERROR("ProcessCallback Pop error.");
+        SECURITY_LOG_ERROR("Pop failed");
         return;
     }
 
     auto proxy = iface_cast<DslmCallbackProxy>(object);
     if (object == nullptr) {
-        SECURITY_LOG_ERROR("ProcessCallback iface_cast error.");
+        SECURITY_LOG_ERROR("iface_cast failed");
         return;
     }
     DslmCallbackProxy::ResponseInfo resInfo = {result, info->level, info->extraBuff, info->extraLen};
@@ -69,7 +69,7 @@ int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIden
     uint32_t expected = sizeof(DeviceIdentify) + sizeof(RequestOption) + sizeof(uint32_t);
     uint32_t actual = data.GetReadableBytes();
     if (expected >= actual) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel unexpected input, length error");
+        SECURITY_LOG_ERROR("unexpected input, length error");
         return ERR_INVALID_PARA;
     }
 
@@ -77,11 +77,11 @@ int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIden
 
     const uint8_t *dataRead = data.ReadBuffer(DEVICE_ID_MAX_LEN);
     if (dataRead == nullptr) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel unexpected input, buffer error");
+        SECURITY_LOG_ERROR("unexpected input, buffer error");
         return ERR_INVALID_PARA;
     }
     if (memcpy_s(identify.identity, DEVICE_ID_MAX_LEN, dataRead, DEVICE_ID_MAX_LEN) != EOK) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel unexpected input, buffer copy error");
+        SECURITY_LOG_ERROR("unexpected input, buffer copy error");
         return ERR_INVALID_PARA;
     }
 
@@ -95,12 +95,12 @@ int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIden
 
     object = data.ReadRemoteObject();
     if (object == nullptr) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel unexpected input, callback ipc error");
+        SECURITY_LOG_ERROR("unexpected input, callback ipc error");
         return ERR_INVALID_PARA;
     }
     cookie = data.ReadUint32();
     if (cookie == 0) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel unexpected input, cookie error");
+        SECURITY_LOG_ERROR("unexpected input, cookie error");
         return ERR_INVALID_PARA;
     }
 
@@ -125,7 +125,7 @@ int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, M
 
     int32_t ret = DslmGetRequestFromParcel(data, identity, option, callback, cookie);
     if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("ProcessGetDeviceSecurityLevel DslmGetRequestFromParcel failed, ret = %{public}d", ret);
+        SECURITY_LOG_ERROR("DslmGetRequestFromParcel failed, ret = %{public}d", ret);
         return ret;
     }
 
@@ -135,14 +135,14 @@ int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, M
     ret = OnRequestDeviceSecLevelInfo(&identity, &option, owner, cookie, ProcessCallback);
     if (ret != SUCCESS) {
         Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
-        SECURITY_LOG_ERROR("ProcessGetDeviceSecurityLevel OnRequestDeviceSecLevelInfo failed, ret = %{public}d", ret);
+        SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo failed, ret = %{public}d", ret);
         return ret;
     }
 
     ret = DslmSetResponseToParcel(reply, cookie);
     if (ret != SUCCESS) {
         Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
-        SECURITY_LOG_ERROR("ProcessGetDeviceSecurityLevel DslmSetResponseToParcel failed, ret = %{public}d", ret);
+        SECURITY_LOG_ERROR("DslmSetResponseToParcel failed, ret = %{public}d", ret);
         return ret;
     }
     return SUCCESS;
@@ -162,7 +162,7 @@ bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const s
     uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
     map_[key] = object;
     if (map_.size() > WARNING_GATE) {
-        SECURITY_LOG_WARN("DslmIpcProcess remote objects max warning");
+        SECURITY_LOG_WARN("remote objects max warning");
     }
     return true;
 }
