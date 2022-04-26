@@ -24,6 +24,9 @@
             "device_security_level_feature_cred_file_sl4",
             "device_security_level_feature_cred_file_sl5"
         ],
+        "hisysevent_config": [
+            "//base/security/device_security_level/hisysevent.yaml"
+        ],
         "adapted_system_type": [
             "standard"
         ],

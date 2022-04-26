@@ -14,18 +14,49 @@
  */
 
 #include "dslm_bigdata.h"
+#include "hisysevent.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
-    (void)event;
+    if (event == nullptr) {
+        return;
+    }
+
+    OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
+        "start_app",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "USER_ID", event->uid,
+        "COST_TIME", event->costTime,
+        "RET_CODE", event->retCode,
+        "SEC_LEVEL", event->secLevel,
+        "RET_MODE", event->retMode,
+        "LOCAL_MODEL", event->localModel,
+        "TARGET_MODEL", event->targetModel,
+        "PKG_NAME", event->pkgName);
 }
 
 void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
 {
-    (void)event;
+    if (event == nullptr) {
+        return;
+    }
+
+    OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
+        "start_app",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "LOCAL_MODEL", event->localModel,
+        "TARGET_MODEL", event->targetModel,
+        "LOCAL_VERSION", event->localVersion,
+        "TARGET_VERSION", event->targetVersion,
+        "CRED_TYPE", event->credType,
+        "RET_CODE", event->retCode,
+        "COST_TIME", event->costTime,
+        "SEC_LEVEL", event->secLevel);
 }
 
 #ifdef __cplusplus
