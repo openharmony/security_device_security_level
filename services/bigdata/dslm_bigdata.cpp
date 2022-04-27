@@ -14,18 +14,64 @@
  */
 
 #include "dslm_bigdata.h"
+#include "hisysevent.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+constexpr char STR_EVENT_CALL_INTERFACE[] = "CALL_INTERFACE";
+constexpr char STR_EVENT_QUERY_INFO[] = "QUERY_INFO";
+constexpr char STR_USER_ID[] = "USER_ID";
+constexpr char STR_COST_TIME[] = "COST_TIME";
+constexpr char STR_RET_CODE[] = "RET_CODE";
+constexpr char STR_SEC_LEVEL[] = "SEC_LEVEL";
+constexpr char STR_RET_MODE[] = "RET_MODE";
+constexpr char STR_LOCAL_MODEL[] = "LOCAL_MODEL";
+constexpr char STR_TARGET_MODEL[] = "TARGET_MODEL";
+constexpr char STR_PKG_NAME[] = "PKG_NAME";
+constexpr char STR_LOCAL_VERSION[] = "LOCAL_VERSION";
+constexpr char STR_TARGET_VERSION[] = "LOCAL_VERSION";
+constexpr char STR_CRED_TYPE[] = "CRED_TYPE";
+
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
-    (void)event;
+    if (event == nullptr) {
+        return;
+    }
+
+    OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
+        STR_EVENT_CALL_INTERFACE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        STR_USER_ID, event->uid,
+        STR_COST_TIME, event->costTime,
+        STR_RET_CODE, event->retCode,
+        STR_SEC_LEVEL, event->secLevel,
+        STR_RET_MODE, event->retMode,
+        STR_LOCAL_MODEL, event->localModel,
+        STR_TARGET_MODEL, event->targetModel,
+        STR_PKG_NAME, event->pkgName);
 }
 
 void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
 {
-    (void)event;
+    if (event == nullptr) {
+        return;
+    }
+
+    OHOS::HiviewDFX::HiSysEvent::Write(
+        OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
+        STR_EVENT_QUERY_INFO,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        STR_LOCAL_MODEL, event->localModel,
+        STR_TARGET_MODEL, event->targetModel,
+        STR_LOCAL_VERSION, event->localVersion,
+        STR_TARGET_VERSION, event->targetVersion,
+        STR_CRED_TYPE, event->credType,
+        STR_RET_CODE, event->retCode,
+        STR_COST_TIME, event->costTime,
+        STR_SEC_LEVEL, event->secLevel);
 }
 
 #ifdef __cplusplus
