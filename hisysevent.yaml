@@ -13,8 +13,8 @@
 
 domain: SECURITY
 
-APP_INVOKE:
-  __BASE: {type: FAULT, level: MINOR, desc: graphic no draw}
+CALL_INTERFACE:
+  __BASE: {type: STATISTIC, level: MINOR, desc: the external module call DSLM interface}
   USER_ID: {type: INT32, desc: uid}
   COST_TIME: {type: INT32, desc: cost time}
   RET_CODE: {type: INT32, desc: ret code}
@@ -24,8 +24,8 @@ APP_INVOKE:
   TARGET_MODEL: {type: STRING, desc: target model}
   PKG_NAME: {type: STRING, desc: package name}
 
-INFO_SYNC:
-  __BASE: {type: FAULT, level: MINOR, desc: graphic no draw}
+QUERY_INFO:
+  __BASE: {type: STATISTIC, level: MINOR, desc: query other device info}
   LOCAL_MODEL: {type: STRING, desc: local model}
   TARGET_MODEL: {type: STRING, desc: target model}
   LOCAL_VERSION: {type: UINT64, desc: local version}

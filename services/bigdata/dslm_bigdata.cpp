@@ -19,6 +19,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+constexpr char STR_EVENT_CALL_INTERFACE[] = "CALL_INTERFACE";
+constexpr char STR_EVENT_QUERY_INFO[] = "QUERY_INFO";
+constexpr char STR_USER_ID[] = "USER_ID";
+constexpr char STR_COST_TIME[] = "COST_TIME";
+constexpr char STR_RET_CODE[] = "RET_CODE";
+constexpr char STR_SEC_LEVEL[] = "SEC_LEVEL";
+constexpr char STR_RET_MODE[] = "RET_MODE";
+constexpr char STR_LOCAL_MODEL[] = "LOCAL_MODEL";
+constexpr char STR_TARGET_MODEL[] = "TARGET_MODEL";
+constexpr char STR_PKG_NAME[] = "PKG_NAME";
+constexpr char STR_LOCAL_VERSION[] = "LOCAL_VERSION";
+constexpr char STR_TARGET_VERSION[] = "LOCAL_VERSION";
+constexpr char STR_CRED_TYPE[] = "CRED_TYPE";
+
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
     if (event == nullptr) {
@@ -27,16 +42,16 @@ void ReportAppInvokeEvent(const AppInvokeEvent *event)
 
     OHOS::HiviewDFX::HiSysEvent::Write(
         OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
-        "start_app",
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "USER_ID", event->uid,
-        "COST_TIME", event->costTime,
-        "RET_CODE", event->retCode,
-        "SEC_LEVEL", event->secLevel,
-        "RET_MODE", event->retMode,
-        "LOCAL_MODEL", event->localModel,
-        "TARGET_MODEL", event->targetModel,
-        "PKG_NAME", event->pkgName);
+        STR_EVENT_CALL_INTERFACE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        STR_USER_ID, event->uid,
+        STR_COST_TIME, event->costTime,
+        STR_RET_CODE, event->retCode,
+        STR_SEC_LEVEL, event->secLevel,
+        STR_RET_MODE, event->retMode,
+        STR_LOCAL_MODEL, event->localModel,
+        STR_TARGET_MODEL, event->targetModel,
+        STR_PKG_NAME, event->pkgName);
 }
 
 void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
@@ -47,16 +62,16 @@ void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
 
     OHOS::HiviewDFX::HiSysEvent::Write(
         OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY,
-        "start_app",
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "LOCAL_MODEL", event->localModel,
-        "TARGET_MODEL", event->targetModel,
-        "LOCAL_VERSION", event->localVersion,
-        "TARGET_VERSION", event->targetVersion,
-        "CRED_TYPE", event->credType,
-        "RET_CODE", event->retCode,
-        "COST_TIME", event->costTime,
-        "SEC_LEVEL", event->secLevel);
+        STR_EVENT_QUERY_INFO,
+        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        STR_LOCAL_MODEL, event->localModel,
+        STR_TARGET_MODEL, event->targetModel,
+        STR_LOCAL_VERSION, event->localVersion,
+        STR_TARGET_VERSION, event->targetVersion,
+        STR_CRED_TYPE, event->credType,
+        STR_RET_CODE, event->retCode,
+        STR_COST_TIME, event->costTime,
+        STR_SEC_LEVEL, event->secLevel);
 }
 
 #ifdef __cplusplus
