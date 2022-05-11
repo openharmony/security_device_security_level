@@ -27,9 +27,8 @@ namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS;
-class DeviceSecurityLevelProxy : public IRemoteProxy<IDeviceSecurityLevel> {
+class DeviceSecurityLevelProxy : public IRemoteProxy<IDeviceSecurityLevel>, public NoCopyable {
 public:
-    DISALLOW_COPY_AND_MOVE(DeviceSecurityLevelProxy);
     explicit DeviceSecurityLevelProxy(const sptr<IRemoteObject> &impl);
     virtual ~DeviceSecurityLevelProxy() = default;
     int32_t RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
