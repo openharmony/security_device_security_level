@@ -25,9 +25,8 @@ namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS;
-class DslmCallbackProxy : public IRemoteProxy<IDeviceSecurityLevelCallback> {
+class DslmCallbackProxy : public IRemoteProxy<IDeviceSecurityLevelCallback>, public NoCopyable {
 public:
-    DISALLOW_COPY_AND_MOVE(DslmCallbackProxy);
     explicit DslmCallbackProxy(const sptr<IRemoteObject> &impl);
     virtual ~DslmCallbackProxy() = default;
 

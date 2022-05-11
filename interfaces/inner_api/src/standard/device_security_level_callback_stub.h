@@ -30,12 +30,11 @@ namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS;
-class DeviceSecurityLevelCallbackStub : public IRemoteStub<IDeviceSecurityLevelCallback> {
+class DeviceSecurityLevelCallbackStub : public IRemoteStub<IDeviceSecurityLevelCallback>, public NoCopyable {
     using RemoteRequest =
         std::function<int32_t(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)>;
 
 public:
-    DISALLOW_COPY_AND_MOVE(DeviceSecurityLevelCallbackStub);
     explicit DeviceSecurityLevelCallbackStub(RemoteRequest request);
     virtual ~DeviceSecurityLevelCallbackStub() = default;
 

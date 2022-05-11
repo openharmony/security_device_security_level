@@ -25,11 +25,10 @@
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-class DslmService : public SystemAbility, public IRemoteStub<IDeviceSecurityLevel> {
+class DslmService : public SystemAbility, public IRemoteStub<IDeviceSecurityLevel>, public NoCopyable {
     DECLARE_SYSTEM_ABILITY(DslmService);
 
 public:
-    DISALLOW_COPY_AND_MOVE(DslmService);
     explicit DslmService(int32_t saId, bool runOnCreate);
     virtual ~DslmService() = default;
     void OnStart() override;
