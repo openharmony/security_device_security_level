@@ -31,7 +31,7 @@ constexpr char STR_LOCAL_MODEL[] = "LOCAL_MODEL";
 constexpr char STR_TARGET_MODEL[] = "TARGET_MODEL";
 constexpr char STR_PKG_NAME[] = "PKG_NAME";
 constexpr char STR_LOCAL_VERSION[] = "LOCAL_VERSION";
-constexpr char STR_TARGET_VERSION[] = "LOCAL_VERSION";
+constexpr char STR_TARGET_VERSION[] = "TARGET_VERSION";
 constexpr char STR_CRED_TYPE[] = "CRED_TYPE";
 
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
