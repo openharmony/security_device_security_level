@@ -220,7 +220,6 @@ class CredInitialization:
 
     def __init__(self, store_dir: str):
         self.ssl = OpenSslWrapper(store_dir)
-    pass
 
     def process(self):
         ssl = self.ssl
@@ -250,15 +249,14 @@ class CredCreation:
         self.ssl = OpenSslWrapper(store_dir)
         self.payload = payload
         self.file = file
-    pass
 
     def _gene_head(self):
         head = {"typ": "DSL"}
         return base64.b64encode(json.dumps(head, ensure_ascii=True).encode('utf8')).decode('utf8')
 
     def _gene_attestation(self, root_pk: str, root_sign: str,
-                           oem_pk: str, oem_sign: str,
-                           device_pk: str, device_sign: str):
+                          oem_pk: str, oem_sign: str,
+                          device_pk: str, device_sign: str):
         data = [
             {
                 ATTESTATION_KEY_USERPUBLICKEY: device_pk,
@@ -304,8 +302,8 @@ class CredCreation:
             device_pub_str = base64.b64encode(device_pub_bytes).decode('utf8')
 
             attestation = self._gene_attestation(root_pub_str, root_pub_self_sign_str,
-                                                  oem_pub_str, oem_pub_signed_str,
-                                                  device_pub_str, device_pub_signed_str)
+                                                 oem_pub_str, oem_pub_signed_str,
+                                                 device_pub_str, device_pub_signed_str)
 
             head = self._gene_head()
             payload = self._gene_payload()
@@ -332,7 +330,6 @@ class CredVerification:
     def __init__(self, store_dir: str, file: str):
         self.ssl = OpenSslWrapper(store_dir)
         self.file = file
-        pass
 
     def process(self):
         try:
@@ -366,8 +363,8 @@ class CredVerification:
 
     def _check_attestation(self, attestation, payload, payload_sign):
         ATTES_PARA_LEN = 3
-        atts_str = self._base64decode(attestation).decode('utf8')
-        attes_obj = json.loads(atts_str)
+        attes_str = self._base64decode(attestation).decode('utf8')
+        attes_obj = json.loads(attes_str)
         if (len(attes_obj) != ATTES_PARA_LEN):
             raise CredVerificationException('attes para error')
         ssl = self.ssl
@@ -473,7 +470,7 @@ class CredCommand:
         cmd_args_def = {
             'action': {
                 'name': 'create',
-                'help': 'creatation tool for device security level credential',
+                'help': 'creation tool for device security level credential',
                 'process': create_cred,
             },
             'arguments': {
