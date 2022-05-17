@@ -28,7 +28,7 @@ The above figure shows the typical security architecture for a single device. Th
 
 The security level of each device in a Super Device provides the decision-making criteria for processing or hopping various user data.
 
-For details about the relationship between data risk levels and device security levels, see [Data Transmit Management](https://gitee.com/openharmony/security_dataclassification).
+For details about the relationship between data risk levels and device security levels, see [Data Transfer Management](https://gitee.com/openharmony/security_dataclassification).
 
 ## Directory Structure
 
@@ -166,7 +166,7 @@ void CheckDestDeviceSecurityLevelAsync(const DeviceIdentify *device, RequestOpti
 
 ## Repositories Involved
 
-[Data Transmit Management](https://gitee.com/openharmony/security_dataclassification)
+[Data Transfer Management](https://gitee.com/openharmony/security_dataclassification)
 
 [**Device Security Level Management**](https://gitee.com/openharmony/security_device_security_level)
 
