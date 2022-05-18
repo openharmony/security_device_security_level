@@ -48,13 +48,13 @@ base/security/device_security_level
 ## Constraints
 
 - Only C and C++ are supported.
-- The default security level of OpenHarmony devices is SL1. Device vendors can [customize](https://gitee.com/openharmony/docs/blob/master/en/device-dev/subsystems/subsys-security-devicesecuritylevel.md) a higher security level as required.
+- The default security level of OpenHarmony devices is SL1. Device vendors can [customize](https://gitee.com/openharmony/docs/blob/master/en/device-dev/subsystems/subsys-security-devicesecuritylevel.md#customizing-device-security-levels) a higher security level as required.
 
 ## Description
 
 ### Available APIs
 
-When different types of user data are hopped or processed in OpenHarmony distributed services, the DSLM APIs can be called to obtain the security levels of related devices for subsequent processing.
+When different types of user data are hopped or processed in OpenHarmony distributed devices, the DSLM APIs can be called to obtain the security levels of related devices for subsequent processing.
 
 | API                                                                                                                                      | Description                    |
 | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
@@ -99,10 +99,10 @@ void CheckDestDeviceSecurityLevel(const DeviceIdentify *device, RequestOption *o
         return;
     }
     int32_t level = 0;
-    // Obtain the device security level from the device security level information.
+    // Obtain the device security level from the security level information.
     ret = GetDeviceSecurityLevelValue(info, &level);
     if (ret != SUCCESS) {
-        // Failed to obtain the security level. You can develop a retry process as required.
+        // Failed to obtain the device security level. You can develop a retry process as required.
         FreeDeviceSecurityInfo(info);
         return;
     }
@@ -112,7 +112,7 @@ void CheckDestDeviceSecurityLevel(const DeviceIdentify *device, RequestOption *o
     if (level >= 3) {
         // The security level of the target device meets the requirements. Services are processed properly. 
     } else {
-        // The security level of the target device does not meet the requirements. An alert or dialog box is displayed as required.
+        // The security level of the target device does not meet the requirements. A toast or dialog box is displayed as required.
     }
 
     // Release the memory before the processing is complete.
@@ -127,7 +127,7 @@ The following is an example of asynchronously obtaining the device security leve
 void DeviceSecurityInfoCallback(const DeviceIdentify *identify, struct DeviceSecurityInfo *info)
 {
     int32_t level = 0;
-    // Obtain the device security level from the device security level information.
+    // Obtain the device security level from the security level information.
     int32_t ret = GetDeviceSecurityLevelValue(info, &level);
     if (ret != SUCCESS) {
         // Failed to obtain the information. You can develop a retry process as required.
@@ -140,7 +140,7 @@ void DeviceSecurityInfoCallback(const DeviceIdentify *identify, struct DeviceSec
     if (level >= 3) {
         // The security level of the target device meets the requirements. Services are processed properly. 
     } else {
-        // The security level of the target device does not meet the requirements. An alert or dialog box is displayed as required.
+        // The security level of the target device does not meet the requirements. A toast or dialog box is displayed as required.
     }
 
     // Release the memory before the processing is complete.
@@ -152,7 +152,7 @@ void CheckDestDeviceSecurityLevelAsync(const DeviceIdentify *device, RequestOpti
     // Invoke the asynchronous callback to return the device security level obtained.
     int ret = RequestDeviceSecurityInfoAsync(device, option, DeviceSecurityInfoCallback);
     if (ret != SUCCESS) {
-        // Failed to obtain the security level. You can develop a retry process as required.
+        // Failed to obtain the device security level. You can develop a retry process as required.
         // In this case, the callback will not be invoked.
         return;
     }
@@ -168,7 +168,7 @@ void CheckDestDeviceSecurityLevelAsync(const DeviceIdentify *device, RequestOpti
 
 [Data Transfer Management](https://gitee.com/openharmony/security_dataclassification)
 
-[**Device Security Level Management**](https://gitee.com/openharmony/security_device_security_level/)
+[**Device Security Level Management**](https://gitee.com/openharmony/security_device_security_level)
 
 [HUKS](https://gitee.com/openharmony/security_huks)
 
