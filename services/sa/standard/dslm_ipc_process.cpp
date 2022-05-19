@@ -47,7 +47,7 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
     }
 
     auto proxy = iface_cast<DslmCallbackProxy>(object);
-    if (object == nullptr) {
+    if (proxy == nullptr) {
         SECURITY_LOG_ERROR("iface_cast failed");
         return;
     }
