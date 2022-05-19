@@ -58,7 +58,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         return ERR_IPC_REMOTE_OBJ_ERR;
     }
     auto proxy = iface_cast<DeviceSecurityLevelProxy>(object);
-    if (object == nullptr) {
+    if (proxy == nullptr) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo iface_cast error.");
         return ERR_IPC_REMOTE_OBJ_ERR;
     }
