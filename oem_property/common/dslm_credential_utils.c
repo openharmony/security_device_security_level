@@ -67,7 +67,7 @@ typedef struct CredentialCb {
     const char *header;
     const char *payload;
     const char *signature;
-    const char *attestionInfo;
+    const char *attestationInfo;
     PayloadAttestation load;
     PublicKeyAttestation root;
     PublicKeyAttestation intermediate;
@@ -262,8 +262,8 @@ static bool SplitCredentialString(CredentialCb *credCb)
     if (context == NULL || credCb->signature == NULL) {
         return false;
     }
-    credCb->attestionInfo = strtok_s(NULL, ".", &context);
-    if (context == NULL || credCb->attestionInfo == NULL) {
+    credCb->attestationInfo = strtok_s(NULL, ".", &context);
+    if (context == NULL || credCb->attestationInfo == NULL) {
         return false;
     }
     return true;
@@ -401,7 +401,7 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
             SECURITY_LOG_ERROR("ParsePayloadAttestation failed");
             break;
         }
-        Base64DecodeApp((uint8_t *)credCb->attestionInfo, &buffer);
+        Base64DecodeApp((uint8_t *)credCb->attestationInfo, &buffer);
         if (buffer == NULL) {
             SECURITY_LOG_ERROR("Base64DecodeApp failed");
             break;
