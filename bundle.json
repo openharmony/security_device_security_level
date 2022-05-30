@@ -65,7 +65,8 @@
                 }
             ],
             "test": [
-                "//base/security/device_security_level/test:dslm_test"
+                "//base/security/device_security_level/test:dslm_test",
+                "//base/security/device_security_level/test:dslm_fuzz_test"
             ]
         }
     }
