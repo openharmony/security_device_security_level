@@ -23,6 +23,8 @@
 #include <thread>
 
 #include "securec.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 
 #include "device_security_defines.h"
 #include "device_security_info.h"
@@ -58,6 +60,26 @@ void DslmTest::SetUpTestCase()
         timeVal.tv_sec = YEAR_TIME_2022_VALID;
         settimeofday(&timeVal, nullptr);
     }
+
+    static const char *ACLS[] = {"GET_SENSITIVE_PERMISSIONS"}; // system_core
+    static const char *PERMS[] = {
+        "ohos.permission.PLACE_CALL",               // system_basic
+        "ohos.permission.GET_SENSITIVE_PERMISSIONS" // system_core
+    };
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .dcaps = nullptr,
+        .perms = PERMS,
+        .aplStr = "system_basic",
+    };
+
+    infoInstance.acls = ACLS;
+    infoInstance.aclsNum = 1;
+    infoInstance.processName = "test_attest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
 }
 void DslmTest::TearDownTestCase()
 {
