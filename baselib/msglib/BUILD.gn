@@ -35,7 +35,7 @@ ohos_static_library("messenger_static") {
       "src/standard/messenger_impl.c",
     ]
     external_deps = [
-      "dsoftbus_standard:softbus_client",
+      "dsoftbus:softbus_client",
       "hilog_native:libhilog",
       "utils_base:utils",
     ]
