@@ -16,6 +16,7 @@
 #include "dslm_fsm_process.h"
 
 #include <stdbool.h>
+#include <securec.h>
 
 #include "utils_datetime.h"
 #include "utils_hexstring.h"
@@ -174,11 +175,12 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         SECURITY_LOG_ERROR("malloc failed, notifyNode is null");
         return false;
     }
+    (void)memset_s(notify, sizeof(DslmNotifyListNode), 0, sizeof(DslmNotifyListNode));
     notify->owner = inputNotify->owner;
     notify->cookie = inputNotify->cookie;
     notify->requestCallback = inputNotify->requestCallback;
     notify->start = inputNotify->start;
-    notify->keep = inputNotify->keep; // 1000 ms per second
+    notify->keep = inputNotify->keep;
     if (notify->cookie == 0 || notify->requestCallback == NULL) {
         SECURITY_LOG_ERROR("ProcessSdkRequest invalid cookie or callback.");
         FREE(notify);
