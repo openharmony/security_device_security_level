@@ -61,23 +61,22 @@ void DslmTest::SetUpTestCase()
         settimeofday(&timeVal, nullptr);
     }
 
-    static const char *ACLS[] = {"GET_SENSITIVE_PERMISSIONS"}; // system_core
+    static const char *ACLS[] = {"ACCESS_IDS"};
     static const char *PERMS[] = {
-        "ohos.permission.PLACE_CALL",               // system_basic
-        "ohos.permission.GET_SENSITIVE_PERMISSIONS" // system_core
+        "ohos.permission.PLACE_CALL",
+        "ohos.permission.ACCESS_IDS"
     };
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 2,
+        .aclsNum = 1,
         .dcaps = nullptr,
         .perms = PERMS,
-        .aplStr = "system_basic",
+        .acls = ACLS,
+        .processName = "test_attest",
+        .aplStr = "system_core",
     };
-
-    infoInstance.acls = ACLS;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_attest";
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
 }
