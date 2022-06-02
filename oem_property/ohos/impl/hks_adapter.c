@@ -110,6 +110,10 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
         return ERR_NO_MEMORY;
     }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
+        (*certChain)->certs[i].size = 0;
+        (*certChain)->certs[i].data = NULL;
+    }
+    for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = certChainParam->certDataSize;
         (*certChain)->certs[i].data = (uint8_t *)MALLOC((*certChain)->certs[i].size);
         if ((*certChain)->certs[i].data == NULL) {
