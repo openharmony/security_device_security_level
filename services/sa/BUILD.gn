@@ -43,13 +43,6 @@ ohos_static_library("service_sa_static") {
     "utils_base:utils",
   ]
 
-  if (is_large_system) {
-    external_deps += [
-      "hilog:libhilog",
-      "samgr:samgr_proxy",
-    ]
-  }
-
   if (is_standard_system) {
     external_deps += [
       "hilog_native:libhilog",

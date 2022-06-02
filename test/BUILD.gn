@@ -59,8 +59,4 @@ ohos_unittest("dslm_test") {
   if (is_standard_system) {
     external_deps += [ "hilog_native:libhilog" ]
   }
-
-  if (is_large_system) {
-    external_deps += [ "hilog:libhilog" ]
-  }
 }

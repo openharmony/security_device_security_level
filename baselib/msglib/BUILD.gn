@@ -41,10 +41,6 @@ ohos_static_library("messenger_static") {
     ]
   }
 
-  if (is_large_system) {
-    include_dirs += [ "src/large" ]
-  }
-
   deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
 
   public_configs = [ ":messenger_static_config" ]
