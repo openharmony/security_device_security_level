@@ -164,14 +164,25 @@ static bool ProcessSendCredRequest(const StateMachine *machine, uint32_t event, 
 static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *deviceInfo = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
-    DslmNotifyListNode *notify = (DslmNotifyListNode *)para;
-    if (notify == NULL) {
+    DslmNotifyListNode *inputNotify = (DslmNotifyListNode *)para;
+    if (inputNotify == NULL) {
         return false;
     }
 
+    DslmNotifyListNode *notify = MALLOC(sizeof(DslmNotifyListNode));
+    if (notify == NULL) {
+        SECURITY_LOG_ERROR("malloc failed, notifyNode is null");
+        return false;
+    }
+    notify->owner = inputNotify->owner;
+    notify->cookie = inputNotify->cookie;
+    notify->requestCallback = inputNotify->requestCallback;
+    notify->start = inputNotify->start;
+    notify->keep = inputNotify->keep; // 1000 ms per second
     if (notify->cookie == 0 || notify->requestCallback == NULL) {
         SECURITY_LOG_ERROR("ProcessSdkRequest invalid cookie or callback.");
         FREE(notify);
+        notify = NULL;
         return false;
     }
 

@@ -75,7 +75,7 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
         }
     }
     interface->destroyInfo(&resultBuffer);
-    return SUCCESS;
+    return ret;
 }
 
 int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certChain, uint32_t *certChainLen)
