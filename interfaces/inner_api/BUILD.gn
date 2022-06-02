@@ -46,13 +46,6 @@ ohos_shared_library("dslm_sdk") {
     ]
   }
 
-  if (is_large_system) {
-    external_deps += [
-      "hilog:libhilog",
-      "samgr:samgr_proxy",
-    ]
-  }
-
   part_name = "device_security_level"
   subsystem_name = "security"
 }
