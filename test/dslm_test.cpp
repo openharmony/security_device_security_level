@@ -74,7 +74,7 @@ void DslmTest::SetUpTestCase()
         .dcaps = nullptr,
         .perms = PERMS,
         .acls = ACLS,
-        .processName = "test_attest",
+        .processName = "dslm_service",
         .aplStr = "system_core",
     };
     tokenId = GetAccessTokenId(&infoInstance);
