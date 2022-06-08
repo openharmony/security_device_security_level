@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "securec.h"
 
@@ -23,6 +24,7 @@
 
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
+#include "dslm_credential.h"
 #include "dslm_hidumper.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
@@ -105,6 +107,30 @@ static int32_t GetPendingNotifyNodeCnt(const DslmDeviceInfo *info)
     return result;
 }
 
+static void GetDefaultStatus(int32_t *requestResult, int32_t *verifyResult, uint32_t *credLevel)
+{
+    if (requestResult == NULL || verifyResult == NULL || credLevel == NULL) {
+        return;
+    }
+    const DeviceIdentify identiy = {DEVICE_ID_MAX_LEN, {0}};
+    RequestObject object;
+
+    object.arraySize = 1;
+    object.credArray[0] = CRED_TYPE_STANDARD;
+    object.challenge = 0x0;
+    object.version = GetCurrentVersion();
+
+    DslmCredBuff *cred = NULL;
+    *requestResult = DefaultRequestDslmCred(&identiy, &object, &cred);
+
+    DslmCredInfo info;
+    (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+
+    *verifyResult = DefaultVerifyDslmCred(&identiy, object.challenge, cred, &info);
+    *credLevel = info.credLevel;
+    DestroyDslmCred(cred);
+}
+
 static void PrintBanner(int fd)
 {
     dprintf(fd, " ___  ___ _    __  __   ___  _   _ __  __ ___ ___ ___ " END_LINE);
@@ -121,7 +147,7 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
 
     dprintf(fd, SPLIT_LINE END_LINE);
     dprintf(fd, "DEVICE_ID                 : %x" END_LINE, info->machine.machineId);
-    dprintf(fd, "DEVICE_TYPE               : %d" END_LINE, info->deviceType);
+    dprintf(fd, "DEVICE_TYPE               : %u" END_LINE, info->deviceType);
     dprintf(fd, END_LINE);
 
     dprintf(fd, "DEVICE_ONLINE_STATUS      : %s" END_LINE, info->onlineStatus ? "online" : "offline");
@@ -133,7 +159,7 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
 
     dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));
     dprintf(fd, "DEVICE_MACHINE_STATUS     : %s" END_LINE, GetMachineState(info));
-    dprintf(fd, "DEVICE_VERIFIED_LEVEL     : %d" END_LINE, info->credInfo.credLevel);
+    dprintf(fd, "DEVICE_VERIFIED_LEVEL     : %u" END_LINE, info->credInfo.credLevel);
     dprintf(fd, "DEVICE_VERIFIED_RESULT    : %s" END_LINE, info->result == 0 ? "success" : "failed");
     dprintf(fd, END_LINE);
 
@@ -154,8 +180,29 @@ static void PrintAllDevices(int fd)
     ForEachDeviceDump(DumpOneDevice, fd);
 }
 
+static void PrintDefaultStatus(int fd)
+{
+    int32_t requestResult = 0;
+    int32_t verifyResult = 0;
+    uint32_t credLevel = 0;
+
+    GetDefaultStatus(&requestResult, &verifyResult, &credLevel);
+
+    const time_t YEAR_TIME_2022 = 1640966400;
+    struct timeval timeVal = {0};
+    gettimeofday(&timeVal, NULL);
+    char *notice = timeVal.tv_sec <= YEAR_TIME_2022 ? ", Please check the system time." : "";
+
+    dprintf(fd, SPLIT_LINE END_LINE);
+    dprintf(fd, "REQUEST_TEST              : %s" END_LINE, requestResult == SUCCESS ? "success" : "failed");
+    dprintf(fd, "VERIFY_TEST               : %s%s" END_LINE, verifyResult == SUCCESS ? "success" : "failed", notice);
+    dprintf(fd, "SELF_CRED_LEVEL           : %u" END_LINE, credLevel);
+    dprintf(fd, SPLIT_LINE END_LINE);
+}
+
 void DslmDumper(int fd)
 {
     PrintBanner(fd);
+    PrintDefaultStatus(fd);
     PrintAllDevices(fd);
 }
