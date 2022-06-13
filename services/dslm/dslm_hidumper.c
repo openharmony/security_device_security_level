@@ -31,6 +31,7 @@
 #define END_LINE "\n"
 
 #define TIME_STRING_LEN 256
+#define NOTIFY_NODE_MAX_CNT 1024
 
 static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
 {
@@ -46,7 +47,8 @@ static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
             SECURITY_LOG_ERROR("GetTimeStringFromTimeStamp GetDateTimeByMillisecondSinceBoot error");
             break;
         }
-        int ret = snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+        int ret = snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1,
+            "%04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu",
             dateTime.year, dateTime.mon, dateTime.day, dateTime.hour, dateTime.min, dateTime.sec, dateTime.msec);
         if (ret < 0) {
             break;
@@ -102,6 +104,9 @@ static int32_t GetPendingNotifyNodeCnt(const DslmDeviceInfo *info)
     ListNode *node = NULL;
     FOREACH_LIST_NODE (node, &info->notifyList) {
         result++;
+        if (result >= NOTIFY_NODE_MAX_CNT) {
+            break;
+        }
     }
     UnLockDslmStateMachine((DslmDeviceInfo *)info);
     return result;
