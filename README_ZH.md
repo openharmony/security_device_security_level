@@ -182,6 +182,6 @@ base/security/device_security_level
 
 [应用权限管理](https://gitee.com/openharmony/security_permission)
 
-[设备认证](https://gitee.com/openharmony/security_deviceauth)
+[设备认证](https://gitee.com/openharmony/security_device_auth)
 
 [SELinux](https://gitee.com/openharmony/security_selinux)
