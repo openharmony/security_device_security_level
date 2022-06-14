@@ -174,6 +174,6 @@ void CheckDestDeviceSecurityLevelAsync(const DeviceIdentify *device, RequestOpti
 
 [Application Permission Management](https://gitee.com/openharmony/security_permission)
 
-[Device Authentication](https://gitee.com/openharmony/security_deviceauth)
+[Device Authentication](https://gitee.com/openharmony/security_device_auth)
 
 [SELinux](https://gitee.com/openharmony/security_selinux)
