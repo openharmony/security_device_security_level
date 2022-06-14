@@ -81,7 +81,7 @@ void OnRemoteRequestFuzzer(Parcel &parcel)
     SECURITY_LOG_INFO("end");
 }
 
-void DlsmFuzzTest(const uint8_t *data, size_t size)
+void DslmFuzzTest(const uint8_t *data, size_t size)
 {
     Parcel parcel;
     parcel.WriteBuffer(data, size);
@@ -100,6 +100,6 @@ void DlsmFuzzTest(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::Security::DeviceSecurityLevel::DlsmFuzzTest(data, size);
+    OHOS::Security::DeviceSecurityLevel::DslmFuzzTest(data, size);
     return 0;
 }
