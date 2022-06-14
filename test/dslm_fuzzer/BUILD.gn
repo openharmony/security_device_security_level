@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-ohos_fuzztest("dslm_fuzz_test") {
+ohos_fuzztest("DslmFuzzTest") {
   module_out_path = "security/device_security_level"
   fuzz_config_file = "//base/security/device_security_level/test/dslm_fuzzer"
 
@@ -32,7 +32,7 @@ ohos_fuzztest("dslm_fuzz_test") {
     "//base/security/device_security_level/services/sa/standard",
   ]
 
-  sources = [ "dlsm_fuzzer.cpp" ]
+  sources = [ "dslm_fuzzer.cpp" ]
 
   deps =
       [ "//base/security/device_security_level/oem_property/ohos:dslm_service" ]
