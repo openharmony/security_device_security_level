@@ -501,7 +501,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
     (void)GetDataFromJson(json, CRED_KEY_SECURITY_LEVEL, credInfo->securityLevel, CRED_INFO_LEVEL_LEN);
 
     if (verified) {
-        if (sscanf_s(credInfo->securityLevel, "SL%d", &credInfo->credLevel) <= 0) {
+        if (sscanf_s(credInfo->securityLevel, "SL%u", &credInfo->credLevel) <= 0) {
             SECURITY_LOG_ERROR("formatting securityLevel string failed");
         }
     }
