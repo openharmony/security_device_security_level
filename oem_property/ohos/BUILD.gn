@@ -51,17 +51,17 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "//base/security/device_security_level/interfaces/inner_api/include",
     "//base/security/device_security_level/services/include",
     "//base/security/device_security_level/oem_property/common",
-    "//base/security/deviceauth/interfaces/innerkits",
+    "//base/security/device_auth/interfaces/innerkits",
   ]
 
   deps = [
+    "//base/security/device_auth/services:deviceauth_sdk",
     "//base/security/device_security_level/baselib/utils:utils_static",
     "//base/security/device_security_level/oem_property/common:oem_common_obj",
-    "//base/security/deviceauth/services:deviceauth_sdk",
   ]
 
   external_deps = [
-    "deviceauth_standard:deviceauth_sdk",
+    "device_auth:deviceauth_sdk",
     "hilog_native:libhilog",
     "huks:libhukssdk",
     "utils_base:utils",
