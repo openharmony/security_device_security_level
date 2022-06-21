@@ -117,7 +117,7 @@ static void GetDefaultStatus(int32_t *requestResult, int32_t *verifyResult, uint
     if (requestResult == NULL || verifyResult == NULL || credLevel == NULL) {
         return;
     }
-    const DeviceIdentify identiy = {DEVICE_ID_MAX_LEN, {0}};
+    const DeviceIdentify identify = {DEVICE_ID_MAX_LEN, {0}};
     RequestObject object;
 
     object.arraySize = 1;
@@ -126,12 +126,12 @@ static void GetDefaultStatus(int32_t *requestResult, int32_t *verifyResult, uint
     object.version = GetCurrentVersion();
 
     DslmCredBuff *cred = NULL;
-    *requestResult = DefaultRequestDslmCred(&identiy, &object, &cred);
+    *requestResult = DefaultRequestDslmCred(&identify, &object, &cred);
 
     DslmCredInfo info;
     (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
-    *verifyResult = DefaultVerifyDslmCred(&identiy, object.challenge, cred, &info);
+    *verifyResult = DefaultVerifyDslmCred(&identify, object.challenge, cred, &info);
     *credLevel = info.credLevel;
     DestroyDslmCred(cred);
 }
@@ -159,7 +159,7 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_ONLINE_TIME        : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOnlineTime));
     dprintf(fd, "DEVICE_OFFLINE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOfflineTime));
     dprintf(fd, "DEVICE_REQUEST_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastRequestTime));
-    dprintf(fd, "DEVICE_RESPONE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime));
+    dprintf(fd, "DEVICE_RESPONSE_TIME      : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime));
     dprintf(fd, END_LINE);
 
     dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));
@@ -170,7 +170,7 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
 
     dprintf(fd, "CRED_TYPE                 : %s" END_LINE, GetCreadType(info));
     dprintf(fd, "CRED_RELEASE_TYPE         : %s" END_LINE, info->credInfo.releaseType);
-    dprintf(fd, "CRED_SIGNTIME             : %s" END_LINE, info->credInfo.signTime);
+    dprintf(fd, "CRED_SIGN_TIME            : %s" END_LINE, info->credInfo.signTime);
     dprintf(fd, "CRED_MANUFACTURE          : %s" END_LINE, info->credInfo.manufacture);
     dprintf(fd, "CRED_BAND                 : %s" END_LINE, info->credInfo.brand);
     dprintf(fd, "CRED_MODEL                : %s" END_LINE, info->credInfo.model);
