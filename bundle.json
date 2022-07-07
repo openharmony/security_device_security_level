@@ -34,15 +34,18 @@
         "ram": "2500KB",
         "deps": {
             "components": [
-                "ipc_core",
-                "libhilog",
-                "samgr_proxy",
-                "softbus_client",
-                "utils"
+                "huks",
+                "dsoftbus",
+                "safwk",
+                "utils_base",
+                "ipc",
+                "samgr_standard",
+                "hisysevent_native",
+                "device_auth",
+                "hilog_native"
             ],
             "third_party": [
-                "cjson_static",
-                "libcrypto"
+                "cjson"
             ]
         },
         "build": {
