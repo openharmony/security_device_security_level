@@ -18,11 +18,11 @@
 #include <future>
 
 #include "hilog/log.h"
-#include "iservice_registry.h"
 
 #include "device_security_level_callback_helper.h"
 #include "device_security_level_callback_stub.h"
 #include "device_security_level_defines.h"
+#include "device_security_level_loader.h"
 #include "device_security_level_proxy.h"
 
 using namespace OHOS::HiviewDFX;
@@ -46,17 +46,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         HiLog::Error(LABEL, "GetDeviceSecurityInfo input error, timeout too len.");
         return ERR_INVALID_PARA;
     }
-
-    auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (registry == nullptr) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo get registry error.");
-        return ERR_IPC_REGISTER_ERR;
-    }
-    auto object = registry->GetSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
-    if (object == nullptr) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo get object error.");
-        return ERR_IPC_REMOTE_OBJ_ERR;
-    }
+    auto object = DeviceSecurityLevelLoader::GetInstance().LoadDslmService();
     auto proxy = iface_cast<DeviceSecurityLevelProxy>(object);
     if (proxy == nullptr) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo iface_cast error.");
