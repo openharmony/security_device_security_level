@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "dslm_fuzzer.h"
+
 #include "securec.h"
 #include "parcel.h"
 
