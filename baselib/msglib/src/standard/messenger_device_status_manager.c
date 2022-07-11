@@ -26,6 +26,7 @@
 static void MessengerOnNodeOnline(NodeBasicInfo *info);
 static void MessengerOnNodeOffline(NodeBasicInfo *info);
 static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *info);
+static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para);
 
 typedef struct DeviceStatusManager {
     const INodeStateCb nodeStateCb;
@@ -157,6 +158,12 @@ static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInf
     // just do nothing
 }
 
+static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para)
+{
+    ProcessDeviceStatusReceiver(devId, EVENT_NODE_STATE_ONLINE, devType);
+    return 0;
+}
+
 bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatusReceiver deviceStatusReceiver)
 {
     if (deviceStatusReceiver == NULL) {
@@ -181,6 +188,7 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
         return false;
     }
 
+    MessengerForEachDeviceProcess(InitDeviceOnlineProcessor, NULL);
     SECURITY_LOG_INFO("InitDeviceManager RegNodeDeviceStateCb success");
     return true;
 }
