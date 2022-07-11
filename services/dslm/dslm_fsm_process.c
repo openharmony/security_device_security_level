@@ -121,6 +121,10 @@ static bool CheckTimesAndSendCredRequest(DslmDeviceInfo *info, bool enforce)
 
 static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker checker)
 {
+#ifndef MAX_HISTORY_CNT
+#define MAX_HISTORY_CNT 30
+#endif
+
     if (info == NULL || checker == NULL) {
         return;
     }
@@ -138,6 +142,22 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
         SECURITY_LOG_DEBUG("ProcessSendDeviceInfoCallback result %{public}u for device %{public}x, level %{public}u.",
             result, info->machine.machineId, cbInfo.level);
         notifyNode->requestCallback(notifyNode->owner, notifyNode->cookie, result, &cbInfo);
+        notifyNode->stop = GetMillisecondSinceBoot();
+        notifyNode->result = result;
+        RemoveListNode(node);
+        AddListNodeBefore(node, &info->historyList);
+    }
+    int32_t historyCnt = 0;
+    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
+        historyCnt++;
+    }
+    int32_t delCnt = historyCnt > MAX_HISTORY_CNT ? (historyCnt - MAX_HISTORY_CNT) : 0;
+    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
+        if (delCnt <= 0) {
+            break;
+        }
+        delCnt--;
+        DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
         RemoveListNode(node);
         FREE(notifyNode);
     }
