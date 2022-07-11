@@ -30,7 +30,7 @@ class DslmService : public SystemAbility, public IRemoteStub<IDeviceSecurityLeve
 
 public:
     explicit DslmService(int32_t saId, bool runOnCreate);
-    virtual ~DslmService() = default;
+    ~DslmService() override = default;
     void OnStart() override;
     void OnStop() override;
     int32_t Dump(int fd, const std::vector<std::u16string> &args) override;
@@ -39,8 +39,8 @@ public:
 private:
     int32_t ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
 };
-} // DeviceSecurityLevel
-} // Security
-} // OHOS
+} // namespace DeviceSecurityLevel
+} // namespace Security
+} // namespace OHOS
 
 #endif // DSLM_SERVICE_H

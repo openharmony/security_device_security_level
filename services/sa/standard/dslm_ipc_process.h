@@ -27,14 +27,10 @@
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-class DslmIpcProcess {
-    DECLARE_SINGLETON(DslmIpcProcess);
-
+class DslmIpcProcess : public Singleton<DslmIpcProcess> {
 public:
     int32_t DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
-
-    class RemoteHolder {
-        DECLARE_SINGLETON(RemoteHolder);
+    class RemoteHolder : public Singleton<RemoteHolder> {
 
     public:
         bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object);
