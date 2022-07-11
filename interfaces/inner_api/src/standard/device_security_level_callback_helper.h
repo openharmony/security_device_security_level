@@ -43,12 +43,12 @@ private:
         struct CallbackInfo {
             DeviceIdentify identity;
             ResultCallback callback;
-            uint64_t cookie;
+            uint64_t cookie {0};
         };
 
     public:
         CallbackInfoHolder();
-        virtual ~CallbackInfoHolder();
+        ~CallbackInfoHolder() override;
         bool PushCallback(const DeviceIdentify &identity, const ResultCallback &callback, uint32_t keep,
             uint32_t &cookie);
         bool PopCallback(uint32_t cookie, uint32_t result, uint32_t level);
