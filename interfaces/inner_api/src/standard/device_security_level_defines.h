@@ -23,11 +23,11 @@
 #include "device_security_defines.h"
 #include "device_security_info.h"
 
-typedef struct DeviceSecurityInfo {
-    uint32_t magicNum;
-    uint32_t result;
-    uint32_t level;
-} DeviceSecurityInfo;
+struct DeviceSecurityInfo {
+    uint32_t magicNum {0};
+    uint32_t result {0};
+    uint32_t level {0};
+};
 
 namespace OHOS {
 namespace Security {

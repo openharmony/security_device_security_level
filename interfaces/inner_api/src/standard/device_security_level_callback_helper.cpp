@@ -41,15 +41,15 @@ DeviceSecurityLevelCallbackHelper::~DeviceSecurityLevelCallbackHelper()
     stub_ = nullptr;
 }
 
-bool DeviceSecurityLevelCallbackHelper::Publish(const DeviceIdentify &identity, ResultCallback callback, uint32_t keep,
-    sptr<DeviceSecurityLevelCallbackStub> &stub, uint32_t &cookie)
+bool DeviceSecurityLevelCallbackHelper::Publish(const DeviceIdentify &identity, const ResultCallback &callback,
+    uint32_t keep, sptr<DeviceSecurityLevelCallbackStub> &stub, uint32_t &cookie)
 {
     if (stub_ == nullptr) {
         return false;
     }
 
     auto result = holder_.PushCallback(identity, callback, keep, cookie);
-    if (result == false) {
+    if (!result) {
         HiLog::Error(LABEL, "DeviceSecurityLevelCallbackHelper::PushCallback failed");
         return false;
     }
@@ -58,14 +58,14 @@ bool DeviceSecurityLevelCallbackHelper::Publish(const DeviceIdentify &identity, 
     return true;
 }
 
-bool DeviceSecurityLevelCallbackHelper::withdraw(uint32_t cookie)
+bool DeviceSecurityLevelCallbackHelper::Withdraw(uint32_t cookie)
 {
     if (cookie == 0) {
         return false;
     }
 
     auto result = holder_.PopCallback(cookie);
-    if (result == false) {
+    if (!result) {
         HiLog::Error(LABEL, "DeviceSecurityLevelCallbackHelper::withdraw failed");
         return false;
     }
@@ -101,7 +101,7 @@ DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::~CallbackInfoHolder()
 }
 
 bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const DeviceIdentify &identity,
-    ResultCallback callback, uint32_t keep, uint32_t &cookie)
+    const ResultCallback &callback, uint32_t keep, uint32_t &cookie)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (map_.size() > MAX_CALLBACKS_NUM) {
@@ -115,7 +115,7 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const D
     if (result.second) {
         auto deleter = [cookie, this]() { PopCallback(cookie, ERR_TIMEOUT, 0); };
         keep += KEEP_COMPENSATION_LEN;
-        timer_.Register(deleter, keep * 1000, true); // 1000 millsec
+        timer_.Register(deleter, keep * 1000, true); // 1000 millisec
     }
     return result.second;
 }
@@ -137,7 +137,7 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t
     }
 
     if (callback != nullptr) {
-        DeviceSecurityInfo *info = new (std::nothrow) DeviceSecurityInfo;
+        DeviceSecurityInfo *info = new (std::nothrow) DeviceSecurityInfo();
         if (info != nullptr) {
             info->magicNum = SECURITY_MAGIC;
             info->result = result;

@@ -55,14 +55,6 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
     proxy->ResponseDeviceSecurityLevel(cookie, resInfo);
 }
 
-DslmIpcProcess::DslmIpcProcess()
-{
-}
-
-DslmIpcProcess::~DslmIpcProcess()
-{
-}
-
 int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
     sptr<IRemoteObject> &object, uint32_t &cookie)
 {
@@ -146,14 +138,6 @@ int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, M
         return ret;
     }
     return SUCCESS;
-}
-
-DslmIpcProcess::RemoteHolder::RemoteHolder()
-{
-}
-
-DslmIpcProcess::RemoteHolder::~RemoteHolder()
-{
 }
 
 bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object)
