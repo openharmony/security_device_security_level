@@ -22,6 +22,7 @@ ohos_shared_library("dslm_sdk") {
     "src/standard/device_security_info.cpp",
     "src/standard/device_security_level_callback_helper.cpp",
     "src/standard/device_security_level_callback_stub.cpp",
+    "src/standard/device_security_level_loader.cpp",
     "src/standard/device_security_level_proxy.cpp",
   ]
 
