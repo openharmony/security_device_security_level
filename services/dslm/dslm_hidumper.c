@@ -22,15 +22,16 @@
 #include "utils_datetime.h"
 #include "utils_log.h"
 
+#include "dslm_credential.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
-#include "dslm_credential.h"
 #include "dslm_hidumper.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
 #define END_LINE "\n"
 
 #define TIME_STRING_LEN 256
+#define COST_STRING_LEN 64
 #define NOTIFY_NODE_MAX_CNT 1024
 
 static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
@@ -47,9 +48,9 @@ static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
             SECURITY_LOG_ERROR("GetTimeStringFromTimeStamp GetDateTimeByMillisecondSinceBoot error");
             break;
         }
-        int ret = snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1,
-            "%04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu",
-            dateTime.year, dateTime.mon, dateTime.day, dateTime.hour, dateTime.min, dateTime.sec, dateTime.msec);
+        int ret =
+            snprintf_s(timeBuff, TIME_STRING_LEN, TIME_STRING_LEN - 1, "%04hu-%02hu-%02hu %02hu:%02hu:%02hu.%03hu",
+                dateTime.year, dateTime.mon, dateTime.day, dateTime.hour, dateTime.min, dateTime.sec, dateTime.msec);
         if (ret < 0) {
             break;
         }
@@ -62,6 +63,24 @@ static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
         }
     }
     return timeBuff;
+}
+
+static const char *GetRequestCostTime(const DslmDeviceInfo *info)
+{
+    static char costBuff[COST_STRING_LEN] = {0};
+
+    if (info->lastResponseTime == 0 || info->lastRequestTime == 0) {
+        return "";
+    }
+
+    if (info->lastResponseTime < info->lastRequestTime) {
+        return "";
+    }
+    uint32_t cost = (uint32_t)(info->lastResponseTime - info->lastRequestTime);
+    if (snprintf_s(costBuff, COST_STRING_LEN, COST_STRING_LEN - 1, "(cost %ums)", cost) < 0) {
+        return "";
+    };
+    return costBuff;
 }
 
 static const char *GetMachineState(const DslmDeviceInfo *info)
@@ -159,7 +178,9 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_ONLINE_TIME        : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOnlineTime));
     dprintf(fd, "DEVICE_OFFLINE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOfflineTime));
     dprintf(fd, "DEVICE_REQUEST_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastRequestTime));
-    dprintf(fd, "DEVICE_RESPONSE_TIME      : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime));
+    dprintf(fd, "DEVICE_RESPONSE_TIME      : %s%s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime),
+        GetRequestCostTime(info));
+
     dprintf(fd, END_LINE);
 
     dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));

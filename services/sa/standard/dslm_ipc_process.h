@@ -31,7 +31,6 @@ class DslmIpcProcess : public Singleton<DslmIpcProcess> {
 public:
     int32_t DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
     class RemoteHolder : public Singleton<RemoteHolder> {
-
     public:
         bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object);
         const sptr<IRemoteObject> Pop(uint32_t owner, uint32_t cookie);
