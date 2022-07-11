@@ -105,6 +105,7 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device)
         FREE(info);
         return NULL;
     }
+    info->result = UINT32_MAX;
     InitDslmStateMachine(info);
     LockMutex(GetDeviceListMutex());
     AddListNode(&info->linkNode, GetDeviceList());
