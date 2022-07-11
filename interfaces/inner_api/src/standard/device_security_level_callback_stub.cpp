@@ -21,13 +21,19 @@ namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS::HiviewDFX;
-DeviceSecurityLevelCallbackStub::DeviceSecurityLevelCallbackStub(RemoteRequest request) : remoteRequest_(request)
+DeviceSecurityLevelCallbackStub::DeviceSecurityLevelCallbackStub(RemoteRequest request)
+    : remoteRequest_(std::move(request))
 {
 }
 
 int32_t DeviceSecurityLevelCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
+    if (DeviceSecurityLevelCallbackStub::GetDescriptor() != data.ReadInterfaceToken()) {
+        HiLog::Error(LABEL, "descriptor not match");
+        return SUCCESS;
+    }
+
     if (remoteRequest_ != nullptr) {
         return remoteRequest_(code, data, reply, option);
     }
