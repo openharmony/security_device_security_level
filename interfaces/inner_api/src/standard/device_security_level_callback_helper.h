@@ -30,16 +30,16 @@ namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS;
 
-class DeviceSecurityLevelCallbackHelper {
-    DECLARE_DELAYED_REF_SINGLETON(DeviceSecurityLevelCallbackHelper);
-
+class DeviceSecurityLevelCallbackHelper : public DelayedRefSingleton<DeviceSecurityLevelCallbackHelper> {
 public:
-    bool Publish(const DeviceIdentify &identity, ResultCallback callback, uint32_t keep,
+    DeviceSecurityLevelCallbackHelper();
+    ~DeviceSecurityLevelCallbackHelper() override;
+    bool Publish(const DeviceIdentify &identity, const ResultCallback &callback, uint32_t keep,
         sptr<DeviceSecurityLevelCallbackStub> &stub, uint32_t &cookie);
-    bool withdraw(uint32_t cookie);
+    bool Withdraw(uint32_t cookie);
 
 private:
-    class CallbackInfoHolder {
+    class CallbackInfoHolder final : public NoCopyable {
         struct CallbackInfo {
             DeviceIdentify identity;
             ResultCallback callback;
@@ -49,7 +49,8 @@ private:
     public:
         CallbackInfoHolder();
         virtual ~CallbackInfoHolder();
-        bool PushCallback(const DeviceIdentify &identity, ResultCallback callback, uint32_t keep, uint32_t &cookie);
+        bool PushCallback(const DeviceIdentify &identity, const ResultCallback &callback, uint32_t keep,
+            uint32_t &cookie);
         bool PopCallback(uint32_t cookie, uint32_t result, uint32_t level);
         bool PopCallback(uint32_t cookie);
 

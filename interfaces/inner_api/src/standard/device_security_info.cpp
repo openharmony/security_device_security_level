@@ -29,16 +29,16 @@ using namespace OHOS::HiviewDFX;
 using namespace OHOS::Security::DeviceSecurityLevel;
 
 static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
-    ResultCallback callback)
+    const ResultCallback &callback)
 {
     if (identify == nullptr || callback == nullptr) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo input error.");
         return ERR_INVALID_PARA;
     }
 
-    constexpr uint32_t DEAFULT_KEEP_LEN = 45;
+    constexpr uint32_t DEFAULT_KEEP_LEN = 45;
     constexpr uint32_t MAX_KEEP_LEN = 300;
-    static RequestOption defaultOption = {0, DEAFULT_KEEP_LEN, 0};
+    static RequestOption defaultOption = {0, DEFAULT_KEEP_LEN, 0};
     if (option == nullptr) {
         option = &defaultOption;
     }
@@ -56,19 +56,20 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
     sptr<DeviceSecurityLevelCallbackStub> stub = nullptr;
     uint32_t cookie = 0;
 
-    auto result = helper.Publish(*identify, callback, option->timeout, stub, cookie);
-    if (result == false || stub == nullptr || cookie == 0) {
+    auto success = helper.Publish(*identify, callback, option->timeout, stub, cookie);
+    if (!success || stub == nullptr || cookie == 0) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo get stub error.");
-        return result;
+        return ERR_REG_CALLBACK;
     }
 
-    auto success = proxy->RequestDeviceSecurityLevel(*identify, *option, stub->AsObject(), cookie);
-    if (success != SUCCESS) {
+    auto result = proxy->RequestDeviceSecurityLevel(*identify, *option, stub->AsObject(), cookie);
+    if (result != SUCCESS) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo RequestDeviceSecurityLevel error.");
-        helper.withdraw(cookie);
+        helper.Withdraw(cookie);
+        return ERR_IPC_REGISTER_ERR;
     }
 
-    return success;
+    return SUCCESS;
 }
 
 static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
@@ -106,8 +107,8 @@ static int32_t GetDeviceSecurityLevelValueImpl(const DeviceSecurityInfo *info, i
         return ERR_INVALID_PARA;
     }
 
-    *level = info->level;
-    return info->result;
+    *level = static_cast<int32_t>(info->level);
+    return static_cast<int32_t>(info->result);
 }
 
 #ifdef __cplusplus

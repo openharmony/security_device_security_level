@@ -25,8 +25,10 @@ extern "C" {
 #endif
 
 using namespace OHOS;
-class UtilsTimer final : public OHOS::Utils::Timer {
-    DECLARE_DELAYED_REF_SINGLETON(UtilsTimer)
+class UtilsTimer final : public OHOS::Utils::Timer, public DelayedRefSingleton<UtilsTimer> {
+public:
+    UtilsTimer();
+    ~UtilsTimer() override;
 };
 
 UtilsTimer::~UtilsTimer()
@@ -42,7 +44,7 @@ UtilsTimer::UtilsTimer() : Timer("timer_process")
 void DoTimerProcess(TimerProc callback, const void *context)
 {
     if (callback != nullptr) {
-        callback(const_cast<void *>(context));
+        callback(context);
     }
 }
 

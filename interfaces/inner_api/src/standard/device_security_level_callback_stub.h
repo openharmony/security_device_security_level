@@ -36,7 +36,7 @@ class DeviceSecurityLevelCallbackStub : public IRemoteStub<IDeviceSecurityLevelC
 
 public:
     explicit DeviceSecurityLevelCallbackStub(RemoteRequest request);
-    virtual ~DeviceSecurityLevelCallbackStub() = default;
+    ~DeviceSecurityLevelCallbackStub() override = default;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
