@@ -15,8 +15,8 @@
 
 #include "dslm_fsm_process.h"
 
-#include <stdbool.h>
 #include <securec.h>
+#include <stdbool.h>
 
 #include "utils_datetime.h"
 #include "utils_hexstring.h"

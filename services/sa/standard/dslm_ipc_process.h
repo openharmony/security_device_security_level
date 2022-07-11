@@ -32,8 +32,8 @@ public:
     int32_t DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
     class RemoteHolder : public Singleton<RemoteHolder> {
     public:
-        bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object);
-        const sptr<IRemoteObject> Pop(uint32_t owner, uint32_t cookie);
+        bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> &object);
+        sptr<IRemoteObject> Pop(uint32_t owner, uint32_t cookie);
 
     private:
         std::map<uint64_t, sptr<IRemoteObject>> map_;
@@ -44,7 +44,7 @@ private:
     int32_t DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
         sptr<IRemoteObject> &object, uint32_t &cookie);
 
-    int32_t DslmSetResponseToParcel(MessageParcel &reply, int32_t status);
+    int32_t DslmSetResponseToParcel(MessageParcel &reply, uint32_t status);
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security

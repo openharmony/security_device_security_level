@@ -72,7 +72,7 @@ int32_t DeviceSecurityLevelProxy::RequestDeviceSecurityLevel(const DeviceIdentif
     auto status = reply.ReadUint32();
     if (status != cookie) {
         HiLog::Error(LABEL, "RequestDeviceSecurityLevelSendRequest result value error, ret is %{public}u", status);
-        return status;
+        return ERR_IPC_REMOTE_OBJ_ERR;
     }
 
     return SUCCESS;

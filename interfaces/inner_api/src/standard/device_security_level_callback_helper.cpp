@@ -75,10 +75,6 @@ bool DeviceSecurityLevelCallbackHelper::Withdraw(uint32_t cookie)
 int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
-    if (DeviceSecurityLevelCallbackStub::GetDescriptor() != data.ReadInterfaceToken()) {
-        return SUCCESS;
-    }
-
     if (code == DeviceSecurityLevelCallbackStub::CMD_SET_DEVICE_SECURITY_LEVEL) {
         auto cookie = data.ReadUint32();
         auto result = data.ReadUint32();

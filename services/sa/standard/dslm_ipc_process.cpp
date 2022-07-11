@@ -99,10 +99,10 @@ int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIden
     return SUCCESS;
 }
 
-int32_t DslmIpcProcess::DslmSetResponseToParcel(MessageParcel &reply, int32_t status)
+int32_t DslmIpcProcess::DslmSetResponseToParcel(MessageParcel &reply, uint32_t status)
 {
     auto success = reply.WriteUint32(status);
-    if (success == false) {
+    if (!success) {
         return ERR_IPC_RET_PARCEL_ERR;
     }
     return SUCCESS;
@@ -140,7 +140,7 @@ int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, M
     return SUCCESS;
 }
 
-bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> object)
+bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> &object)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
@@ -151,7 +151,7 @@ bool DslmIpcProcess::RemoteHolder::Push(uint32_t owner, uint32_t cookie, const s
     return true;
 }
 
-const sptr<IRemoteObject> DslmIpcProcess::RemoteHolder::Pop(uint32_t owner, uint32_t cookie)
+sptr<IRemoteObject> DslmIpcProcess::RemoteHolder::Pop(uint32_t owner, uint32_t cookie)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     uint64_t key = (static_cast<uint64_t>(owner) << COOKIE_SHIFT) | cookie;
