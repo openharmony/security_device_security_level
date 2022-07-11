@@ -37,7 +37,7 @@ void DslmService::OnStart()
 {
     SECURITY_LOG_INFO("start");
 
-    std::thread t([this]() {
+    std::thread thread([this]() {
         if (InitService() == SUCCESS) {
             SECURITY_LOG_INFO("init service success");
         }
@@ -45,7 +45,7 @@ void DslmService::OnStart()
             SECURITY_LOG_ERROR("publish service failed");
         }
     });
-    t.detach();
+    thread.detach();
 }
 
 void DslmService::OnStop()
@@ -73,7 +73,7 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
             default:
                 break;
         }
-    } while (0);
+    } while (false);
 
     return ERR_REQUEST_CODE_ERR;
 }
