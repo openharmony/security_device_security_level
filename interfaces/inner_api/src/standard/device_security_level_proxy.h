@@ -30,7 +30,7 @@ using namespace OHOS;
 class DeviceSecurityLevelProxy : public IRemoteProxy<IDeviceSecurityLevel>, public NoCopyable {
 public:
     explicit DeviceSecurityLevelProxy(const sptr<IRemoteObject> &impl);
-    virtual ~DeviceSecurityLevelProxy() = default;
+    ~DeviceSecurityLevelProxy() override = default;
     int32_t RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
         const sptr<IRemoteObject> &callback, uint64_t cookie);
 
