@@ -26,6 +26,7 @@
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
 #include "dslm_hidumper.h"
+#include "dslm_notify_node.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
 #define END_LINE "\n"
@@ -198,6 +199,19 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "CRED_SOFTWARE_VERSION     : %s" END_LINE, info->credInfo.softwareVersion);
     dprintf(fd, "CRED_SECURITY_LEVEL       : %s" END_LINE, info->credInfo.securityLevel);
     dprintf(fd, "CRED_VERSION              : %s" END_LINE, info->credInfo.version);
+    dprintf(fd, END_LINE);
+
+    dprintf(fd, "SDK_CALL_HISTORY: " END_LINE);
+    ListNode *node = NULL;
+    int32_t index = 0;
+    FOREACH_LIST_NODE (node, &info->historyList) {
+        index++;
+        DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
+        dprintf(fd, "#%2d: pid:%4u, req:%s, res:%s, cost:%ums, ret:%u" END_LINE, index, notifyNode->owner,
+            GetTimeStringFromTimeStamp(notifyNode->start), GetTimeStringFromTimeStamp(notifyNode->stop),
+            notifyNode->stop - notifyNode->start, notifyNode->result);
+    }
+
     dprintf(fd, SPLIT_LINE END_LINE);
 }
 

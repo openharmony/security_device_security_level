@@ -108,8 +108,9 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device)
     info->result = UINT32_MAX;
     InitDslmStateMachine(info);
     LockMutex(GetDeviceListMutex());
-    AddListNode(&info->linkNode, GetDeviceList());
+    AddListNodeBefore(&info->linkNode, GetDeviceList());
     InitListHead(&info->notifyList);
+    InitListHead(&info->historyList);
     UnlockMutex(GetDeviceListMutex());
     SECURITY_LOG_INFO("create new DslmDeviceInfo %{public}x", info->machine.machineId);
     return info;

@@ -29,9 +29,11 @@ extern "C" {
 typedef struct DslmNotifyListNode {
     ListNode linkNode;
     uint64_t start;
+    uint64_t stop;
     uint32_t keep;
     uint32_t owner;
     uint32_t cookie;
+    uint32_t result;
     uint32_t extra;
     RequestCallback *requestCallback;
 } DslmNotifyListNode;

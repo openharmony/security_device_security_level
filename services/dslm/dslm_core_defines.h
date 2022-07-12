@@ -54,6 +54,7 @@ typedef struct DslmDeviceInfo {
     uint32_t result;
     DslmCredInfo credInfo;
     ListHead notifyList;
+    ListHead historyList;
 } DslmDeviceInfo;
 
 static inline uint32_t GetCurrentVersion(void)
