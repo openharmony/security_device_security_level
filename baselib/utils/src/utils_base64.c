@@ -15,9 +15,11 @@
 
 #include "utils_base64.h"
 
-#include <securec.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include "securec.h"
 
 #include "utils_log.h"
 #include "utils_mem.h"

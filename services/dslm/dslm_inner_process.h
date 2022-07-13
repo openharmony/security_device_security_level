@@ -16,7 +16,6 @@
 #ifndef DSLM_INNER_PROCESS_H
 #define DSLM_INNER_PROCESS_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #include "dslm_core_defines.h"

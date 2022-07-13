@@ -15,7 +15,9 @@
 
 #include "utils_tlv.h"
 
-#include <securec.h>
+#include <stddef.h>
+
+#include "securec.h"
 
 #define TLV_TAG_LEN sizeof(uint16_t)
 #define TLV_LENGTH_LEN sizeof(uint16_t)
