@@ -15,7 +15,6 @@
 
 #include "utils_hexstring.h"
 
-#include <stdbool.h>
 #include <stdio.h>
 
 #include "utils_log.h"

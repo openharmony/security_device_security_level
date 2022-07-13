@@ -15,18 +15,20 @@
 
 #include "dslm_device_list.h"
 
-#include <securec.h>
-#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
-#include "utils_datetime.h"
-#include "utils_list.h"
-#include "utils_log.h"
-#include "utils_mem.h"
-#include "utils_mutex.h"
+#include "securec.h"
 
 #include "device_security_defines.h"
 #include "dslm_core_defines.h"
 #include "dslm_fsm_process.h"
+#include "utils_list.h"
+#include "utils_log.h"
+#include "utils_mem.h"
+#include "utils_mutex.h"
+#include "utils_state_machine.h"
 
 #define MAX_DEVICE_CNT 128
 

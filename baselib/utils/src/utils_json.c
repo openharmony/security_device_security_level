@@ -15,6 +15,8 @@
 
 #include "utils_json.h"
 
+#include <stddef.h>
+
 #include "cJSON.h"
 
 #ifdef __cplusplus

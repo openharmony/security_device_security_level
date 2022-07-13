@@ -15,14 +15,14 @@
 
 #include "hks_adapter.h"
 
-#include "external_interface_adapter.h"
-#include "device_security_defines.h"
+#include <stddef.h>
 
-#include <securec.h>
-#include "device_auth.h"
+#include "securec.h"
 #include "hks_api.h"
+#include "hks_type.h"
 #include "hks_param.h"
-#include "utils_json.h"
+
+#include "device_security_defines.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_tlv.h"

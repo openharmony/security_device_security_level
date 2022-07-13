@@ -17,9 +17,11 @@
 
 #include <stdlib.h>
 
-#include "messenger_utils.h"
 #include "securec.h"
 #include "softbus_bus_center.h"
+#include "softbus_common.h"
+
+#include "messenger_utils.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 
@@ -185,7 +187,7 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
     return true;
 }
 
-bool DeInitDeviceStatusManager()
+bool DeInitDeviceStatusManager(void)
 {
     DeviceStatusManager *instance = GetDeviceManagerInstance();
 

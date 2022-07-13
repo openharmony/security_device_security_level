@@ -15,10 +15,11 @@
 
 #include "utils_work_queue.h"
 
+#include <stddef.h>
 #include <pthread.h>
 #include <sys/prctl.h>
 
-#include <securec.h>
+#include "securec.h"
 
 #include "utils_list.h"
 #include "utils_mem.h"

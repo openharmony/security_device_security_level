@@ -15,10 +15,9 @@
 
 #include "dslm_crypto.h"
 
+#include <stddef.h>
+#include <stdint.h>
 #include <openssl/rand.h>
-
-#include "device_security_defines.h"
-#include "utils_log.h"
 
 void GenerateRandom(RandomValue *rand, uint32_t length)
 {

@@ -14,12 +14,14 @@
  */
 
 #include "dslm_ohos_request.h"
-#include "dslm_messenger_wrapper.h"
-#include "external_interface_adapter.h"
 
-#include <securec.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
+#include "securec.h"
+
+#include "external_interface_adapter.h"
 #include "utils_hexstring.h"
 #include "utils_json.h"
 #include "utils_log.h"

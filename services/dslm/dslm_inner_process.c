@@ -15,17 +15,19 @@
 
 #include "dslm_inner_process.h"
 
-#include <securec.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "device_security_defines.h"
 #include "utils_datetime.h"
 #include "utils_log.h"
-
+#include "utils_state_machine.h"
+#include "dslm_core_defines.h"
 #include "dslm_credential.h"
 #include "dslm_crypto.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_utils.h"
+#include "dslm_cred.h"
 
 #ifdef __cplusplus
 extern "C" {

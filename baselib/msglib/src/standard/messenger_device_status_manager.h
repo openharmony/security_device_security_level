@@ -16,8 +16,10 @@
 #ifndef SEC_MESSENGER_DEVICE_STATUS_MANAGER_H
 #define SEC_MESSENGER_DEVICE_STATUS_MANAGER_H
 
-#include "messenger.h"
+#include <stdint.h>
+#include <stdbool.h>
 
+#include "messenger.h"
 #include "utils_work_queue.h"
 
 #ifdef __cplusplus
@@ -26,7 +28,7 @@ extern "C" {
 
 bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatusReceiver deviceStatusReceiver);
 
-bool DeInitDeviceStatusManager();
+bool DeInitDeviceStatusManager(void);
 
 bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
 

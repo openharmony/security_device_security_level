@@ -18,6 +18,9 @@
 
 #include "messenger.h"
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "utils_work_queue.h"
 
 #ifdef __cplusplus
