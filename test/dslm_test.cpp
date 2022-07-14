@@ -110,7 +110,7 @@ static void BlockCheckDeviceStatus(const DeviceIdentify *device, uint32_t status
     } while (true);
 }
 
-HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level1)
+HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level0)
 {
     uint64_t random = 0x0807060504030201;
     MessageBuff *msg = nullptr;
@@ -123,7 +123,7 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level1)
     FreeMessageBuff(msg);
 }
 
-HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case1, TestSize.Level1)
+HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case1, TestSize.Level0)
 {
     uint64_t random = 0x0807060504030201;
     uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
@@ -141,7 +141,7 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case1, TestSize.Level1)
     FreeMessageBuff(msg);
 }
 
-HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level1)
+HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level0)
 {
     const char *message = "{\"message\":1,\"payload\":{\"version\":131072,\"challenge\":\"0102030405060708\"}}";
     const char *except = "{\"version\":131072,\"challenge\":\"0102030405060708\"}";
@@ -158,7 +158,7 @@ HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level1)
     FreeMessagePacket(packet);
 }
 
-HWTEST_F(DslmTest, ParseMessage_case2, TestSize.Level1)
+HWTEST_F(DslmTest, ParseMessage_case2, TestSize.Level0)
 {
     const char *message = "{\"mege\":1,\"payload\":{\"version\":131072,\"challenge\":\"0102030405060708\"}}";
 
@@ -170,7 +170,7 @@ HWTEST_F(DslmTest, ParseMessage_case2, TestSize.Level1)
     FreeMessagePacket(packet);
 }
 
-HWTEST_F(DslmTest, ParseMessage_case3, TestSize.Level1)
+HWTEST_F(DslmTest, ParseMessage_case3, TestSize.Level0)
 {
     const char *message = "{\"message\":1,\"pay\":{\"version\":131072,\"challenge\":\"0102030405060708\"}}";
 
@@ -182,7 +182,7 @@ HWTEST_F(DslmTest, ParseMessage_case3, TestSize.Level1)
     FreeMessagePacket(packet);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":\"010203040a0b0c0d\"}";
 
@@ -201,7 +201,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level1)
     EXPECT_EQ((uint32_t)0, obj.arraySize);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case2, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case2, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":\"z\"}";
 
@@ -215,7 +215,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case2, TestSize.Level1)
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case3, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case3, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":1}";
 
@@ -228,7 +228,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case3, TestSize.Level1)
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case4, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case4, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challssenge\":\"z\"}";
 
@@ -241,7 +241,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case4, TestSize.Level1)
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case5, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case5, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":\"010203040a0b0c0d\",\"support\":[33,44,55]}";
 
@@ -263,7 +263,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case5, TestSize.Level1)
     EXPECT_EQ((uint32_t)55, obj.credArray[2]);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":\"010203040a0b0c0d\",\"support\":[]}";
 
@@ -282,7 +282,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level1)
     EXPECT_EQ((uint32_t)0, obj.arraySize);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level0)
 {
     const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
                           "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
@@ -309,7 +309,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level1)
     DestroyDslmCred(cred);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case2, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case2, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challssenge\":\"z\"}";
 
@@ -324,7 +324,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case2, TestSize.Level1)
     EXPECT_EQ(ERR_NO_CHALLENGE, ret);
 }
 
-HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case3, TestSize.Level1)
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case3, TestSize.Level0)
 {
     const char *message =
         "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"infod\":\"JADE-AL00:87AD28D3B1B...\"}";
@@ -340,7 +340,7 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case3, TestSize.Level1)
     EXPECT_EQ(ERR_NO_CRED, ret);
 }
 
-HWTEST_F(DslmTest, RandomValue_case1, TestSize.Level1)
+HWTEST_F(DslmTest, RandomValue_case1, TestSize.Level0)
 {
     RandomValue rand1 = {0, {0}};
     (void)memset_s(&rand1, sizeof(RandomValue), 0, sizeof(RandomValue));
@@ -358,7 +358,7 @@ HWTEST_F(DslmTest, RandomValue_case1, TestSize.Level1)
     EXPECT_NE(0, memcmp(rand1.value, rand2.value, sizeof(uint64_t)));
 }
 
-HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level1)
+HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level0)
 {
     RandomValue rand = {0, {0}};
     (void)memset_s(&rand, sizeof(RandomValue), 0, sizeof(RandomValue));
@@ -367,7 +367,7 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level1)
     EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
 }
 
-HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
+HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level0)
 {
     const DeviceIdentify identify = {DEVICE_ID_MAX_LEN, {0}};
     RequestObject object;
@@ -392,7 +392,7 @@ HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level1)
     DestroyDslmCred(cred);
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
 
@@ -442,7 +442,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level1)
     }
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level1)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a'}};
     const RequestOption option = {
@@ -468,7 +468,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level1)
     mockMsg.MakeDeviceOffline(&device);
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level1)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
 {
     DslmMsgInterfaceMock mockMsg;
     DslmRequestCallbackMock mockCallback;
@@ -513,7 +513,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level1)
     mockMsg.MakeDeviceOffline(&device);
 }
 
-HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level1)
+HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level0)
 {
     const char *input = "{\"version\":65536,\"challenge\":\"0102030405060708\"}";
     uint32_t len = strlen(input) + 1;
@@ -538,7 +538,7 @@ HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level1)
     EXPECT_EQ(0, (int32_t)ret);
 }
 
-HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level1)
+HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
 {
     const char *input = "{\"version\":65536,\"type\":0,\"challenge\":\"EEFFFFFFFFCDABFF\",\"info\":"
                         "\"MDAwMTAyMDMwNDA1MDYwNzA4MDkwQTBCMEMwRDBFMEYxMDExMTIxMzE0MTUxNkFBQkJDQ0RE\"}";
@@ -550,7 +550,7 @@ HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level1)
     EXPECT_EQ(ERR_NOEXIST_DEVICE, (int32_t)ret);
 }
 
-HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level1)
+HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'}};
     DslmDeviceInfo *info = GetDslmDeviceInfo(&device);
@@ -568,7 +568,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level1)
     mockMsg.MakeDeviceOffline(&device);
 }
 
-HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level1)
+HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'}};
 
@@ -590,7 +590,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level1)
     mockMsg.MakeDeviceOffline(&device);
 }
 
-HWTEST_F(DslmTest, InnerKitsTest_case1, TestSize.Level1)
+HWTEST_F(DslmTest, InnerKitsTest_case1, TestSize.Level0)
 {
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
@@ -620,7 +620,7 @@ void TestDeviceSecurityInfoCallback(const DeviceIdentify *identify, struct Devic
     g_cv.notify_one();
 }
 
-HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level1)
+HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level0)
 {
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
@@ -637,6 +637,15 @@ HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level1)
     unique_lock<mutex> lck(g_mtx);
     g_cv.wait_for(lck, std::chrono::milliseconds(2000), []() { return (g_cnt == 3); });
     EXPECT_EQ(g_cnt, 3);
+}
+
+HWTEST_F(DslmTest, InnerKitsTest_case3, TestSize.Level0)
+{
+    DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
+    (void)memset_s(device.identity, DEVICE_ID_MAX_LEN, 'F', DEVICE_ID_MAX_LEN);
+    DeviceSecurityInfo *info = NULL;
+    int32_t ret = RequestDeviceSecurityInfo(&device, NULL, &info);
+    EXPECT_EQ(ret, ERR_NOEXIST_DEVICE);
 }
 } // namespace DslmUnitTest
 } // namespace Security

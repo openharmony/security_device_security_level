@@ -66,7 +66,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
     if (result != SUCCESS) {
         HiLog::Error(LABEL, "GetDeviceSecurityInfo RequestDeviceSecurityLevel error.");
         helper.Withdraw(cookie);
-        return ERR_IPC_REGISTER_ERR;
+        return result;
     }
 
     return SUCCESS;
