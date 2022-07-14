@@ -15,10 +15,12 @@
 
 #include "utils_timer.h"
 
+#include <new>
+#include <functional>
+
+#include "nocopyable.h"
 #include "singleton.h"
 #include "timer.h"
-
-#include "utils_log.h"
 
 #ifdef __cplusplus
 extern "C" {

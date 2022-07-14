@@ -15,17 +15,17 @@
 
 #include "dslm_ohos_verify.h"
 
-#include <securec.h>
+#include <stdbool.h>
 #include <string.h>
 
+#include "securec.h"
+
+#include "dslm_credential_utils.h"
+#include "external_interface_adapter.h"
 #include "utils_hexstring.h"
 #include "utils_json.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-
-#include "dslm_credential_utils.h"
-#include "dslm_crypto.h"
-#include "external_interface_adapter.h"
 
 #define UDID_STRING_LENGTH 65
 

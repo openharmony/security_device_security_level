@@ -15,16 +15,16 @@
 
 #include "messenger_impl.h"
 
+#include <stdint.h>
 #include <stdlib.h>
-
-#include "securec.h"
-#include "utils_log.h"
-#include "utils_mem.h"
-#include "utils_work_queue.h"
+#include <stdbool.h>
 
 #include "messenger.h"
 #include "messenger_device_session_manager.h"
 #include "messenger_device_status_manager.h"
+#include "utils_log.h"
+#include "utils_mem.h"
+#include "utils_work_queue.h"
 
 #define MESSENGER_MAGIC_HEAD 0x1234abcd
 #define MESSENGER_PROCESS_QUEUE_SIZE 256

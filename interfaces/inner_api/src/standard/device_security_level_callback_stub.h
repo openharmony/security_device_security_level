@@ -16,9 +16,11 @@
 #ifndef DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 #define DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 
+#include <stdint.h>
 #include <functional>
-#include <mutex>
 
+#include "errors.h"
+#include "refbase.h"
 #include "iremote_stub.h"
 #include "nocopyable.h"
 

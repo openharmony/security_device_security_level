@@ -15,13 +15,17 @@
 
 #include "dslm_credential_utils.h"
 
-#include <securec.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
+#include <openssl/ossl_typ.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 
+#include "securec.h"
+
+#include "device_security_defines.h"
 #include "utils_base64.h"
 #include "utils_json.h"
 #include "utils_log.h"
@@ -205,7 +209,7 @@ static bool VerifyCredentialCb(const CredentialCb *credCb)
         return false;
     }
     SECURITY_LOG_INFO("verify payload success");
-    
+
     return true;
 }
 

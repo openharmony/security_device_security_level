@@ -15,7 +15,6 @@
 
 #include "dslm_credential.h"
 
-#include <dlfcn.h>
 #include <stdbool.h>
 #include <string.h>
 

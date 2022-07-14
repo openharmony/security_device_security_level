@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "device_security_defines.h"
 #include "dslm_cred.h"
 
 #ifdef __cplusplus

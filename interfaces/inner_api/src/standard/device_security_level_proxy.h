@@ -16,12 +16,17 @@
 #ifndef DEVICE_SECURITY_LEVEL_PROXY
 #define DEVICE_SECURITY_LEVEL_PROXY
 
+#include <cstdint>
+#include <functional>
+
+#include "errors.h"
+#include "refbase.h"
+#include "iremote_broker.h"
 #include "iremote_proxy.h"
 #include "nocopyable.h"
 
-#include "idevice_security_level.h"
-
 #include "device_security_defines.h"
+#include "idevice_security_level.h"
 
 namespace OHOS {
 namespace Security {

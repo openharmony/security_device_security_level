@@ -17,9 +17,8 @@
 
 #include <mutex>
 
-#include "utils_log.h"
-
 #include "device_security_defines.h"
+#include "utils_log.h"
 
 namespace OHOS {
 namespace Security {

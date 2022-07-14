@@ -15,18 +15,18 @@
 
 #include "dslm_msg_utils.h"
 
-#include <securec.h>
 #include <string.h>
 
+#include "securec.h"
+
+#include "device_security_defines.h"
+#include "dslm_core_defines.h"
+#include "dslm_credential.h"
 #include "utils_base64.h"
 #include "utils_hexstring.h"
 #include "utils_json.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-
-#include "device_security_defines.h"
-#include "dslm_core_defines.h"
-#include "dslm_credential.h"
 
 #define CHALLENGE_STRING_LENGTH 32
 
