@@ -15,9 +15,13 @@
 
 #include "dslm_messenger_wrapper.h"
 
-#include "messenger.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
+#include "messenger.h"
 #include "utils_mutex.h"
+#include "device_security_defines.h"
 
 #define PKG_NAME "ohos.dslm"
 #define SESSION_NAME "device.security.level"

@@ -16,13 +16,13 @@
 #include "dslm_ipc_process.h"
 
 #include <ipc_skeleton.h>
-#include <securec.h>
 #include <string_ex.h>
 
-#include "utils_log.h"
+#include "securec.h"
 
 #include "dslm_callback_proxy.h"
 #include "dslm_core_process.h"
+#include "utils_log.h"
 
 namespace {
 constexpr uint32_t DFT_TIMEOUT = 45;

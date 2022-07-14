@@ -16,8 +16,6 @@
 #ifndef DSLM_BIGDATA_EVENT_H
 #define DSLM_BIGDATA_EVENT_H
 
-#include <stdint.h>
-
 #include "dslm_core_defines.h"
 
 #ifdef __cplusplus

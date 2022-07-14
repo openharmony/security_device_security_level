@@ -15,8 +15,13 @@
 
 #include "device_security_level_proxy.h"
 
-#include "hilog/log.h"
+#include "ipc_types.h"
+#include "iremote_object.h"
+#include "message_option.h"
+#include "message_parcel.h"
+#include "hilog/log_cpp.h"
 
+#include "idevice_security_level.h"
 #include "device_security_level_defines.h"
 namespace OHOS {
 namespace Security {

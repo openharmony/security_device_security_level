@@ -19,13 +19,14 @@
 #include "securec.h"
 #include "session.h"
 #include "softbus_bus_center.h"
+#include "softbus_common.h"
+
+#include "messenger_device_status_manager.h"
+#include "messenger_utils.h"
 #include "utils_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
-
-#include "messenger_device_status_manager.h"
-#include "messenger_utils.h"
 
 #define IS_SERVER 0
 

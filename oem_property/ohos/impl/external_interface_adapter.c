@@ -14,16 +14,21 @@
  */
 
 #include "external_interface_adapter.h"
-#include "device_security_defines.h"
 
-#include <securec.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "device_auth.h"
+#include "securec.h"
+#include "hks_api.h"
+#include "hks_param.h"
+#include "hks_type.h"
 #include "hks_adapter.h"
+#include "device_auth.h"
+
+#include "device_security_defines.h"
 #include "utils_json.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-#include "utils_tlv.h"
 
 const char g_dslmKey[] = "dslm_key";
 

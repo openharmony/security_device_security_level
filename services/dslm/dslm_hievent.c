@@ -15,8 +15,14 @@
 
 #include "dslm_hievent.h"
 
-#include <securec.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "securec.h"
+
+#include "device_security_defines.h"
+#include "dslm_core_defines.h"
+#include "dslm_cred.h"
 #include "dslm_bigdata.h"
 
 void ReportHiEventInfoSync(const DslmDeviceInfo *info)

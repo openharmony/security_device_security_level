@@ -14,12 +14,13 @@
  */
 
 #include "dslm_ohos_init.h"
-#include "dslm_credential_utils.h"
-#include "dslm_ohos_request.h"
 
 #include <string.h>
 
 #include "utils_log.h"
+#include "dslm_credential_utils.h"
+#include "dslm_ohos_request.h"
+#include "device_security_defines.h"
 
 #define DSLM_CRED_STR_LEN_MAX 4096
 

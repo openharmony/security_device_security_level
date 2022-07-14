@@ -15,9 +15,12 @@
 
 #include "dslm_msg_serialize.h"
 
-#include <securec.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include "securec.h"
 
 #include "utils_json.h"
 #include "utils_log.h"
