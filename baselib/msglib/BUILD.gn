@@ -15,7 +15,6 @@ import("//build/ohos.gni")
 
 # messenger_static lib
 config("messenger_static_config") {
-  visibility = [ ":*" ]
   include_dirs = [ "include" ]
 }
 
@@ -23,25 +22,23 @@ ohos_static_library("messenger_static") {
   include_dirs = [
     "include",
     "src",
+    "src/standard",
   ]
 
-  sources = [ "src/messenger.c" ]
-
-  if (is_standard_system) {
-    include_dirs += [ "src/standard" ]
-    sources += [
-      "src/standard/messenger_device_session_manager.c",
-      "src/standard/messenger_device_status_manager.c",
-      "src/standard/messenger_impl.c",
-    ]
-    external_deps = [
-      "dsoftbus:softbus_client",
-      "hilog_native:libhilog",
-      "utils_base:utils",
-    ]
-  }
+  sources = [
+    "src/messenger.c",
+    "src/standard/messenger_device_session_manager.c",
+    "src/standard/messenger_device_status_manager.c",
+    "src/standard/messenger_impl.c",
+  ]
 
   deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
+
+  external_deps = [
+    "dsoftbus:softbus_client",
+    "hilog_native:libhilog",
+    "utils_base:utils",
+  ]
 
   public_configs = [ ":messenger_static_config" ]
   part_name = "device_security_level"
