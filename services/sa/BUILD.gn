@@ -38,17 +38,12 @@ ohos_static_library("service_sa_static") {
   ]
 
   external_deps = [
+    "hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
     "utils_base:utils",
   ]
-
-  if (is_standard_system) {
-    external_deps += [
-      "hilog_native:libhilog",
-      "samgr_standard:samgr_proxy",
-    ]
-  }
 
   part_name = "device_security_level"
   subsystem_name = "security"
