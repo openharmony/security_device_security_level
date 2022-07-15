@@ -48,6 +48,7 @@ typedef struct DslmDeviceInfo {
     uint64_t lastOfflineTime;
     uint64_t lastRequestTime;
     uint64_t lastResponseTime;
+    uint64_t lastVerifyTime;
     uint64_t transNum;
     TimerHandle timeHandle;
     uint32_t queryTimes;

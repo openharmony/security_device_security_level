@@ -27,6 +27,7 @@
 #include "utils_timer.h"
 
 #include "dslm_device_list.h"
+#include "dslm_hitrace.h"
 #include "dslm_inner_process.h"
 #include "dslm_notify_node.h"
 
@@ -109,11 +110,12 @@ static bool CheckTimesAndSendCredRequest(DslmDeviceInfo *info, bool enforce)
     if (!enforce && info->queryTimes > MAX_SEND_TIMES) {
         return false;
     }
-
+    DslmStartProcessTraceAsync("SendCredRequest", info->machine.machineId, info->queryTimes + 1);
     CheckAndGenerateChallenge(info);
     SendDeviceInfoRequest(info);
     info->queryTimes++;
     info->lastRequestTime = GetMillisecondSinceBoot();
+
     StopSendDeviceInfoRequestTimer(info);
     StartSendDeviceInfoRequestTimer(info);
     return true;
@@ -141,10 +143,14 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
         }
         SECURITY_LOG_DEBUG("ProcessSendDeviceInfoCallback result %{public}u for device %{public}x, level %{public}u.",
             result, info->machine.machineId, cbInfo.level);
+
         notifyNode->requestCallback(notifyNode->owner, notifyNode->cookie, result, &cbInfo);
         notifyNode->stop = GetMillisecondSinceBoot();
         notifyNode->result = result;
+
         RemoveListNode(node);
+        DslmFinishProcessTraceAsync("SDK_GET", notifyNode->owner, notifyNode->cookie);
+
         AddListNodeBefore(node, &info->historyList);
     }
     int32_t historyCnt = 0;
@@ -208,6 +214,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         return false;
     }
 
+    DslmStartProcessTraceAsync("SDK_GET", notify->owner, notify->cookie);
     AddListNode(&notify->linkNode, &deviceInfo->notifyList);
     SECURITY_LOG_DEBUG(
         "ProcessSdkRequest, device is %{public}x, owner is %{public}u, cookie is %{public}u, keep is %{public}u",
@@ -258,8 +265,9 @@ static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event
     MessageBuff *buff = (MessageBuff *)para;
 
     deviceInfo->lastResponseTime = GetMillisecondSinceBoot();
-
     deviceInfo->result = (uint32_t)VerifyDeviceInfoResponse(deviceInfo, buff);
+    deviceInfo->lastVerifyTime = GetMillisecondSinceBoot();
+    DslmFinishProcessTraceAsync("SendCredRequest", machine->machineId, deviceInfo->queryTimes);
     ProcessSendDeviceInfoCallback(deviceInfo, RequestDoneChecker);
 
     if (deviceInfo->result == SUCCESS) {
@@ -349,8 +357,9 @@ void ScheduleDslmStateMachine(DslmDeviceInfo *info, uint32_t event, const void *
     };
 
     static const uint32_t nodeCnt = sizeof(stateNodes) / sizeof(StateNode);
-
+    DslmStartStateMachineTrace(info->machine.machineId, event);
     ScheduleMachine(stateNodes, nodeCnt, &info->machine, event, para);
+    DslmFinishProcessTrace();
 }
 
 uint32_t GetCurrentMachineState(const DslmDeviceInfo *info)
