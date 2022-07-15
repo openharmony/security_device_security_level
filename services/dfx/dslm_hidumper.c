@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "dslm_hidumper.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
@@ -25,7 +27,6 @@
 #include "dslm_credential.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
-#include "dslm_hidumper.h"
 #include "dslm_notify_node.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
@@ -66,18 +67,18 @@ static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
     return timeBuff;
 }
 
-static const char *GetRequestCostTime(const DslmDeviceInfo *info)
+static const char *GetCostTime(const uint64_t beginTime, const uint64_t endTime)
 {
     static char costBuff[COST_STRING_LEN] = {0};
 
-    if (info->lastResponseTime == 0 || info->lastRequestTime == 0) {
+    if (beginTime == 0 || endTime == 0) {
         return "";
     }
 
-    if (info->lastResponseTime < info->lastRequestTime) {
+    if (endTime < beginTime) {
         return "";
     }
-    uint32_t cost = (uint32_t)(info->lastResponseTime - info->lastRequestTime);
+    uint32_t cost = (uint32_t)(endTime - beginTime);
     if (snprintf_s(costBuff, COST_STRING_LEN, COST_STRING_LEN - 1, "(cost %ums)", cost) < 0) {
         return "";
     };
@@ -180,8 +181,9 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_OFFLINE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOfflineTime));
     dprintf(fd, "DEVICE_REQUEST_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastRequestTime));
     dprintf(fd, "DEVICE_RESPONSE_TIME      : %s%s" END_LINE, GetTimeStringFromTimeStamp(info->lastResponseTime),
-        GetRequestCostTime(info));
-
+        GetCostTime(info->lastRequestTime, info->lastResponseTime));
+    dprintf(fd, "DEVICE_VERIFY_TIME        : %s%s" END_LINE, GetTimeStringFromTimeStamp(info->lastVerifyTime),
+        GetCostTime(info->lastResponseTime, info->lastVerifyTime));
     dprintf(fd, END_LINE);
 
     dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));

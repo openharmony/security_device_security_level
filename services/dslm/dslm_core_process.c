@@ -15,29 +15,30 @@
 
 #include "dslm_core_process.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <stdbool.h>
 
 #include "securec.h"
 
-#include "utils_mutex.h"
-#include "utils_state_machine.h"
-#include "utils_datetime.h"
-#include "utils_log.h"
 #include "device_security_defines.h"
-#include "dslm_core_defines.h"
 #include "dslm_callback_info.h"
+#include "dslm_core_defines.h"
 #include "dslm_cred.h"
-#include "dslm_msg_serialize.h"
 #include "dslm_credential.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
 #include "dslm_hievent.h"
+#include "dslm_hitrace.h"
 #include "dslm_messenger_wrapper.h"
+#include "dslm_msg_serialize.h"
 #include "dslm_msg_utils.h"
 #include "dslm_notify_node.h"
+#include "utils_datetime.h"
+#include "utils_log.h"
+#include "utils_mutex.h"
+#include "utils_state_machine.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -183,6 +184,7 @@ int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, ui
     }
 
     uint32_t event = (status == ONLINE_STATUS_ONLINE) ? EVENT_DEVICE_ONLINE : EVENT_DEVICE_OFFLINE;
+
     ScheduleDslmStateMachine(info, event, &devType);
     return SUCCESS;
 }
