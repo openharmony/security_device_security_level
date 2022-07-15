@@ -49,13 +49,13 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
 
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilitySuccess(int32_t sid, const sptr<IRemoteObject> &object)
 {
-    HiLog::Info(LABEL, "OnLoadSystemAbilitySuccess.");
+    HiLog::Info(LABEL, "OnLoadSystemAbilitySuccess = %{public}d.", sid);
     promise_.set_value(object);
 }
 
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t sid)
 {
-    HiLog::Error(LABEL, "OnLoadSystemAbilityFail.");
+    HiLog::Error(LABEL, "OnLoadSystemAbilityFail = %{public}d.", sid);
 }
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
