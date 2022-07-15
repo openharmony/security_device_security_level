@@ -207,9 +207,12 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     FOREACH_LIST_NODE (node, &info->historyList) {
         index++;
         DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
-        dprintf(fd, "#%2d: pid:%4u, req:%s, res:%s, cost:%ums, ret:%u" END_LINE, index, notifyNode->owner,
-            GetTimeStringFromTimeStamp(notifyNode->start), GetTimeStringFromTimeStamp(notifyNode->stop),
+        dprintf(fd, "#%2d: pid:%4u, req:%s,", index, notifyNode->owner, GetTimeStringFromTimeStamp(notifyNode->start));
+        dprintf(fd, " res:%s, cost:%4ums, ret:%u" END_LINE, GetTimeStringFromTimeStamp(notifyNode->stop),
             notifyNode->stop - notifyNode->start, notifyNode->result);
+        if (index >= NOTIFY_NODE_MAX_CNT) {
+            break;
+        }
     }
 
     dprintf(fd, SPLIT_LINE END_LINE);
