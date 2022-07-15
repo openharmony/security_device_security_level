@@ -35,7 +35,7 @@ ohos_static_library("utils_static") {
 
   public_configs = [ ":utils_static_config" ]
 
-  deps = [ "//third_party/cJSON:cjson_static" ]
+  deps = [ "//third_party/cJSON:cjson" ]
 
   external_deps = [
     "hilog_native:libhilog",
