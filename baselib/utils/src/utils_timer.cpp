@@ -15,8 +15,8 @@
 
 #include "utils_timer.h"
 
-#include <new>
 #include <functional>
+#include <new>
 
 #include "nocopyable.h"
 #include "singleton.h"
@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+namespace {
 using namespace OHOS;
 class UtilsTimer final : public OHOS::Utils::Timer, public DelayedRefSingleton<UtilsTimer> {
 public:
@@ -42,6 +43,7 @@ UtilsTimer::UtilsTimer() : Timer("timer_process")
 {
     this->Setup();
 }
+} // namespace
 
 void DoTimerProcess(TimerProc callback, const void *context)
 {
