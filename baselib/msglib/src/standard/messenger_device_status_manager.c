@@ -157,7 +157,8 @@ static void MessengerOnNodeOffline(NodeBasicInfo *info)
 
 static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *info)
 {
-    // just do nothing
+    (void)type;
+    (void)info;
 }
 
 static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para)
