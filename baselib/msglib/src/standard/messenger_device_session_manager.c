@@ -42,7 +42,8 @@ typedef struct DeviceSessionManager {
     DeviceMessageReceiver messageReceiver;
     MessageSendResultNotifier sendResultNotifier;
     const char *pkgName;
-    const char *sessionName;
+    const char *primarySessName;
+    const char *secondarySessName;
     WorkQueue *queue;
     Mutex mutex;
 } DeviceSessionManager;
@@ -50,7 +51,7 @@ typedef struct DeviceSessionManager {
 typedef struct QueueMsgData {
     DeviceIdentify srcIdentity;
     uint32_t msgLen;
-    uint8_t msgdata[1];
+    uint8_t msgData[1];
 } QueueMsgData;
 
 typedef struct PendingMsgData {
@@ -58,7 +59,7 @@ typedef struct PendingMsgData {
     uint32_t transNo;
     DeviceIdentify destIdentity;
     uint32_t msgLen;
-    uint8_t msgdata[1];
+    uint8_t msgData[1];
 } PendingMsgData;
 
 typedef struct SessionInfo {
@@ -104,7 +105,7 @@ static void ProcessSessionMessageReceived(const uint8_t *data, uint32_t len)
         SECURITY_LOG_ERROR("messageReceiver is null");
         return;
     }
-    messageReceiver(&queueData->srcIdentity, queueData->msgdata, queueData->msgLen);
+    messageReceiver(&queueData->srcIdentity, queueData->msgData, queueData->msgLen);
     FREE(queueData);
 }
 
@@ -133,7 +134,7 @@ static void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t 
         FREE(queueData);
         return;
     }
-    ret = (uint32_t)memcpy_s(queueData->msgdata, msgLen, msg, msgLen);
+    ret = (uint32_t)memcpy_s(queueData->msgData, msgLen, msg, msgLen);
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy failed");
         FREE(queueData);
@@ -217,7 +218,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
         }
 
         RemoveListNode(node);
-        int ret = SendBytes(sessionId, msgData->msgdata, msgData->msgLen);
+        int ret = SendBytes(sessionId, msgData->msgData, msgData->msgLen);
         if (ret != 0) {
             SECURITY_LOG_ERROR("SendBytes error code = %{public}d", ret);
         }
@@ -231,8 +232,7 @@ static int MessengerOnSessionOpened(int sessionId, int result)
 static void MessengerOnSessionClosed(int sessionId)
 {
     int side = GetSessionSide(sessionId);
-    SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s", sessionId,
-        (side == IS_SERVER) ? "server" : "client");
+    SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s", sessionId, (side == IS_SERVER) ? "server" : "client");
 
     if (side == IS_SERVER) {
         return;
@@ -251,7 +251,6 @@ static void MessengerOnSessionClosed(int sessionId)
         }
     }
     UnlockMutex(&instance->mutex);
-    return;
 }
 
 static void MessengerOnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
@@ -271,23 +270,13 @@ static void MessengerOnMessageReceived(int sessionId, const void *data, unsigned
     return MessengerOnBytesReceived(sessionId, data, dataLen);
 }
 
-bool InitDeviceSessionManager(WorkQueue *queue, const char *pkgName, const char *sessionName,
-    DeviceMessageReceiver messageReceiver, MessageSendResultNotifier sendResultNotifier)
+static bool TryToCreateSessionServer(const char *pkgName, const char *sessionName, const ISessionListener *listener)
 {
-    if ((pkgName == NULL) || (sessionName == NULL)) {
-        return false;
-    }
-    DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
-    instance->pkgName = pkgName;
-    instance->sessionName = sessionName;
-    instance->messageReceiver = messageReceiver;
-    instance->sendResultNotifier = sendResultNotifier;
-    instance->queue = queue;
     int try = 0;
-    int ret = CreateSessionServer(pkgName, sessionName, &instance->listener);
+    int ret = CreateSessionServer(pkgName, sessionName, listener);
     while (ret != 0 && try < MAX_TRY_TIMES) {
         MessengerSleep(1); // sleep 1 second and try again
-        ret = CreateSessionServer(pkgName, sessionName, &instance->listener);
+        ret = CreateSessionServer(pkgName, sessionName, listener);
         try++;
     }
 
@@ -295,22 +284,53 @@ bool InitDeviceSessionManager(WorkQueue *queue, const char *pkgName, const char 
         SECURITY_LOG_ERROR("CreateSessionServer failed = %{public}d", ret);
         return false;
     }
-
-    SECURITY_LOG_INFO("CreateSessionServer success");
     return true;
+}
+
+bool InitDeviceSessionManager(WorkQueue *queue, const MessengerConfig *config)
+{
+    if ((queue == NULL) || (config == NULL)) {
+        return false;
+    }
+    DeviceSessionManager *inst = GetDeviceSessionManagerInstance();
+    inst->pkgName = config->pkgName;
+    inst->primarySessName = config->primarySessName;
+    inst->secondarySessName = config->secondarySessName;
+    inst->messageReceiver = config->messageReceiver;
+    inst->sendResultNotifier = config->sendResultNotifier;
+    inst->queue = queue;
+
+    bool succ = TryToCreateSessionServer(inst->pkgName, inst->primarySessName, &inst->listener);
+    SECURITY_LOG_INFO("CreateSessionServer %{public}s = %{public}s", inst->primarySessName, succ ? "succ" : "fail");
+
+    if (inst->secondarySessName == NULL) {
+        return succ;
+    }
+
+    succ = TryToCreateSessionServer(inst->pkgName, inst->secondarySessName, &inst->listener);
+    SECURITY_LOG_INFO("CreateSessionServer %{public}s = %{public}s", inst->secondarySessName, succ ? "succ" : "fail");
+    return succ;
 }
 
 bool DeInitDeviceSessionManager(void)
 {
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
-    int ret = RemoveSessionServer(instance->pkgName, instance->sessionName);
+    int ret = RemoveSessionServer(instance->pkgName, instance->primarySessName);
     if (ret != 0) {
-        SECURITY_LOG_ERROR("RemoveSessionServer failed = %{public}d", ret);
-        return false;
+        SECURITY_LOG_ERROR("RemoveSessionServer %{public}s failed = %{public}d", instance->primarySessName, ret);
     }
+
+    if (instance->secondarySessName) {
+        ret = RemoveSessionServer(instance->pkgName, instance->primarySessName);
+        if (ret != 0) {
+            SECURITY_LOG_ERROR("RemoveSessionServer %{public}s failed = %{public}d", instance->primarySessName, ret);
+        }
+    }
+
     LockMutex(&instance->mutex);
     instance->pkgName = NULL;
-    instance->sessionName = NULL;
+    instance->primarySessName = NULL;
+    instance->secondarySessName = NULL;
     instance->messageReceiver = NULL;
     instance->sendResultNotifier = NULL;
     instance->queue = NULL;
@@ -372,7 +392,7 @@ static void PushMsgDataToPendingList(uint32_t transNo, const DeviceIdentify *dev
     data->transNo = transNo;
     data->msgLen = msgLen;
     (void)memcpy_s(&data->destIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
-    (void)memcpy_s(data->msgdata, msgLen, msg, msgLen);
+    (void)memcpy_s(data->msgData, msgLen, msg, msgLen);
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     LockMutex(&instance->mutex);
     AddListNodeBefore(&data->link, &instance->pendingSendList);
@@ -392,13 +412,27 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
     const SessionAttribute attr = {
         .dataType = TYPE_BYTES,
     };
-    DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
-    int ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
+
+    const char *primary = GetDeviceSessionManagerInstance()->primarySessName;
+    const char *secondary = GetDeviceSessionManagerInstance()->secondarySessName;
+
+    int ret = OpenSession(primary, primary, deviceName, "", &attr);
     if (ret <= 0) {
         // open failed, need to try again.
-        ret = OpenSession(instance->sessionName, instance->sessionName, deviceName, "", &attr);
+        ret = OpenSession(primary, primary, deviceName, "", &attr);
     }
-    SECURITY_LOG_INFO("device %{public}x ret is %{public}d", mask, ret);
+    SECURITY_LOG_INFO("open 1st session %{public}s device %{public}x ret is %{public}d", primary, mask, ret);
+
+    if (secondary == NULL || ret) {
+        return;
+    }
+
+    ret = OpenSession(primary, secondary, deviceName, "", &attr);
+    if (ret <= 0) {
+        // open failed, need to try again.
+        ret = OpenSession(primary, secondary, deviceName, "", &attr);
+    }
+    SECURITY_LOG_INFO("open 2nd session %{public}s device %{public}x ret is %{public}d", secondary, mask, ret);
 }
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
@@ -425,8 +459,9 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
         if (ret != 0) {
             SECURITY_LOG_ERROR("SendBytes error code = %{public}d", ret);
         }
-    } else {
-        PushMsgDataToPendingList(transNo, devId, msg, msgLen);
-        CreateNewDeviceSession(devId);
+        return;
     }
+
+    PushMsgDataToPendingList(transNo, devId, msg, msgLen);
+    CreateNewDeviceSession(devId);
 }

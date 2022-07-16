@@ -163,6 +163,7 @@ static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInf
 
 static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para)
 {
+    (void)para;
     ProcessDeviceStatusReceiver(devId, EVENT_NODE_STATE_ONLINE, devType);
     return 0;
 }
