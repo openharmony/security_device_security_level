@@ -23,9 +23,6 @@
 #include "utils_mutex.h"
 #include "device_security_defines.h"
 
-#define PKG_NAME "ohos.dslm"
-#define SESSION_NAME "device.security.level"
-
 Messenger *g_messenger = NULL;
 static Mutex g_mutex = INITED_MUTEX;
 
@@ -33,8 +30,9 @@ uint32_t InitMessenger(const MessageReceiver messageReceiver, const StatusReceiv
     const SendResultNotifier notifier)
 {
     MessengerConfig config = {
-        .pkgName = PKG_NAME,
-        .sessName = SESSION_NAME,
+        .pkgName = GetMessengerPackageName(),
+        .primarySessName = GetMessengerPrimarySessionName(),
+        .secondarySessName = GetMessengerSecondarySessionName(),
         .messageReceiver = messageReceiver,
         .statusReceiver = statusReceiver,
         .sendResultNotifier = notifier,
@@ -117,4 +115,19 @@ const DeviceIdentify *GetSelfDevice(uint32_t *devType)
     }
     UnlockMutex(&g_mutex);
     return &deviceId;
+}
+
+__attribute__((weak)) const char *GetMessengerPackageName(void)
+{
+    return "ohos.dslm";
+}
+
+__attribute__((weak)) const char *GetMessengerPrimarySessionName(void)
+{
+    return "device.security.level";
+}
+
+__attribute__((weak)) const char *GetMessengerSecondarySessionName(void)
+{
+    return NULL;
 }

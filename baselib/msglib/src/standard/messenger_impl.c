@@ -43,13 +43,14 @@ Messenger *CreateMessengerImpl(const MessengerConfig *config)
 
     WorkQueue *processQueue = CreateWorkQueue(MESSENGER_PROCESS_QUEUE_SIZE, MESSENGER_PROCESS_QUEUE_NAME);
     if (processQueue == NULL) {
+        SECURITY_LOG_ERROR("create work queue failed");
         return NULL;
     }
 
-    bool result = InitDeviceSessionManager(processQueue, config->pkgName, config->sessName, config->messageReceiver,
-        config->sendResultNotifier);
+    bool result = InitDeviceSessionManager(processQueue, config);
     if (result == false) {
         DestroyWorkQueue(processQueue);
+        SECURITY_LOG_ERROR("init session manager failed");
         return NULL;
     }
 
