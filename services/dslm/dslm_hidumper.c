@@ -164,13 +164,8 @@ static void PrintBanner(int fd)
     dprintf(fd, "|___/|___/____|_|  |_| |___/ \\___/|_|  |_|_| |___|_|_\\" END_LINE);
 }
 
-static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
+static void DumpDeviceDetails(const DslmDeviceInfo *info, int32_t fd)
 {
-    if (info == NULL) {
-        return;
-    }
-
-    dprintf(fd, SPLIT_LINE END_LINE);
     dprintf(fd, "DEVICE_ID                 : %x" END_LINE, info->machine.machineId);
     dprintf(fd, "DEVICE_TYPE               : %u" END_LINE, info->deviceType);
     dprintf(fd, END_LINE);
@@ -200,21 +195,45 @@ static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "CRED_SECURITY_LEVEL       : %s" END_LINE, info->credInfo.securityLevel);
     dprintf(fd, "CRED_VERSION              : %s" END_LINE, info->credInfo.version);
     dprintf(fd, END_LINE);
+}
 
+static void DumpHistoryCalls(const DslmDeviceInfo *info, int32_t fd)
+{
     dprintf(fd, "SDK_CALL_HISTORY: " END_LINE);
     ListNode *node = NULL;
     int32_t index = 0;
     FOREACH_LIST_NODE (node, &info->historyList) {
         index++;
         DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
-        dprintf(fd, "#%2d: pid:%4u, req:%s,", index, notifyNode->owner, GetTimeStringFromTimeStamp(notifyNode->start));
-        dprintf(fd, " res:%s, cost:%4ums, ret:%u" END_LINE, GetTimeStringFromTimeStamp(notifyNode->stop),
-            notifyNode->stop - notifyNode->start, notifyNode->result);
+
+        char timeStart[TIME_STRING_LEN] = {0};
+        if (strcpy_s(timeStart, TIME_STRING_LEN, GetTimeStringFromTimeStamp(notifyNode->start)) != EOK) {
+            continue;
+        }
+        char timeStop[TIME_STRING_LEN] = {0};
+        if (strcpy_s(timeStop, TIME_STRING_LEN, GetTimeStringFromTimeStamp(notifyNode->stop)) != EOK) {
+            continue;
+        }
+
+        uint32_t cost = (notifyNode->stop > notifyNode->start) ? (notifyNode->stop - notifyNode->start) : 0;
+        dprintf(fd, "#%-4d pid:%-6u seq:%-4u req:%-26s res:%-26s ret:%-4u cost:%ums" END_LINE, index, notifyNode->owner,
+            notifyNode->cookie, timeStart, timeStop, notifyNode->result, cost);
+
         if (index >= NOTIFY_NODE_MAX_CNT) {
             break;
         }
     }
+}
 
+static void DumpOneDevice(const DslmDeviceInfo *info, int32_t fd)
+{
+    if (info == NULL) {
+        return;
+    }
+
+    dprintf(fd, SPLIT_LINE END_LINE);
+    DumpDeviceDetails(info, fd);
+    DumpHistoryCalls(info, fd);
     dprintf(fd, SPLIT_LINE END_LINE);
 }
 
