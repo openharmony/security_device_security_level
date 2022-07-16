@@ -49,12 +49,12 @@ static inline uint32_t MaskDeviceIdentity(const char *deviceId, uint32_t length)
 static inline void MessengerSleep(uint32_t seconds)
 {
     int ret;
-    struct timeval tm = {
+    struct timeval tmv = {
         .tv_sec = seconds,
         .tv_usec = 0,
     };
     do {
-        ret = select(0, NULL, NULL, NULL, &tm);
+        ret = select(0, NULL, NULL, NULL, &tmv);
     } while ((ret == -1) && (errno == EINTR));
 }
 

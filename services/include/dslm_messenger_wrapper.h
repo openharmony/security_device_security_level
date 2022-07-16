@@ -49,6 +49,10 @@ bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
 
 const DeviceIdentify *GetSelfDevice(uint32_t *devType);
 
+const char *GetMessengerPackageName(void) __attribute__((weak));
+const char *GetMessengerPrimarySessionName(void) __attribute__((weak));
+const char *GetMessengerSecondarySessionName(void) __attribute__((weak));
+
 #ifdef __cplusplus
 }
 #endif
