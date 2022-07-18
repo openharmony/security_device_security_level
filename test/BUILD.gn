@@ -53,10 +53,7 @@ ohos_unittest("dslm_test") {
 
   external_deps = [
     "device_security_level:dslm_sdk",
+    "hilog_native:libhilog",
     "utils_base:utils",
   ]
-
-  if (is_standard_system) {
-    external_deps += [ "hilog_native:libhilog" ]
-  }
 }
