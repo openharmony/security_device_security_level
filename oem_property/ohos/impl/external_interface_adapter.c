@@ -145,7 +145,7 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
     };
 
     struct HksParamSet *outputParam = NULL;
-    struct HksBlob certBlob[CERT_CHAIN_CERT_NUM] = {0};
+    struct HksBlob certBlob[CERT_CHAIN_CERT_NUM] = {{0}};
     struct HksCertChain hksCertChain = {&certBlob[0], CERT_CHAIN_CERT_NUM};
 
     if (BufferToHksCertChain(data, dataLen, &hksCertChain) != SUCCESS) {
