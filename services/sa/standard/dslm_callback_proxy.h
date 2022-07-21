@@ -16,8 +16,14 @@
 #ifndef DSLM_CALLBACK_PROXY
 #define DSLM_CALLBACK_PROXY
 
+#include <cstdint>
+#include <functional>
+
+#include "iremote_broker.h"
+#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "nocopyable.h"
+#include "refbase.h"
 
 #include "idevice_security_level.h"
 

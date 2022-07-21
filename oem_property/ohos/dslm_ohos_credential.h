@@ -16,8 +16,4 @@
 #ifndef DSLM_OHOS_CREDENTIAL_H
 #define DSLM_OHOS_CREDENTIAL_H
 
-#include "impl/dslm_ohos_init.h"
-#include "impl/dslm_ohos_request.h"
-#include "impl/dslm_ohos_verify.h"
-
 #endif // DSLM_OHOS_CREDENTIAL_H

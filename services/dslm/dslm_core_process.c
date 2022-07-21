@@ -15,10 +15,10 @@
 
 #include "dslm_core_process.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <stdbool.h>
 
 #include "securec.h"
 
