@@ -15,9 +15,19 @@
 
 #include "device_security_level_callback_helper.h"
 
+#include <cstdint>
+#include <functional>
+#include <map>
+#include <new>
+#include <utility>
+
+#include "hilog/log_cpp.h"
+#include "idevice_security_level.h"
 #include "timer.h"
 
-#include "hilog/log.h"
+#include "device_security_info.h"
+#include "device_security_level_callback_stub.h"
+#include "device_security_level_defines.h"
 
 namespace OHOS {
 namespace Security {

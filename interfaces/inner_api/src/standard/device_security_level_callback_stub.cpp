@@ -15,7 +15,14 @@
 
 #include "device_security_level_callback_stub.h"
 
-#include "hilog/log.h"
+#include <functional>
+#include <string>
+#include <type_traits>
+
+#include "hilog/log_cpp.h"
+
+#include "device_security_defines.h"
+#include "device_security_level_defines.h"
 
 namespace OHOS {
 namespace Security {

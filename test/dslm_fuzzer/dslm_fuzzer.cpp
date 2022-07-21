@@ -18,6 +18,7 @@
 #include "securec.h"
 #include "parcel.h"
 
+#include "device_security_defines.h"
 #include "utils_log.h"
 #include "device_security_level_callback_stub.h"
 #include "dslm_service.h"

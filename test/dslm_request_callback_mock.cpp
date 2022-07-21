@@ -15,9 +15,7 @@
 
 #include "dslm_request_callback_mock.h"
 
-#include <memory>
-#include <thread>
-#include <vector>
+#include <gmock/gmock.h>
 
 using namespace testing;
 using namespace testing::ext;
