@@ -16,7 +16,7 @@
 #ifndef DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 #define DEVICE_SECURITY_LEVEL_CALLBACK_STUB
 
-#include <stdint.h>
+#include <cstdint>
 #include <functional>
 
 #include "errors.h"
