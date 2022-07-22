@@ -275,7 +275,7 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devTy
     if (devId == NULL) {
         return false;
     }
-    NodeBasicInfo info = {0};
+    NodeBasicInfo info = {{0}, {0}, 0};
     bool result = MessengerGetDeviceNodeBasicInfo(devId, &info);
     if (result == true && devType != NULL) {
         *devType = info.deviceTypeId;
@@ -288,7 +288,7 @@ bool MessengerGetDeviceNetworkId(const DeviceIdentify *devId, char *networkId, u
     if (devId == NULL || networkId == NULL || len == 0) {
         return false;
     }
-    NodeBasicInfo info = {0};
+    NodeBasicInfo info = {{0}, {0}, 0};
     bool result = MessengerGetDeviceNodeBasicInfo(devId, &info);
     if (result != true) {
         return false;
