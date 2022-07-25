@@ -31,8 +31,8 @@ ohos_static_library("service_sa_static") {
 
   deps = [
     "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/services/bigdata:service_bigdata_obj",
     "//base/security/device_security_level/services/common:service_common_obj",
+    "//base/security/device_security_level/services/dfx:dslm_extension_dfx",
     "//base/security/device_security_level/services/dslm:service_dslm_obj",
     "//base/security/device_security_level/services/msg:service_msg_obj",
   ]

@@ -44,7 +44,6 @@ ohos_unittest("dslm_test") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/device_security_level/baselib/utils:utils_static",
     "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cred_obj",
-    "//base/security/device_security_level/services/bigdata:service_bigdata_obj",
     "//base/security/device_security_level/services/common:service_common_obj",
     "//base/security/device_security_level/services/dslm:service_dslm_test_obj",
     "//base/security/device_security_level/services/msg:service_msg_obj",
