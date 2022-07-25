@@ -19,6 +19,7 @@
 #include "utils_log.h"
 
 #include "dslm_core_process.h"
+#include "dslm_hitrace.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_serialize.h"
 
@@ -70,8 +71,10 @@ int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint
 uint32_t InitService(void)
 {
     uint32_t times = 0;
+    DslmStartProcessTrace("InitService");
     uint32_t ret = InitMessenger(OnPeerMsgReceived, OnPeerStatusReceiver, OnSendResultNotifier);
     if (ret != SUCCESS) {
+        DslmFinishProcessTrace();
         SECURITY_LOG_ERROR("InitMessenger ret = %{public}u", ret);
         return ret;
     }
@@ -79,6 +82,7 @@ uint32_t InitService(void)
     SECURITY_LOG_INFO("InitService InitMessenger success");
 
     while (true) {
+        DslmCountTrace("InitDslmProcess", times);
         if (InitDslmProcess()) {
             break;
         }
@@ -89,6 +93,8 @@ uint32_t InitService(void)
         }
         times++;
     }
+    DslmFinishProcessTrace();
+
     return SUCCESS;
 }
 
