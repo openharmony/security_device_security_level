@@ -170,7 +170,7 @@ static void DumpDeviceDetails(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_TYPE               : %u" END_LINE, info->deviceType);
     dprintf(fd, END_LINE);
 
-    dprintf(fd, "DEVICE_ONLINE_STATUS      : %s" END_LINE, info->onlineStatus ? "online" : "offline");
+    dprintf(fd, "DEVICE_ONLINE_STATUS      : %s" END_LINE, (info->onlineStatus != 0) ? "online" : "offline");
     dprintf(fd, "DEVICE_ONLINE_TIME        : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOnlineTime));
     dprintf(fd, "DEVICE_OFFLINE_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastOfflineTime));
     dprintf(fd, "DEVICE_REQUEST_TIME       : %s" END_LINE, GetTimeStringFromTimeStamp(info->lastRequestTime));
@@ -182,7 +182,7 @@ static void DumpDeviceDetails(const DslmDeviceInfo *info, int32_t fd)
     dprintf(fd, "DEVICE_PENDING_CNT        : %d" END_LINE, GetPendingNotifyNodeCnt(info));
     dprintf(fd, "DEVICE_MACHINE_STATUS     : %s" END_LINE, GetMachineState(info));
     dprintf(fd, "DEVICE_VERIFIED_LEVEL     : %u" END_LINE, info->credInfo.credLevel);
-    dprintf(fd, "DEVICE_VERIFIED_RESULT    : %s" END_LINE, info->result == 0 ? "success" : "failed");
+    dprintf(fd, "DEVICE_VERIFIED_RESULT    : %s" END_LINE, (info->result == 0) ? "success" : "failed");
     dprintf(fd, END_LINE);
 
     dprintf(fd, "CRED_TYPE                 : %s" END_LINE, GetCreadType(info));
