@@ -15,9 +15,10 @@
 
 #include "dslm_ohos_credential.h"
 
-#include <stdio.h>
-
-#include "utils_log.h"
+#include "dslm_cred.h"
+#include "impl/dslm_ohos_init.h"
+#include "impl/dslm_ohos_request.h"
+#include "impl/dslm_ohos_verify.h"
 
 __attribute__((constructor)) static void Constructor(void)
 {

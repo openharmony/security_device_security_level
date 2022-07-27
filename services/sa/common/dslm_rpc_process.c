@@ -14,10 +14,13 @@
  */
 #include "dslm_rpc_process.h"
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <unistd.h>
 
 #include "utils_log.h"
 
+#include "device_security_defines.h"
 #include "dslm_core_process.h"
 #include "dslm_hitrace.h"
 #include "dslm_messenger_wrapper.h"

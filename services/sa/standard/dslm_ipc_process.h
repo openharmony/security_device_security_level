@@ -16,10 +16,14 @@
 #ifndef DSLM_IPC_PROCESS_H
 #define DSLM_IPC_PROCESS_H
 
+#include <cstdint>
+#include <functional>
 #include <map>
+#include <mutex>
 
 #include "iremote_object.h"
 #include "message_parcel.h"
+#include "refbase.h"
 #include "singleton.h"
 
 #include "device_security_defines.h"

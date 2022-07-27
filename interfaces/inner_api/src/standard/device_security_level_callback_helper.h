@@ -16,12 +16,18 @@
 #ifndef DEVICE_SECURITY_LEVEL_CALLBACK_HELPER
 #define DEVICE_SECURITY_LEVEL_CALLBACK_HELPER
 
+#include <cstdint>
 #include <map>
 #include <mutex>
 
+#include "message_option.h"
+#include "message_parcel.h"
+#include "nocopyable.h"
+#include "refbase.h"
 #include "singleton.h"
 #include "timer.h"
 
+#include "device_security_defines.h"
 #include "device_security_level_callback_stub.h"
 #include "device_security_level_defines.h"
 

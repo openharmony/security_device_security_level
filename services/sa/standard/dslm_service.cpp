@@ -17,8 +17,11 @@
 
 #include <thread>
 
+#include "iremote_object.h"
+#include "singleton.h"
 #include "utils_log.h"
 
+#include "device_security_defines.h"
 #include "dslm_hidumper.h"
 #include "dslm_ipc_process.h"
 #include "dslm_rpc_process.h"

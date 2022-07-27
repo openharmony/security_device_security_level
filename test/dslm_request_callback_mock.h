@@ -16,10 +16,10 @@
 #ifndef DSLM_REQUEST_CALLBACK_MOCK_H
 #define DSLM_REQUEST_CALLBACK_MOCK_H
 
+#include <cstdint>
 #include <gmock/gmock.h>
 #include <mutex>
-
-#include "messenger.h"
+#include <new>
 
 #include "dslm_callback_info.h"
 
