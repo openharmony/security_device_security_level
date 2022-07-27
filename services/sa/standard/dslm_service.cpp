@@ -74,7 +74,7 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
             case CMD_GET_DEVICE_SECURITY_LEVEL:
                 return ProcessGetDeviceSecurityLevel(data, reply);
             default:
-                break;
+                return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     } while (false);
 
