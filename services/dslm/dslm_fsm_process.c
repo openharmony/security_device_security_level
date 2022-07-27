@@ -38,6 +38,8 @@
 #include "dslm_msg_serialize.h"
 #include "dslm_notify_node.h"
 
+#define REQUEST_INTERVAL (24 * 60 * 60 * 1000)
+
 typedef bool DslmInfoChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result);
 
@@ -176,6 +178,20 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
     }
 }
 
+static bool CheckNeedToResend(const DslmDeviceInfo *info)
+{
+    if (info->credInfo.credLevel == 0) {
+        return true;
+    }
+    if (info->lastOnlineTime < info->lastRequestTime) {
+        return true;
+    }
+    if (!info->lastOnlineTime - info->lastRequestTime > REQUEST_INTERVAL) {
+        return true;
+    }
+    return false;
+}
+
 static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *info = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
@@ -185,6 +201,10 @@ static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, con
     info->onlineStatus = ONLINE_STATUS_ONLINE;
     info->queryTimes = 0;
     info->lastOnlineTime = GetMillisecondSinceBoot();
+    if (!CheckNeedToResend(info)) {
+        SECURITY_LOG_DEBUG("last request time is last than 24 hours");
+        ScheduleDslmStateMachine(info, EVENT_TO_SYNC, NULL);
+    }
     return ProcessSendCredRequest(machine, event, para);
 }
 
@@ -351,6 +371,7 @@ void ScheduleDslmStateMachine(DslmDeviceInfo *info, uint32_t event, const void *
         {STATE_WAITING_CRED_RSP, EVENT_MSG_SEND_FAILED, ProcessSendRequestFailed, STATE_WAITING_CRED_RSP, STATE_FAILED},
         {STATE_WAITING_CRED_RSP, EVENT_TIME_OUT, ProcessSendCredRequest, STATE_WAITING_CRED_RSP, STATE_FAILED},
         {STATE_WAITING_CRED_RSP, EVENT_DEVICE_OFFLINE, ProcessDeviceOffline, STATE_INIT, STATE_INIT},
+        {STATE_WAITING_CRED_RSP, EVENT_TO_SYNC, NULL, STATE_SUCCESS, STATE_SUCCESS},
         {STATE_WAITING_CRED_RSP, EVENT_SDK_GET, ProcessSdkRequest, STATE_WAITING_CRED_RSP, STATE_WAITING_CRED_RSP},
         {STATE_WAITING_CRED_RSP, EVENT_SDK_TIMEOUT, ProcessSdkTimeout, STATE_WAITING_CRED_RSP, STATE_WAITING_CRED_RSP},
         {STATE_SUCCESS, EVENT_DEVICE_OFFLINE, ProcessDeviceOffline, STATE_INIT, STATE_INIT},
