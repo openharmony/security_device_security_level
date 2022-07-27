@@ -15,7 +15,12 @@
 
 #include "device_security_level_loader.h"
 
-#include "hilog/log.h"
+#include <future>
+#include <type_traits>
+
+#include "hilog/log_cpp.h"
+#include "if_system_ability_manager.h"
+#include "isystem_ability_load_callback.h"
 #include "iservice_registry.h"
 
 #include "device_security_level_defines.h"

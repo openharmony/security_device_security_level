@@ -17,9 +17,11 @@
 #define DEVICE_SECURITY_LEVEL_LOADER
 
 #include <future>
+#include <new>
+#include <cstdint>
 
+#include "refbase.h"
 #include "iremote_object.h"
-#include "nocopyable.h"
 #include "singleton.h"
 #include "system_ability_load_callback_stub.h"
 

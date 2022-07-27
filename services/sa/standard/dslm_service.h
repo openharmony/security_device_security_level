@@ -16,8 +16,16 @@
 #ifndef DSLM_SERVICE_H
 #define DSLM_SERVICE_H
 
+#include <cstdint>
+#include <iosfwd>
+#include <string>
+#include <vector>
+
 #include "iremote_stub.h"
+#include "message_option.h"
+#include "message_parcel.h"
 #include "nocopyable.h"
+#include "refbase.h"
 #include "system_ability.h"
 
 #include "idevice_security_level.h"

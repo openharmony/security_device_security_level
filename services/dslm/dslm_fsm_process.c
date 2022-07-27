@@ -17,18 +17,25 @@
 
 #include <securec.h>
 #include <stdbool.h>
+#include <stddef.h>
 
+#include "device_security_defines.h"
 #include "utils_datetime.h"
 #include "utils_hexstring.h"
+#include "utils_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
 #include "utils_state_machine.h"
 #include "utils_timer.h"
 
+#include "dslm_callback_info.h"
+#include "dslm_core_defines.h"
+#include "dslm_cred.h"
 #include "dslm_device_list.h"
 #include "dslm_hitrace.h"
 #include "dslm_inner_process.h"
+#include "dslm_msg_serialize.h"
 #include "dslm_notify_node.h"
 
 typedef bool DslmInfoChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
