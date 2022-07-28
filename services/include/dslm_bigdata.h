@@ -52,6 +52,10 @@ typedef struct SecurityInfoSyncEvent {
 extern "C" {
 #endif
 
+void ReportServiceStartFailedEvent(const uint32_t errorType);
+
+void ReportInitSelfFailedEvent(const char *errorString);
+
 void ReportAppInvokeEvent(const AppInvokeEvent *event);
 
 void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event);
