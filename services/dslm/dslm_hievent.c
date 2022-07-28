@@ -25,6 +25,16 @@
 #include "dslm_cred.h"
 #include "dslm_bigdata.h"
 
+void ReportHiEventServiceStartFailed(const uint32_t errorType)
+{
+    ReportServiceStartFailedEvent(errorType);
+}
+
+void ReportHiEventInitSelfFailed(const char *errorString)
+{
+    ReportInitSelfFailedEvent(errorString);
+}
+
 void ReportHiEventInfoSync(const DslmDeviceInfo *info)
 {
     if (info == NULL) {

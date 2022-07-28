@@ -27,6 +27,7 @@ ohos_static_library("service_sa_static") {
     "//base/security/device_security_level/interfaces/inner_api/include",
     "//base/security/device_security_level/services/include",
     "//base/security/device_security_level/services/sa/common",
+    "//base/security/device_security_level/services/dslm",
   ]
 
   deps = [

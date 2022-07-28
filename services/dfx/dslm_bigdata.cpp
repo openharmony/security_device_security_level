@@ -20,8 +20,12 @@
 extern "C" {
 #endif
 
+constexpr char STR_EVENT_START_FAILED[] = "SERVICE_START_FAILED";
+constexpr char STR_EVENT_INIT_SELF_LEVEL_FAULT[] = "INIT_SELF_LEVEL_FAULT";
 constexpr char STR_EVENT_CALL_INTERFACE[] = "CALL_INTERFACE";
 constexpr char STR_EVENT_QUERY_INFO[] = "QUERY_INFO";
+constexpr char STR_ERROR_TYPE[] = "ERROR_TYPE";
+constexpr char STR_ERROR_STR[] = "ERROR_STR";
 constexpr char STR_USER_ID[] = "USER_ID";
 constexpr char STR_COST_TIME[] = "COST_TIME";
 constexpr char STR_RET_CODE[] = "RET_CODE";
@@ -33,6 +37,18 @@ constexpr char STR_PKG_NAME[] = "PKG_NAME";
 constexpr char STR_LOCAL_VERSION[] = "LOCAL_VERSION";
 constexpr char STR_TARGET_VERSION[] = "TARGET_VERSION";
 constexpr char STR_CRED_TYPE[] = "CRED_TYPE";
+
+void ReportServiceStartFailedEvent(const uint32_t errorType)
+{
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_START_FAILED,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, STR_ERROR_TYPE, errorType);
+}
+
+void ReportInitSelfFailedEvent(const char *errorString)
+{
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_INIT_SELF_LEVEL_FAULT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, STR_ERROR_STR, errorString);
+}
 
 void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {

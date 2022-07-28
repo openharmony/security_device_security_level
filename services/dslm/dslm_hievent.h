@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+void ReportHiEventServiceStartFailed(const uint32_t errorType);
+void ReportHiEventInitSelfFailed(const char *errorString);
 void ReportHiEventInfoSync(const DslmDeviceInfo *info);
 void ReportHiEventAppInvoke(const DslmDeviceInfo *info);
 
