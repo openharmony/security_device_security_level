@@ -22,8 +22,9 @@
 #include <mutex>
 #include <thread>
 
-#include "securec.h"
+#include "file_ex.h"
 #include "nativetoken_kit.h"
+#include "securec.h"
 #include "token_setproc.h"
 
 #include "device_security_defines.h"
@@ -79,9 +80,11 @@ void DslmTest::SetUpTestCase()
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+    SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 void DslmTest::TearDownTestCase()
 {
+    SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 void DslmTest::SetUp()
 {
