@@ -42,6 +42,7 @@ enum {
     EVENT_SDK_GET = 5,
     EVENT_SDK_TIMEOUT = 6,
     EVENT_CHECK = 7,
+    EVENT_TO_SYNC = 8,
 };
 
 void InitDslmStateMachine(DslmDeviceInfo *info);
