@@ -195,12 +195,14 @@ bool InitSelfDeviceSecureLevel(void)
     const DeviceIdentify *device = GetSelfDevice(&devType);
     if (device->length == 0) {
         SECURITY_LOG_ERROR("GetSelfDevice failed");
+        ReportHiEventInitSelfFailed("GetSelfDevice failed");
         return false;
     }
 
     DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(device);
     if (info == NULL) {
         SECURITY_LOG_ERROR("CreatOrGetDslmDeviceInfo failed");
+        ReportHiEventInitSelfFailed("CreatOrGetDslmDeviceInfo failed");
         return false;
     }
 

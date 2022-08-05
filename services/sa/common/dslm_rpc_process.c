@@ -22,6 +22,7 @@
 
 #include "device_security_defines.h"
 #include "dslm_core_process.h"
+#include "dslm_hievent.h"
 #include "dslm_hitrace.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_serialize.h"
@@ -78,6 +79,7 @@ uint32_t InitService(void)
     uint32_t ret = InitMessenger(OnPeerMsgReceived, OnPeerStatusReceiver, OnSendResultNotifier);
     if (ret != SUCCESS) {
         DslmFinishProcessTrace();
+        ReportHiEventServiceStartFailed(ret);
         SECURITY_LOG_ERROR("InitMessenger ret = %{public}u", ret);
         return ret;
     }
