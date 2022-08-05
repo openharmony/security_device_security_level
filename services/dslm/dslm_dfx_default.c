@@ -30,6 +30,14 @@ extern "C" {
 #define END_LINE "\n"
 
 // bigdata
+__attribute__((weak)) void ReportServiceStartFailedEvent(const uint32_t errorType)
+{
+}
+
+__attribute__((weak)) void ReportInitSelfFailedEvent(const char *errorString)
+{
+}
+
 __attribute__((weak)) void ReportAppInvokeEvent(const AppInvokeEvent *event)
 {
 }
