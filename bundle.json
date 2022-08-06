@@ -39,7 +39,7 @@
                 "safwk",
                 "utils_base",
                 "ipc",
-                "samgr_standard",
+                "samgr",
                 "hisysevent_native",
                 "device_auth",
                 "hilog_native"
