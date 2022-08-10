@@ -37,8 +37,8 @@ ohos_static_library("utils_static") {
   deps = [ "//third_party/cJSON:cjson" ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
-    "utils_base:utils",
   ]
 
   part_name = "device_security_level"

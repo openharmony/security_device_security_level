@@ -38,10 +38,10 @@ ohos_fuzztest("DslmFuzzTest") {
       [ "//base/security/device_security_level/oem_property/ohos:dslm_service" ]
 
   external_deps = [
+    "c_utils:utils",
     "device_security_level:dslm_sdk",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "utils_base:utils",
   ]
 }
