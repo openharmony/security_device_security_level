@@ -31,9 +31,9 @@ ohos_source_set("service_common_obj") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "ipc:ipc_core",
-    "utils_base:utils",
   ]
 
   part_name = "device_security_level"
