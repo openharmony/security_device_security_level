@@ -36,10 +36,10 @@ ohos_shared_library("dslm_sdk") {
   deps = []
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 
   part_name = "device_security_level"

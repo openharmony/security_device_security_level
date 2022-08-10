@@ -31,10 +31,10 @@ ohos_source_set("dslm_extension_dfx") {
   deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog_native:libhilog",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
-    "utils_base:utils",
   ]
 
   part_name = "device_security_level"
