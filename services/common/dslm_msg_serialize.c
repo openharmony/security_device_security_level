@@ -35,6 +35,10 @@ static inline bool IsAscii(const uint8_t ch)
 
 bool CheckMessage(const uint8_t *msg, uint32_t length)
 {
+    if (msg == NULL || length <= 1) {
+        return false;
+    }
+
     // our msgs is a printable string
     if (msg[length - 1] != '\0') {
         return false;
@@ -49,6 +53,11 @@ bool CheckMessage(const uint8_t *msg, uint32_t length)
 
 MessagePacket *ParseMessage(const MessageBuff *buff)
 {
+    if (buff == NULL) {
+        SECURITY_LOG_DEBUG("EMPTY BUFF   ");
+        return NULL;
+    }
+
     if (!CheckMessage(buff->buff, buff->length)) {
         SECURITY_LOG_DEBUG("ERR MSG");
         return NULL;
@@ -83,39 +92,6 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
 
     DestroyJson(handle);
     return packet;
-}
-
-MessageBuff *SerializeMessage(const MessagePacket *packet)
-{
-    if (!CheckMessage(packet->payload, packet->length)) {
-        SECURITY_LOG_DEBUG("ERR MSG");
-        return NULL;
-    }
-
-    MessageBuff *out = MALLOC(sizeof(MessageBuff));
-    if (out == NULL) {
-        return NULL;
-    }
-    (void)memset_s(out, sizeof(MessageBuff), 0, sizeof(MessageBuff));
-
-    JsonHandle json = CreateJson(NULL);
-    if (json == NULL) {
-        FREE(out);
-        return NULL;
-    }
-
-    AddFieldIntToJson(json, FIELD_MESSAGE, (int32_t)packet->type);
-    AddFieldStringToJson(json, FIELD_PAYLOAD, (const char *)packet->payload);
-
-    out->buff = (uint8_t *)ConvertJsonToString(json);
-    if (out->buff == NULL) {
-        FREE(out);
-        DestroyJson(json);
-        return NULL;
-    }
-    out->length = strlen((char *)out->buff) + 1;
-    DestroyJson(json);
-    return out;
 }
 
 void FreeMessagePacket(MessagePacket *packet)
