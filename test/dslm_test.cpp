@@ -41,6 +41,7 @@
 #include "dslm_msg_serialize.h"
 #include "dslm_msg_utils.h"
 #include "dslm_request_callback_mock.h"
+#include "utils_datetime.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -183,6 +184,37 @@ HWTEST_F(DslmTest, ParseMessage_case3, TestSize.Level0)
     MessagePacket *packet = ParseMessage(&msg);
     EXPECT_EQ(nullptr, packet);
     FreeMessagePacket(packet);
+}
+
+HWTEST_F(DslmTest, ParseMessage_case4, TestSize.Level0)
+{
+    const MessageBuff *buff = NULL;
+    EXPECT_EQ(NULL, ParseMessage(buff));
+}
+
+HWTEST_F(DslmTest, ParseMessage_case5, TestSize.Level0)
+{
+    uint8_t *message = NULL;
+    uint32_t messageLen = 0;
+    MessageBuff msg = {.length = messageLen, .buff = message};
+
+    EXPECT_EQ(NULL, ParseMessage(&msg));
+}
+
+HWTEST_F(DslmTest, ParseMessage_case6, TestSize.Level0)
+{
+    uint8_t message[] = {'1', '2'};
+    uint32_t messageLen = 2;
+    MessageBuff msg = {.length = messageLen, .buff = message};
+    EXPECT_EQ(NULL, ParseMessage(&msg));
+}
+
+HWTEST_F(DslmTest, ParseMessage_case7, TestSize.Level0)
+{
+    uint8_t message[] = {1, 2, 0};
+    uint32_t messageLen = 3;
+    MessageBuff msg = {.length = messageLen, .buff = message};
+    EXPECT_EQ(NULL, ParseMessage(&msg));
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
@@ -368,6 +400,44 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level0)
 
     GenerateRandom(&rand, 1024);
     EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
+}
+
+HWTEST_F(DslmTest, GetMillisecondSinceBoot_case1, TestSize.Level0)
+{
+    uint64_t tick = 100;
+    uint64_t start = GetMillisecondSinceBoot();
+    EXPECT_GT(start, 0U);
+    this_thread::sleep_for(milliseconds(tick));
+    uint64_t end = GetMillisecondSinceBoot();
+    EXPECT_GT(end, 0U);
+
+    EXPECT_GT(end - start, tick - 10);
+    EXPECT_LT(end - start, tick + 10);
+}
+
+HWTEST_F(DslmTest, GetMillisecondSince1970_case1, TestSize.Level0)
+{
+    uint64_t tick = 100;
+    uint64_t start = GetMillisecondSince1970();
+    EXPECT_GT(start, 0U);
+    this_thread::sleep_for(milliseconds(tick));
+    uint64_t end = GetMillisecondSince1970();
+    EXPECT_GT(end, 0U);
+
+    EXPECT_GT(end - start, tick - 10);
+    EXPECT_LT(end - start, tick + 10);
+}
+
+HWTEST_F(DslmTest, GetDateTime_case1, TestSize.Level0)
+{
+    {
+        DateTime date;
+        EXPECT_TRUE(GetDateTimeByMillisecondSince1970(GetMillisecondSince1970(), &date));
+    }
+    {
+        DateTime date;
+        EXPECT_TRUE(GetDateTimeByMillisecondSinceBoot(GetMillisecondSinceBoot(), &date));
+    }
 }
 
 HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level0)
