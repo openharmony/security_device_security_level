@@ -11,7 +11,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-domain: SECURITY
+domain: DSLM
 
 SERVICE_START_FAILED:
   __BASE: {type: FAULT, level: CRITICAL, tag: DSLM, desc: DSLM service start errors}
