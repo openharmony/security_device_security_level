@@ -49,12 +49,17 @@
             ]
         },
         "build": {
-            "sub_component": [
-                "//base/security/device_security_level/interfaces/inner_api:dslm_sdk",
-                "//base/security/device_security_level/oem_property/ohos:dslm_service",
-                "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cred_file",
-                "//base/security/device_security_level/profile:dslm_service.rc"
-            ],
+            "group_type": {
+                "base_group": [],
+                "fwk_group": [
+                    "//base/security/device_security_level/interfaces/inner_api:dslm_sdk"
+                ],
+                "service_group": [
+                    "//base/security/device_security_level/oem_property/ohos:dslm_service",
+                    "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cred_file",
+                    "//base/security/device_security_level/profile:dslm_service.rc"
+                ]
+            },
             "inner_kits": [
                 {
                     "name": "//base/security/device_security_level/interfaces/inner_api:dslm_sdk",
