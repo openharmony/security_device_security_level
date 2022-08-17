@@ -40,13 +40,13 @@ constexpr char STR_CRED_TYPE[] = "CRED_TYPE";
 } // namespace
 void ReportServiceStartFailedEvent(const uint32_t errorType)
 {
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_START_FAILED,
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::DSLM, STR_EVENT_START_FAILED,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, STR_ERROR_TYPE, errorType);
 }
 
 void ReportInitSelfFailedEvent(const char *errorString)
 {
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_INIT_SELF_LEVEL_FAULT,
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::DSLM, STR_EVENT_INIT_SELF_LEVEL_FAULT,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, STR_ERROR_STR, errorString);
 }
 
@@ -56,7 +56,7 @@ void ReportAppInvokeEvent(const AppInvokeEvent *event)
         return;
     }
 
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_CALL_INTERFACE,
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::DSLM, STR_EVENT_CALL_INTERFACE,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, STR_USER_ID, event->uid, STR_COST_TIME, event->costTime,
         STR_RET_CODE, event->retCode, STR_SEC_LEVEL, event->secLevel, STR_RET_MODE, event->retMode, STR_LOCAL_MODEL,
         event->localModel, STR_TARGET_MODEL, event->targetModel, STR_PKG_NAME, event->pkgName);
@@ -68,7 +68,7 @@ void ReportSecurityInfoSyncEvent(const SecurityInfoSyncEvent *event)
         return;
     }
 
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, STR_EVENT_QUERY_INFO,
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::DSLM, STR_EVENT_QUERY_INFO,
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, STR_LOCAL_MODEL, event->localModel, STR_TARGET_MODEL,
         event->targetModel, STR_LOCAL_VERSION, event->localVersion, STR_TARGET_VERSION, event->targetVersion,
         STR_CRED_TYPE, event->credType, STR_RET_CODE, event->retCode, STR_COST_TIME, event->costTime, STR_SEC_LEVEL,
