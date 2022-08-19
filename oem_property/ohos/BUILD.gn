@@ -86,12 +86,10 @@ template("make_dslm_cred") {
   if (!defined(device_name)) {
     device_name = "default"
   }
-  if (!defined(product_name)) {
-    product_name = "default"
-  }
 
   product_level = target_name
   product_manufacture = "OHOS"
+  product_model = "default"
   product_version = "3.0.0"
 
   action("gen_ohos_dslm_cred_file") {
@@ -107,7 +105,7 @@ template("make_dslm_cred") {
       "--field-brand",
       device_name,
       "--field-model",
-      product_name,
+      product_model,
       "--field-software-version",
       product_version,
       "--field-security-level",
