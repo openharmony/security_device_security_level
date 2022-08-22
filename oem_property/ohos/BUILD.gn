@@ -71,75 +71,9 @@ ohos_source_set("dslm_ohos_cred_obj") {
   subsystem_name = "security"
 }
 
-# dslm cred
-declare_args() {
-  device_security_level_feature_cred_file_sl1 = false
-  device_security_level_feature_cred_file_sl2 = false
-  device_security_level_feature_cred_file_sl3 = false
-  device_security_level_feature_cred_file_sl4 = false
-  device_security_level_feature_cred_file_sl5 = false
-}
-
-template("make_dslm_cred") {
-  forward_variables_from(invoker, "*")
-
-  if (!defined(device_name)) {
-    device_name = "default"
-  }
-
-  product_level = target_name
-  product_manufacture = "OHOS"
-  product_model = "default"
-  product_version = "3.0.0"
-
-  action("gen_ohos_dslm_cred_file") {
-    script = "dslm_cred_tool.py"
-    cred_file = target_gen_dir + "/dslm_finger.cfg"
-    outputs = [ cred_file ]
-    args = [
-      "create",
-      "--artifacts-dir",
-      rebase_path(target_gen_dir + "/artifacts"),
-      "--field-manufacture",
-      product_manufacture,
-      "--field-brand",
-      device_name,
-      "--field-model",
-      product_model,
-      "--field-software-version",
-      product_version,
-      "--field-security-level",
-      product_level,
-      "--cred-file",
-      rebase_path(cred_file),
-      "--strict",
-      "true",
-    ]
-  }
-}
-
-if (device_security_level_feature_cred_file_sl5) {
-  make_dslm_cred("SL5") {
-  }
-} else if (device_security_level_feature_cred_file_sl4) {
-  make_dslm_cred("SL4") {
-  }
-} else if (device_security_level_feature_cred_file_sl3) {
-  make_dslm_cred("SL3") {
-  }
-} else if (device_security_level_feature_cred_file_sl2) {
-  make_dslm_cred("SL2") {
-  }
-} else {
-  make_dslm_cred("SL1") {
-  }
-}
-
 ohos_prebuilt_etc("dslm_ohos_cred_file") {
-  out = get_target_outputs(":gen_ohos_dslm_cred_file")
-  source = out[0]
-
-  deps = [ ":gen_ohos_dslm_cred_file" ]
+  source = "dslm_finger_sl1.cfg"
+  output = "dslm_finger.cfg"
 
   part_name = "device_security_level"
   subsystem_name = "security"
