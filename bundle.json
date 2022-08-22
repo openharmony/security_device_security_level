@@ -18,11 +18,6 @@
             "SystemCapability.Security.DeviceSecurityLevel"
         ],
         "features": [
-            "device_security_level_feature_cred_file_sl1",
-            "device_security_level_feature_cred_file_sl2",
-            "device_security_level_feature_cred_file_sl3",
-            "device_security_level_feature_cred_file_sl4",
-            "device_security_level_feature_cred_file_sl5"
         ],
         "hisysevent_config": [
             "//base/security/device_security_level/hisysevent.yaml"
