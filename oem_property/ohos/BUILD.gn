@@ -72,8 +72,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
 }
 
 ohos_prebuilt_etc("dslm_ohos_cred_file") {
-  source = "dslm_finger_sl1.cfg"
-  output = "dslm_finger.cfg"
+  source = "dslm_finger.cfg"
 
   part_name = "device_security_level"
   subsystem_name = "security"
