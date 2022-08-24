@@ -14,9 +14,9 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-ohos_fuzztest("DslmFuzzTest") {
+ohos_fuzztest("dslm_fuzz") {
   module_out_path = "security/device_security_level"
-  fuzz_config_file = "//base/security/device_security_level/test/dslm_fuzzer"
+  fuzz_config_file = "//base/security/device_security_level/test/dslm_fuzz_test"
 
   cflags = [
     "-g",
