@@ -31,6 +31,8 @@ ohos_shared_library("dslm_sdk") {
     "//base/security/device_security_level/common/include",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   public_configs = [ ":device_security_level_sdk_config" ]
 
   deps = []

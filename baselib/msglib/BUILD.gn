@@ -40,6 +40,8 @@ ohos_static_library("messenger_static") {
     "hilog_native:libhilog",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   public_configs = [ ":messenger_static_config" ]
   part_name = "device_security_level"
   subsystem_name = "security"

@@ -18,6 +18,7 @@
             "SystemCapability.Security.DeviceSecurityLevel"
         ],
         "features": [
+            "device_security_level_feature_coverage = false"
         ],
         "hisysevent_config": [
             "//base/security/device_security_level/hisysevent.yaml"
