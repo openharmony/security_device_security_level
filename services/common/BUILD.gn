@@ -36,6 +36,8 @@ ohos_source_set("service_common_obj") {
     "ipc:ipc_core",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   part_name = "device_security_level"
   subsystem_name = "security"
 }

@@ -43,6 +43,9 @@ ohos_source_set("service_dslm_obj") {
     "MAX_SEND_TIMES=5",
     "SEND_MSG_TIMEOUT_LEN=40000",
   ]
+
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   part_name = "device_security_level"
   subsystem_name = "security"
 }
@@ -61,6 +64,9 @@ ohos_source_set("service_dslm_test_obj") {
     "MAX_SEND_TIMES=5",
     "SEND_MSG_TIMEOUT_LEN=500",
   ]
+
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   part_name = "device_security_level"
   subsystem_name = "security"
 }

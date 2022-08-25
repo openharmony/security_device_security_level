@@ -37,6 +37,8 @@ ohos_source_set("dslm_extension_dfx") {
     "hitrace_native:hitrace_meter",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   part_name = "device_security_level"
   subsystem_name = "security"
 }
