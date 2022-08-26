@@ -58,6 +58,7 @@ int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint3
             ret = OnPeerMsgResponseInfoReceived(devId, packet->payload, packet->length);
             break;
         default:
+            ret = ERR_INVALID_PARA;
             break;
     }
     if (ret != SUCCESS) {
