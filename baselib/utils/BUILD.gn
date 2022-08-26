@@ -32,6 +32,8 @@ ohos_static_library("utils_static") {
 
   include_dirs = [ "include" ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   public_configs = [ ":utils_static_config" ]
 
   deps = [ "//third_party/cJSON:cjson" ]

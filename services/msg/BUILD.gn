@@ -32,6 +32,8 @@ ohos_source_set("service_msg_obj") {
     "hilog_native:libhilog",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   part_name = "device_security_level"
   subsystem_name = "security"
 }

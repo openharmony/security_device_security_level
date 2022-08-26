@@ -28,6 +28,8 @@ ohos_shared_library("dslm_service") {
     "//base/security/device_security_level/services/sa:service_sa_static",
   ]
 
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
+
   external_deps = [
     "c_utils:utils",
     "hilog_native:libhilog",
@@ -59,6 +61,8 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "//base/security/device_security_level/baselib/utils:utils_static",
     "//base/security/device_security_level/oem_property/common:oem_common_obj",
   ]
+
+  configs = [ "//base/security/device_security_level/common:common_configs" ]
 
   external_deps = [
     "c_utils:utils",
