@@ -92,7 +92,7 @@ extern "C" {
 Messenger *CreateMessengerImpl(const MessengerConfig *config)
 {
     (void)config;
-    return nullptr;
+    return g_messenger;
 }
 
 void DestroyMessengerImpl(Messenger *messenger)
