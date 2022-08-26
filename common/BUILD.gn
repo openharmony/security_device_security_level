@@ -13,27 +13,14 @@
 
 import("//build/ohos.gni")
 
-# oem_common_obj object
-ohos_source_set("oem_common_obj") {
-  sources = [ "dslm_credential_utils.c" ]
+declare_args() {
+  device_security_level_feature_coverage = false
+}
 
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-  ]
-
-  deps = [
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//third_party/openssl:libcrypto_shared",
-  ]
-
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-  ]
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
+config("common_configs") {
+  if (device_security_level_feature_coverage) {
+    cflags = [ "--coverage" ]
+    cflags_cc = [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
 }
