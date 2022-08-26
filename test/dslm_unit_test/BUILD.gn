@@ -27,6 +27,7 @@ ohos_unittest("dslm_test") {
     "//base/security/device_security_level/services/sa/common/dslm_rpc_process.c",
     "dslm_msg_interface_mock.cpp",
     "dslm_request_callback_mock.cpp",
+    "dslm_rpc_process_test.cpp",
     "dslm_test.cpp",
   ]
 

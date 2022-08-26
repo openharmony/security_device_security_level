@@ -400,6 +400,8 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level0)
 
     GenerateRandom(&rand, 1024);
     EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
+
+    GenerateRandom(nullptr, 1024);
 }
 
 HWTEST_F(DslmTest, GetMillisecondSinceBoot_case1, TestSize.Level0)
@@ -471,7 +473,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
 
     const RequestOption option = {
         .challenge = 0xffffffffffffffff,
-        .timeout = 3,
+        .timeout = 2,
     };
 
     {
@@ -520,7 +522,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a'}};
     const RequestOption option = {
         .challenge = 0xffabcdffffffffee,
-        .timeout = 3,
+        .timeout = 2,
         .extra = 0,
     };
 
@@ -557,7 +559,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
     const int32_t reqTimes = 3;
 
     uint32_t cookies[] = {0, 0x1234, 0x5678, 0xabcd};
-    uint32_t timeouts[] = {0, 1, 5, 9};
+    uint32_t timeouts[] = {0, 1, 3, 5};
 
     auto checkCookie = [&mtx, &cv, &cnt, &start, &cookies, &timeouts](uint32_t cookie) {
         unique_lock<mutex> lck(mtx);
