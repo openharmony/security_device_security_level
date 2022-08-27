@@ -36,7 +36,7 @@ ohos_static_library("utils_static") {
 
   public_configs = [ ":utils_static_config" ]
 
-  deps = [ "//third_party/cJSON:cjson" ]
+  deps = [ "//third_party/cJSON:cjson_static" ]
 
   external_deps = [
     "c_utils:utils",
