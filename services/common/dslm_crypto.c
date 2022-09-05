@@ -17,14 +17,15 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <openssl/rand.h>
+
+#include "openssl/rand.h"
 
 void GenerateRandom(RandomValue *rand, uint32_t length)
 {
     if (rand == NULL) {
         return;
     }
-    rand->length = (length > RAMDOM_MAX_LEN) ? RAMDOM_MAX_LEN : length;
+    rand->length = (length > RANDOM_MAX_LEN) ? RANDOM_MAX_LEN : length;
 
     RAND_bytes(&rand->value[0], rand->length);
 }
