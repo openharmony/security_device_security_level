@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define RAMDOM_MAX_LEN 32
+#define RANDOM_MAX_LEN 32
 
 #define TYPE_ECDSA_SHA_256 0
 #define TYPE_ECDSA_SHA_384 1
@@ -30,7 +30,7 @@ extern "C" {
 
 typedef struct RandomValue {
     uint32_t length;
-    uint8_t value[RAMDOM_MAX_LEN];
+    uint8_t value[RANDOM_MAX_LEN];
 } RandomValue;
 
 void GenerateRandom(RandomValue *rand, uint32_t length);
