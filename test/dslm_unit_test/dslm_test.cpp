@@ -54,19 +54,19 @@ namespace DslmUnitTest {
 void DslmTest::SetUpTestCase()
 {
     // modify the device's systime to ensure that the certificate verification passes
-    constexpr time_t YEAR_TIME_2022 = 1640966400;
-    constexpr time_t YEAR_TIME_2022_VALID = 1648518888;
+    constexpr time_t year_timer_2022 = 1640966400;
+    constexpr time_t year_timer_2022_valid = 1648518888;
     struct timeval timeVal = {0};
     gettimeofday(&timeVal, nullptr);
-    if (timeVal.tv_sec <= YEAR_TIME_2022) {
-        timeVal.tv_sec = YEAR_TIME_2022_VALID;
+    if (timeVal.tv_sec <= year_timer_2022) {
+        timeVal.tv_sec = year_timer_2022_valid;
         settimeofday(&timeVal, nullptr);
     }
 
-    static const char *ACLS[] = {"ACCESS_IDS"};
-    static const char *PERMS[] = {
+    static const char *acls[] = {"ACCESS_IDS"};
+    static const char *perms[] = {
         "ohos.permission.PLACE_CALL",
-        "ohos.permission.ACCESS_IDS"
+        "ohos.permission.ACCESS_IDS",
     };
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
@@ -74,8 +74,8 @@ void DslmTest::SetUpTestCase()
         .permsNum = 2,
         .aclsNum = 1,
         .dcaps = nullptr,
-        .perms = PERMS,
-        .acls = ACLS,
+        .perms = perms,
+        .acls = acls,
         .processName = "dslm_service",
         .aplStr = "system_core",
     };
@@ -156,7 +156,7 @@ HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level0)
     MessagePacket *packet = ParseMessage(&msg);
     ASSERT_NE(nullptr, packet);
 
-    EXPECT_EQ(1, (int32_t)packet->type);
+    EXPECT_EQ(1U, packet->type);
     EXPECT_STREQ(except, (const char *)packet->payload);
 
     FreeMessagePacket(packet);
@@ -188,17 +188,17 @@ HWTEST_F(DslmTest, ParseMessage_case3, TestSize.Level0)
 
 HWTEST_F(DslmTest, ParseMessage_case4, TestSize.Level0)
 {
-    const MessageBuff *buff = NULL;
-    EXPECT_EQ(NULL, ParseMessage(buff));
+    const MessageBuff *buff = nullptr;
+    EXPECT_EQ(nullptr, ParseMessage(buff));
 }
 
 HWTEST_F(DslmTest, ParseMessage_case5, TestSize.Level0)
 {
-    uint8_t *message = NULL;
+    uint8_t *message = nullptr;
     uint32_t messageLen = 0;
     MessageBuff msg = {.length = messageLen, .buff = message};
 
-    EXPECT_EQ(NULL, ParseMessage(&msg));
+    EXPECT_EQ(nullptr, ParseMessage(&msg));
 }
 
 HWTEST_F(DslmTest, ParseMessage_case6, TestSize.Level0)
@@ -206,7 +206,7 @@ HWTEST_F(DslmTest, ParseMessage_case6, TestSize.Level0)
     uint8_t message[] = {'1', '2'};
     uint32_t messageLen = 2;
     MessageBuff msg = {.length = messageLen, .buff = message};
-    EXPECT_EQ(NULL, ParseMessage(&msg));
+    EXPECT_EQ(nullptr, ParseMessage(&msg));
 }
 
 HWTEST_F(DslmTest, ParseMessage_case7, TestSize.Level0)
@@ -214,7 +214,7 @@ HWTEST_F(DslmTest, ParseMessage_case7, TestSize.Level0)
     uint8_t message[] = {1, 2, 0};
     uint32_t messageLen = 3;
     MessageBuff msg = {.length = messageLen, .buff = message};
-    EXPECT_EQ(NULL, ParseMessage(&msg));
+    EXPECT_EQ(nullptr, ParseMessage(&msg));
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
@@ -231,9 +231,9 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
     EXPECT_EQ(0, ret);
 
-    EXPECT_EQ((uint32_t)0x332211, obj.version);
-    EXPECT_EQ((uint64_t)0x0d0c0b0a04030201, obj.challenge);
-    EXPECT_EQ((uint32_t)0, obj.arraySize);
+    EXPECT_EQ(0x332211U, obj.version);
+    EXPECT_EQ(0x0d0c0b0a04030201UL, obj.challenge);
+    EXPECT_EQ(0U, obj.arraySize);
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case2, TestSize.Level0)
@@ -288,14 +288,14 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case5, TestSize.Level0)
 
     // 3351057 = 0x332211
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
-    EXPECT_EQ(0, ret);
-    EXPECT_EQ((uint32_t)0x332211, obj.version);
-    EXPECT_EQ((uint64_t)0x0d0c0b0a04030201, obj.challenge);
+    EXPECT_EQ(static_cast<int32_t>(0), ret);
+    EXPECT_EQ(0x332211U, obj.version);
+    EXPECT_EQ(0x0d0c0b0a04030201U, obj.challenge);
     // add support
-    EXPECT_EQ((uint32_t)3, obj.arraySize);
-    EXPECT_EQ((uint32_t)33, obj.credArray[0]);
-    EXPECT_EQ((uint32_t)44, obj.credArray[1]);
-    EXPECT_EQ((uint32_t)55, obj.credArray[2]);
+    EXPECT_EQ(3U, obj.arraySize);
+    EXPECT_EQ(33U, obj.credArray[0]);
+    EXPECT_EQ(44U, obj.credArray[1]);
+    EXPECT_EQ(55U, obj.credArray[2]);
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level0)
@@ -311,10 +311,10 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level0)
     // 3351057 = 0x332211
     int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
     EXPECT_EQ(0, ret);
-    EXPECT_EQ((uint32_t)0x332211, obj.version);
-    EXPECT_EQ((uint64_t)0x0d0c0b0a04030201, obj.challenge);
+    EXPECT_EQ(0x332211U, obj.version);
+    EXPECT_EQ(0x0d0c0b0a04030201U, obj.challenge);
     // add support
-    EXPECT_EQ((uint32_t)0, obj.arraySize);
+    EXPECT_EQ(0U, obj.arraySize);
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level0)
@@ -332,13 +332,13 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level0)
     // 131072 = 0x020000
     int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
     EXPECT_EQ(0, ret);
-    EXPECT_EQ((uint32_t)0x020000, version);
+    EXPECT_EQ(0x020000U, version);
 
-    EXPECT_EQ((uint64_t)0xE2C4D353EE211F3C, challenge);
+    EXPECT_EQ(0xE2C4D353EE211F3CUL, challenge);
 
     const char *except = "JADE-AL00:87AD28D3B1B...";
     EXPECT_NE(nullptr, cred);
-    EXPECT_EQ(2, (int32_t)cred->type);
+    EXPECT_EQ(2U, cred->type);
     EXPECT_EQ(strlen(except), cred->credLen);
     EXPECT_EQ(0, strncmp(except, (const char *)cred->credVal, cred->credLen));
     DestroyDslmCred(cred);
@@ -399,7 +399,7 @@ HWTEST_F(DslmTest, RandomValue_case2, TestSize.Level0)
     (void)memset_s(&rand, sizeof(RandomValue), 0, sizeof(RandomValue));
 
     GenerateRandom(&rand, 1024);
-    EXPECT_EQ(RAMDOM_MAX_LEN, (int32_t)rand.length);
+    EXPECT_EQ(static_cast<uint32_t>(RANDOM_MAX_LEN), rand.length);
 
     GenerateRandom(nullptr, 1024);
 }
@@ -455,14 +455,14 @@ HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level0)
     DslmCredBuff *cred = nullptr;
 
     int32_t ret = DefaultRequestDslmCred(&identify, &object, &cred);
-    ASSERT_EQ(SUCCESS, (int32_t)ret);
+    ASSERT_EQ(SUCCESS, static_cast<int32_t>(ret));
 
     DslmCredInfo info;
     (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
     ret = DefaultVerifyDslmCred(&identify, object.challenge, cred, &info);
     EXPECT_EQ(SUCCESS, ret);
-    EXPECT_GE(info.credLevel, (uint32_t)1);
+    EXPECT_GE(info.credLevel, 1U);
 
     DestroyDslmCred(cred);
 }
@@ -481,7 +481,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         DslmRequestCallbackMock mockCallback;
         EXPECT_CALL(mockCallback, RequestCallback(_, _, _)).Times(Exactly(0));
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
-        EXPECT_EQ((int32_t)ret, ERR_MSG_NOT_INIT);
+        EXPECT_EQ(static_cast<int32_t>(ret), ERR_MSG_NOT_INIT);
     }
 
     {
@@ -492,7 +492,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(false));
         EXPECT_CALL(mockCallback, RequestCallback(_, _, _)).Times(Exactly(0));
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
-        EXPECT_EQ((int32_t)ret, ERR_NOEXIST_DEVICE);
+        EXPECT_EQ(static_cast<int32_t>(ret), ERR_NOEXIST_DEVICE);
 
         EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(AtLeast(2));
         mockMsg.MakeMsgLoopback();
@@ -508,11 +508,11 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
         EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(1));
         DslmRequestCallbackMock mockCallback;
-        auto IsRightLevel = [](const DslmCallbackInfo *info) { return info->level >= 1; };
-        EXPECT_CALL(mockCallback, RequestCallback(cookie, 0, Truly(IsRightLevel))).Times(Exactly(1));
+        auto isRightLevel = [](const DslmCallbackInfo *info) { return info->level >= 1; };
+        EXPECT_CALL(mockCallback, RequestCallback(cookie, 0, Truly(isRightLevel))).Times(Exactly(1));
 
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
-        EXPECT_EQ(ret, (int32_t)0);
+        EXPECT_EQ(ret, 0);
         mockMsg.MakeDeviceOffline(&device);
     }
 }
@@ -532,14 +532,14 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     auto isSendRequestOut = [](const uint8_t *message) {
         const char *prefix = "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"";
         string msg = string((char *)message);
-        EXPECT_EQ((int)msg.rfind(prefix, 0), 0);
+        EXPECT_EQ(msg.rfind(prefix, 0), 0U);
         return true;
     };
 
     uint32_t cookie = 0x4567;
     EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, Truly(isSendRequestOut), _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
     int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
-    EXPECT_EQ((int32_t)ret, (int32_t)0);
+    EXPECT_EQ(static_cast<uint32_t>(ret), 0U);
     mockMsg.MakeDeviceOffline(&device);
 }
 
@@ -580,7 +580,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
         option.timeout = timeouts[i];
         int32_t ret =
             OnRequestDeviceSecLevelInfo(&device, &option, i, cookies[i], DslmRequestCallbackMock::MockedCallback);
-        EXPECT_EQ((int32_t)ret, (int32_t)0);
+        EXPECT_EQ(static_cast<uint32_t>(ret), 0U);
     }
 
     unique_lock<mutex> lck(mtx);
@@ -599,18 +599,18 @@ HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level0)
 
     auto isSendResponseOut = [](const uint8_t *message) {
         const string msg = string((char *)message);
-        EXPECT_EQ((int)msg.find("{\"message\":2,\"payload\":{"), 0);
-        EXPECT_GT((int)msg.find("\"version\":"), 0);
-        EXPECT_GT((int)msg.find("\"challenge\":"), 0);
-        EXPECT_GT((int)msg.find("\"type\":"), 0);
-        EXPECT_GT((int)msg.find("\"info\":"), 0);
+        EXPECT_EQ(msg.find("{\"message\":2,\"payload\":{"), 0U);
+        EXPECT_GT(msg.find("\"version\":"), 0U);
+        EXPECT_GT(msg.find("\"challenge\":"), 0U);
+        EXPECT_GT(msg.find("\"type\":"), 0U);
+        EXPECT_GT(msg.find("\"info\":"), 0U);
         return true;
     };
 
     EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, Truly(isSendResponseOut), _)).Times(Exactly(1));
 
     int32_t ret = OnPeerMsgRequestInfoReceived(&device, (const uint8_t *)input, len);
-    EXPECT_EQ(0, (int32_t)ret);
+    EXPECT_EQ(0, static_cast<int32_t>(ret));
 }
 
 HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
@@ -622,7 +622,7 @@ HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
     DeviceIdentify device = {8, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
 
     int32_t ret = OnPeerMsgResponseInfoReceived(&device, (const uint8_t *)input, len);
-    EXPECT_EQ(ERR_NOEXIST_DEVICE, (int32_t)ret);
+    EXPECT_EQ(ERR_NOEXIST_DEVICE, static_cast<int32_t>(ret));
 }
 
 HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level0)
@@ -639,7 +639,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level0)
 
     info = GetDslmDeviceInfo(&device);
     ASSERT_NE(nullptr, info);
-    EXPECT_GE(info->credInfo.credLevel, (uint32_t)1);
+    EXPECT_GE(info->credInfo.credLevel, 1U);
     mockMsg.MakeDeviceOffline(&device);
 }
 
@@ -656,12 +656,12 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level0)
 
     info = GetDslmDeviceInfo(&device);
     ASSERT_NE(nullptr, info);
-    EXPECT_EQ((uint32_t)1, info->queryTimes);
-    EXPECT_EQ((uint32_t)STATE_WAITING_CRED_RSP, info->machine.currState);
+    EXPECT_EQ(1U, info->queryTimes);
+    EXPECT_EQ(STATE_WAITING_CRED_RSP, info->machine.currState);
 
     BlockCheckDeviceStatus(&device, STATE_SUCCESS, 5000);
-    EXPECT_EQ((uint32_t)STATE_FAILED, info->machine.currState);
-    EXPECT_LT((uint32_t)5, info->queryTimes);
+    EXPECT_EQ(STATE_FAILED, info->machine.currState);
+    EXPECT_LT(5U, info->queryTimes);
     mockMsg.MakeDeviceOffline(&device);
 }
 
@@ -669,8 +669,8 @@ HWTEST_F(DslmTest, InnerKitsTest_case1, TestSize.Level0)
 {
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
-    DeviceSecurityInfo *info = NULL;
-    int32_t ret = RequestDeviceSecurityInfo(&device, NULL, &info);
+    DeviceSecurityInfo *info = nullptr;
+    int32_t ret = RequestDeviceSecurityInfo(&device, nullptr, &info);
     EXPECT_EQ(ret, 0);
     int32_t level = 0;
     ret = GetDeviceSecurityLevelValue(info, &level);
@@ -700,13 +700,13 @@ HWTEST_F(DslmTest, InnerKitsTest_case2, TestSize.Level0)
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
 
     g_cnt = 0;
-    int ret = RequestDeviceSecurityInfoAsync(&device, NULL, TestDeviceSecurityInfoCallback);
+    int ret = RequestDeviceSecurityInfoAsync(&device, nullptr, TestDeviceSecurityInfoCallback);
     EXPECT_EQ(ret, 0);
 
-    ret = RequestDeviceSecurityInfoAsync(&device, NULL, TestDeviceSecurityInfoCallback);
+    ret = RequestDeviceSecurityInfoAsync(&device, nullptr, TestDeviceSecurityInfoCallback);
     EXPECT_EQ(ret, 0);
 
-    ret = RequestDeviceSecurityInfoAsync(&device, NULL, TestDeviceSecurityInfoCallback);
+    ret = RequestDeviceSecurityInfoAsync(&device, nullptr, TestDeviceSecurityInfoCallback);
     EXPECT_EQ(ret, 0);
 
     unique_lock<mutex> lck(g_mtx);
@@ -718,8 +718,8 @@ HWTEST_F(DslmTest, InnerKitsTest_case3, TestSize.Level0)
 {
     DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
     (void)memset_s(device.identity, DEVICE_ID_MAX_LEN, 'F', DEVICE_ID_MAX_LEN);
-    DeviceSecurityInfo *info = NULL;
-    int32_t ret = RequestDeviceSecurityInfo(&device, NULL, &info);
+    DeviceSecurityInfo *info = nullptr;
+    int32_t ret = RequestDeviceSecurityInfo(&device, nullptr, &info);
     EXPECT_EQ(ret, ERR_NOEXIST_DEVICE);
 }
 } // namespace DslmUnitTest

@@ -18,19 +18,17 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "securec.h"
+#include "device_auth.h"
+#include "hks_adapter.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_type.h"
-#include "hks_adapter.h"
-#include "device_auth.h"
+#include "securec.h"
 
 #include "device_security_defines.h"
 #include "utils_json.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-
-const char g_dslmKey[] = "dslm_key";
 
 #define DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH 512
 #define DSLM_CERT_CHAIN_BASE_LENGTH 4096
@@ -87,7 +85,9 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
 {
     SECURITY_LOG_INFO("start");
 
-    struct HksBlob keyAlias = {sizeof(g_dslmKey), (uint8_t *)g_dslmKey};
+    const char key[] = "dslm_key";
+    struct HksBlob keyAlias = {sizeof(key), (uint8_t *)key};
+
     if (HksGenerateKeyAdapter(&keyAlias) != SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKeyAdapter failed");
         return ERR_HUKS_ERR;
@@ -148,7 +148,6 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
         {.tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = {DSLM_INFO_MAX_LEN_CRED, (uint8_t *)credStr}},
         {.tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = {DSLM_INFO_MAX_LEN_UDID, (uint8_t *)udidStr}},
     };
-
     struct HksParamSet *outputParam = NULL;
     struct HksBlob certBlob[CERT_CHAIN_CERT_NUM] = {{0}};
     struct HksCertChain hksCertChain = {&certBlob[0], CERT_CHAIN_CERT_NUM};
@@ -161,27 +160,24 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
         SECURITY_LOG_ERROR("FillHksParamSet failed");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-
     if (HksValidateCertChain(&hksCertChain, outputParam) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("HksValidateCertChain failed");
         HksFreeParamSet(&outputParam);
         return ERR_CALL_EXTERNAL_FUNC;
     }
     uint32_t cnt = 0;
-    if (memcpy_s(resultInfo->nonceStr, DSLM_INFO_MAX_LEN_NONCE, outputParam->params[cnt].blob.data,
-        outputParam->params[cnt].blob.size) != EOK) {
+    struct HksBlob *blob = &outputParam->params[cnt].blob;
+    if (memcpy_s(resultInfo->nonceStr, DSLM_INFO_MAX_LEN_NONCE, blob->data, blob->size) != EOK) {
         HksFreeParamSet(&outputParam);
         return ERR_MEMORY_ERR;
     }
-    cnt++;
-    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, outputParam->params[cnt].blob.data,
-        outputParam->params[cnt].blob.size) != EOK) {
+    blob = &outputParam->params[++cnt].blob;
+    if (memcpy_s(resultInfo->credStr, DSLM_INFO_MAX_LEN_CRED, blob->data, blob->size) != EOK) {
         HksFreeParamSet(&outputParam);
         return ERR_MEMORY_ERR;
     }
-    cnt++;
-    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, outputParam->params[cnt].blob.data,
-        outputParam->params[cnt].blob.size) != EOK) {
+    blob = &outputParam->params[++cnt].blob;
+    if (memcpy_s(resultInfo->udidStr, DSLM_INFO_MAX_LEN_UDID, blob->data, blob->size) != EOK) {
         HksFreeParamSet(&outputParam);
         return ERR_MEMORY_ERR;
     }
