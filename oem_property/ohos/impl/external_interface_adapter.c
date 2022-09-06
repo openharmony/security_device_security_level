@@ -85,8 +85,8 @@ int32_t DslmCredAttestAdapter(struct DslmInfoInCertChain *info, uint8_t **certCh
 {
     SECURITY_LOG_INFO("start");
 
-    const char key[] = "dslm_key";
-    struct HksBlob keyAlias = {sizeof(key), (uint8_t *)key};
+    const char alias[] = "dslm_key";
+    struct HksBlob keyAlias = {sizeof(alias), (uint8_t *)alias};
 
     if (HksGenerateKeyAdapter(&keyAlias) != SUCCESS) {
         SECURITY_LOG_ERROR("HksGenerateKeyAdapter failed");
