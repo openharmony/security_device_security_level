@@ -54,12 +54,12 @@ namespace DslmUnitTest {
 void DslmTest::SetUpTestCase()
 {
     // modify the device's systime to ensure that the certificate verification passes
-    constexpr time_t year_timer_2022 = 1640966400;
-    constexpr time_t year_timer_2022_valid = 1648518888;
+    constexpr time_t yearTimeLeast = 1640966400;
+    constexpr time_t yearTimeValid = 1648518888;
     struct timeval timeVal = {0};
     gettimeofday(&timeVal, nullptr);
-    if (timeVal.tv_sec <= year_timer_2022) {
-        timeVal.tv_sec = year_timer_2022_valid;
+    if (timeVal.tv_sec <= yearTimeLeast) {
+        timeVal.tv_sec = yearTimeValid;
         settimeofday(&timeVal, nullptr);
     }
 
@@ -531,7 +531,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
     auto isSendRequestOut = [](const uint8_t *message) {
         const char *prefix = "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"";
-        string msg = string((char *)message);
+        const string msg = string(static_cast<const char *>(static_cast<const void *>(message)));
         EXPECT_EQ(msg.rfind(prefix, 0), 0U);
         return true;
     };
@@ -598,7 +598,7 @@ HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level0)
     DslmMsgInterfaceMock mockMsg;
 
     auto isSendResponseOut = [](const uint8_t *message) {
-        const string msg = string((char *)message);
+        const string msg = string(static_cast<const char *>(static_cast<const void *>(message)));
         EXPECT_EQ(msg.find("{\"message\":2,\"payload\":{"), 0U);
         EXPECT_GT(msg.find("\"version\":"), 0U);
         EXPECT_GT(msg.find("\"challenge\":"), 0U);
