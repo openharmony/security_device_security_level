@@ -273,6 +273,10 @@ static const DeviceIdentify *RefreshDeviceOnlineStatus(const DeviceIdentify *dev
         (void)OnPeerStatusReceiver(deviceId, ONLINE_STATUS_ONLINE, devType);
     }
 
+    if (IsSameDevice(deviceId, GetSelfDevice((&devType)))) {
+        (void)InitSelfDeviceSecureLevel();
+    }
+
     return deviceId;
 }
 
