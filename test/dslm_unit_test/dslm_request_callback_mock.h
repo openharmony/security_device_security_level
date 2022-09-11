@@ -28,8 +28,8 @@ namespace Security {
 namespace DslmUnitTest {
 class DslmRequestCallback {
 public:
-    DslmRequestCallback() {};
-    virtual ~DslmRequestCallback() {};
+    DslmRequestCallback() = default;
+    virtual ~DslmRequestCallback() = default;
     virtual void RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info) = 0;
 };
 

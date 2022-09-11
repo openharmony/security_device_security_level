@@ -480,7 +480,10 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
     if (credCb == NULL || credInfo == NULL) {
         return;
     }
+
+    CredType credType = credInfo->credType;
     (void)memset_s(credInfo, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+    credInfo->credType = credType;
 
     uint8_t *buffer = NULL;
 
