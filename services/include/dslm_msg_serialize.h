@@ -25,6 +25,8 @@ extern "C" {
 #define MSG_TYPE_DSLM_CRED_REQUEST 0x1
 #define MSG_TYPE_DSLM_CRED_RESPONSE 0x2
 
+#define MSG_BUFF_MAX_LENGTH (81920 * 4)
+
 #define FIELD_MESSAGE "message"
 #define FIELD_PAYLOAD "payload"
 
