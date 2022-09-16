@@ -16,8 +16,13 @@
 #ifndef SEC_MESSENGER_DEVICE_STATUS_MANAGER_H
 #define SEC_MESSENGER_DEVICE_STATUS_MANAGER_H
 
-#include <stdint.h>
+#ifdef __cplusplus
+#include <cstdbool>
+#include <cstdint>
+#else
 #include <stdbool.h>
+#include <stdint.h>
+#endif
 
 #include "messenger.h"
 #include "utils_work_queue.h"
@@ -32,11 +37,13 @@ bool DeInitDeviceStatusManager(void);
 
 bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
 
-bool MessengerGetDeviceNetworkId(const DeviceIdentify *devId, char *networkId, uint32_t len);
-
 bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType);
 
 void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para);
+
+bool MessengerGetNetworkIdByDeviceIdentify(const DeviceIdentify *devId, char *networkId, uint32_t len);
+
+bool MessengerGetDeviceIdentifyByNetworkId(const char *networkId, DeviceIdentify *devId);
 
 #ifdef __cplusplus
 }
