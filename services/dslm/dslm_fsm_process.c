@@ -186,7 +186,7 @@ static bool CheckNeedToResend(const DslmDeviceInfo *info)
     if (info->lastOnlineTime < info->lastRequestTime) {
         return true;
     }
-    if (!info->lastOnlineTime - info->lastRequestTime > REQUEST_INTERVAL) {
+    if (info->lastOnlineTime - info->lastRequestTime > REQUEST_INTERVAL) {
         return true;
     }
     return false;
@@ -204,6 +204,7 @@ static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, con
     if (!CheckNeedToResend(info)) {
         SECURITY_LOG_DEBUG("last request time is last than 24 hours");
         ScheduleDslmStateMachine(info, EVENT_TO_SYNC, NULL);
+        return true;
     }
     return ProcessSendCredRequest(machine, event, para);
 }
