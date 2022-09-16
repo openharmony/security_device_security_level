@@ -18,8 +18,6 @@
 
 #include "securec.h"
 #include "session.h"
-#include "softbus_bus_center.h"
-#include "softbus_common.h"
 
 #include "messenger_device_status_manager.h"
 #include "messenger_utils.h"
@@ -154,23 +152,20 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
     if (identity == NULL || maskId == NULL) {
         return false;
     }
-    char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    int ret = GetPeerDeviceId(sessionId, deviceName, DEVICE_ID_MAX_LEN + 1);
+    char networkId[DEVICE_ID_MAX_LEN + 1] = {0};
+    int ret = GetPeerDeviceId(sessionId, networkId, DEVICE_ID_MAX_LEN + 1);
     if (ret != 0) {
         SECURITY_LOG_INFO("GetPeerDeviceId failed, sessionId is %{public}d, result is %{public}d", sessionId, ret);
         return false;
     }
 
-    char udid[UDID_BUF_LEN] = {0};
-    DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
-    if (GetNodeKeyInfo(instance->pkgName, deviceName, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
-        SECURITY_LOG_ERROR("GetNodeKeyInfo failed");
+    if (!MessengerGetDeviceIdentifyByNetworkId(networkId, identity)) {
+        SECURITY_LOG_ERROR("MessengerGetDeviceIdentifyByNetworkId failed");
         return false;
     }
 
-    *maskId = MaskDeviceIdentity(udid, DEVICE_ID_MAX_LEN);
-    identity->length = DEVICE_ID_MAX_LEN;
-    (void)memcpy_s(&identity->identity, DEVICE_ID_MAX_LEN, udid, DEVICE_ID_MAX_LEN);
+    *maskId = MaskDeviceIdentity((const char *)identity->identity, DEVICE_ID_MAX_LEN);
+
     return true;
 }
 
@@ -403,7 +398,7 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
 {
     uint32_t mask = MaskDeviceIdentity((const char *)&devId->identity[0], devId->length);
     char deviceName[DEVICE_ID_MAX_LEN + 1] = {0};
-    bool succ = MessengerGetDeviceNetworkId(devId, deviceName, DEVICE_ID_MAX_LEN + 1);
+    bool succ = MessengerGetNetworkIdByDeviceIdentify(devId, deviceName, DEVICE_ID_MAX_LEN + 1);
     if (!succ) {
         SECURITY_LOG_ERROR("get network id failed");
         return;
