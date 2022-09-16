@@ -15,9 +15,9 @@
 
 #include "dslm_msg_serialize.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "securec.h"
@@ -35,7 +35,7 @@ static inline bool IsAscii(const uint8_t ch)
 
 bool CheckMessage(const uint8_t *msg, uint32_t length)
 {
-    if (msg == NULL || length <= 1) {
+    if (msg == NULL || length <= 1 || length > MSG_BUFF_MAX_LENGTH) {
         return false;
     }
 
@@ -54,7 +54,7 @@ bool CheckMessage(const uint8_t *msg, uint32_t length)
 MessagePacket *ParseMessage(const MessageBuff *buff)
 {
     if (buff == NULL) {
-        SECURITY_LOG_DEBUG("EMPTY BUFF   ");
+        SECURITY_LOG_DEBUG("EMPTY BUFF");
         return NULL;
     }
 
