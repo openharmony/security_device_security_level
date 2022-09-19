@@ -489,6 +489,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         DslmMsgInterfaceMock mockMsg;
         DslmRequestCallbackMock mockCallback;
         EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
+        EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
         EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(false));
         EXPECT_CALL(mockCallback, RequestCallback(_, _, _)).Times(Exactly(0));
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
@@ -505,8 +506,9 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         uint32_t cookie = 0xabcd;
         DslmMsgInterfaceMock mockMsg;
         EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
+        EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
         EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
-        EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(1));
+        EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(0));
         DslmRequestCallbackMock mockCallback;
         auto isRightLevel = [](const DslmCallbackInfo *info) { return info->level >= 1; };
         EXPECT_CALL(mockCallback, RequestCallback(cookie, 0, Truly(isRightLevel))).Times(Exactly(1));
@@ -528,6 +530,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
 
     DslmMsgInterfaceMock mockMsg;
     EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
     auto isSendRequestOut = [](const uint8_t *message) {
         const char *prefix = "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"";
@@ -551,6 +554,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
     EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
     EXPECT_CALL(mockMsg, GetDeviceOnlineStatus(_, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
 
     mutex mtx;
     condition_variable cv;
