@@ -59,6 +59,10 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
     }
 
     const DeviceGroupManager *interface = GetGmInstance();
+    if (interface == NULL) {
+        SECURITY_LOG_ERROR("GetGmInstance null");
+        return ERR_CALL_EXTERNAL_FUNC;
+    }
     ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
     if (ret != SUCCESS) {
         SECURITY_LOG_INFO("getPkInfoList failed, ret = %{public}d", ret);
