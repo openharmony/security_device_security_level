@@ -213,8 +213,8 @@ static int MessengerOnSessionOpened(int sessionId, int result)
         }
 
         RemoveListNode(node);
-        int ret = SendBytes(sessionId, msgData->msgData, msgData->msgLen);
-        if (ret != 0) {
+        int sent = SendBytes(sessionId, msgData->msgData, msgData->msgLen);
+        if (sent != 0) {
             SECURITY_LOG_ERROR("SendBytes error code = %{public}d", ret);
         }
         FREE(msgData);
