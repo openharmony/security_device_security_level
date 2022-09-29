@@ -19,8 +19,8 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <openssl/ossl_typ.h>
 #include <openssl/evp.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/x509.h>
 
 #include "securec.h"
@@ -175,7 +175,7 @@ static bool VerifyCredentialCb(const CredentialCb *credCb)
     const PublicKeyAttestation *last = &credCb->last;
     const PayloadAttestation *payload = &credCb->load;
 
-    // rootkey, signed by self
+    // root key, signed by self
     int32_t ret = EcdsaVerify(&root->publicKey, &root->signature, &root->publicKey, root->algorithm);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("verify root key failed, ret is %{public}d", ret);
@@ -254,7 +254,7 @@ static bool SplitCredentialString(CredentialCb *credCb)
     }
     char *context = NULL;
     credCb->header = strtok_s(credCb->saved, ".", &context);
-    if (context == NULL) {
+    if (context == NULL || credCb->header == NULL) {
         return false;
     }
 
