@@ -158,7 +158,7 @@ int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen)
         return ERR_INVALID_PARA;
     }
     int32_t ret = fscanf_s(fp, "%s", credStr, maxLen);
-    if (ret == -1) {
+    if (ret <= 0) {
         SECURITY_LOG_ERROR("fscanf_s cred file failed");
         ret = ERR_INVALID_PARA;
     } else {
