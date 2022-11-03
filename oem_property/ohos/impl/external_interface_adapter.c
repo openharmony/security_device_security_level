@@ -65,12 +65,16 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
         return ERR_CALL_EXTERNAL_FUNC;
     }
     ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
-    if (ret != SUCCESS && ret != HC_ERR_ONLY_ACCOUNT_RELATED) {
+    if (ret == HC_ERR_ONLY_ACCOUNT_RELATED) {
+        SECURITY_LOG_INFO("device auth cred situation");
+        ret = SUCCESS;
+    }
+    if (ret != SUCCESS) {
         SECURITY_LOG_INFO("getPkInfoList failed, ret = %{public}d", ret);
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
-    if (memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0 || ret == HC_ERR_ONLY_ACCOUNT_RELATED) {
+    if (resultBuffer == NULL || memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
         SECURITY_LOG_INFO("current pkInfoList is null");
         *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
         if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
@@ -82,7 +86,9 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
             ret = ERR_MEMORY_ERR;
         }
     }
-    interface->destroyInfo(&resultBuffer);
+    if (resultBuffer != NULL) {
+        interface->destroyInfo(&resultBuffer);
+    }
     return ret;
 }
 
