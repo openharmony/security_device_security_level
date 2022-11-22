@@ -22,6 +22,10 @@
 #include "utils_list.h"
 #include "utils_mutex.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct StateMachine StateMachine;
 
 typedef bool (*StateMachineProcessFunc)(const StateMachine *machine, uint32_t event, const void *para);
@@ -47,5 +51,9 @@ void InitStateMachine(StateMachine *machine, uint32_t machineId, uint32_t initSt
 void ScheduleMachine(const StateNode *nodes, uint32_t nodeCnt, StateMachine *machine, uint32_t event, const void *para);
 
 #define STATE_MACHINE_ENTRY(item, type, member) ((type *)((char *)(item) - (char *)(&((type *)0)->member)))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SEC_UTILS_FINITE_STATE_MACHINE_H
