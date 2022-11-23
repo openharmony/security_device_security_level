@@ -33,20 +33,43 @@
 #include "dslm_core_defines.h"
 #include "dslm_core_process.h"
 #include "dslm_credential.h"
+#include "dslm_credential_utils.h"
 #include "dslm_crypto.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
+#include "dslm_inner_process.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_interface_mock.h"
 #include "dslm_msg_serialize.h"
 #include "dslm_msg_utils.h"
+#include "dslm_ohos_request.h"
+#include "dslm_ohos_verify.h"
 #include "dslm_request_callback_mock.h"
+#include "external_interface_adapter.h"
+#include "hks_adapter.h"
+#include "hks_type.h"
 #include "utils_datetime.h"
+#include "utils_tlv.h"
 
 using namespace std;
 using namespace std::chrono;
 using namespace testing;
 using namespace testing::ext;
+
+// for testing
+extern "C" {
+extern int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
+    const struct DataBuffer *pbkData, uint32_t algorithm);
+extern bool CheckMessage(const uint8_t *msg, uint32_t length);
+extern int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, int32_t paramNums);
+extern int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias);
+extern int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain);
+extern int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **data, uint32_t *dataLen);
+extern void DestroyHksCertChain(struct HksCertChain *certChain);
+extern int32_t ConstructHksCertChain(struct HksCertChain **certChain,
+    const struct HksCertChainInitParams *certChainParam);
+extern void DoTimerProcess(TimerProc callback, const void *context);
+}
 
 namespace OHOS {
 namespace Security {
@@ -127,6 +150,26 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level0)
     FreeMessageBuff(msg);
 }
 
+HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case2, TestSize.Level0)
+{
+    uint64_t random = 0x0807060504030201;
+    MessageBuff **msg = nullptr;
+    int32_t ret = BuildDeviceSecInfoRequest(random, msg);
+    ASSERT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case3, TestSize.Level0)
+{
+    uint64_t random = 0x0807060504030201;
+    const char *message = "{\"mege\":1,\"payload\":{\"version\":131072,\"challenge\":\"0102030405060708\"}}";
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+    MessageBuff *msg_ptr = &msg;
+
+    int32_t ret = BuildDeviceSecInfoRequest(random, &msg_ptr);
+    ASSERT_EQ(ERR_INVALID_PARA, ret);
+}
+
 HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case1, TestSize.Level0)
 {
     uint64_t random = 0x0807060504030201;
@@ -143,6 +186,16 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case1, TestSize.Level0)
 
     EXPECT_STREQ(except, (const char *)msg->buff);
     FreeMessageBuff(msg);
+}
+
+HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case2, TestSize.Level0)
+{
+    uint64_t random = 0x0807060504030201;
+    uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
+    DslmCredBuff cred = {(CredType)3, 9, info};
+    MessageBuff **msg = nullptr;
+    int32_t ret = BuildDeviceSecInfoResponse(random, (DslmCredBuff *)&cred, msg);
+    ASSERT_EQ(ERR_INVALID_PARA, ret);
 }
 
 HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level0)
@@ -317,6 +370,28 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level0)
     EXPECT_EQ(0U, obj.arraySize);
 }
 
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case7, TestSize.Level0)
+{
+    // NULL parameters
+    int32_t ret = ParseDeviceSecInfoRequest(NULL, NULL);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case8, TestSize.Level0)
+{
+    const char *message = "{\"version\":3351057,\"challenge}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    RequestObject obj;
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+
+    // 3351057 = 0x332211
+    int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
 HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case1, TestSize.Level0)
 {
     const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
@@ -372,6 +447,92 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case3, TestSize.Level0)
     DslmCredBuff *cred = nullptr;
 
     int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, &cred);
+    EXPECT_EQ(ERR_NO_CRED, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case4, TestSize.Level0)
+{
+    const char *message =
+        "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"infod\":\"JADE-AL00:87AD28D3B1B...\"}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    uint64_t challenge;
+    uint32_t ver;
+    DslmCredBuff **cred = nullptr;
+
+    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, cred);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case5, TestSize.Level0)
+{
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    // msg has null buff
+    MessageBuff msg = {.length = messageLen, .buff = nullptr};
+
+    uint64_t challenge;
+    uint32_t version;
+    DslmCredBuff *cred = nullptr;
+
+    // 131072 = 0x020000
+    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case6, TestSize.Level0)
+{
+    // malformed json message
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"infod}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    uint64_t challenge;
+    uint32_t ver;
+    DslmCredBuff **cred = nullptr;
+
+    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, cred);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case7, TestSize.Level0)
+{
+    // malformed challenge
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2A\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    uint64_t challenge;
+    uint32_t version;
+    DslmCredBuff *cred = nullptr;
+
+    // 131072 = 0x020000
+    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
+    EXPECT_EQ(ERR_NO_CHALLENGE, ret);
+}
+
+HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case8, TestSize.Level0)
+{
+    // malformed info field
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4ux\"}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    uint64_t challenge;
+    uint32_t version;
+    DslmCredBuff *cred = nullptr;
+
+    // 131072 = 0x020000
+    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
     EXPECT_EQ(ERR_NO_CRED, ret);
 }
 
@@ -440,6 +601,12 @@ HWTEST_F(DslmTest, GetDateTime_case1, TestSize.Level0)
         DateTime date;
         EXPECT_TRUE(GetDateTimeByMillisecondSinceBoot(GetMillisecondSinceBoot(), &date));
     }
+}
+
+HWTEST_F(DslmTest, InitDslmCredentialFunctions_case1, TestSize.Level0)
+{
+    bool ret = InitDslmCredentialFunctions(NULL);
+    EXPECT_EQ(false, ret);
 }
 
 HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level0)
@@ -592,6 +759,20 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
     mockMsg.MakeDeviceOffline(&device);
 }
 
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case4, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    const RequestOption option = {
+        .challenge = 0xffabcdffffffffee,
+        .timeout = 2,
+        .extra = 0,
+    };
+    uint32_t cookie = 1234;
+
+    int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, nullptr);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
 HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level0)
 {
     const char *input = "{\"version\":65536,\"challenge\":\"0102030405060708\"}";
@@ -617,7 +798,17 @@ HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case1, TestSize.Level0)
     EXPECT_EQ(0, static_cast<int32_t>(ret));
 }
 
-HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
+HWTEST_F(DslmTest, OnPeerMsgRequestInfoReceived_case2, TestSize.Level0)
+{
+    const DeviceIdentify *device = nullptr;
+    const char *input = "{\"version\":65536,\"challenge\":\"0102030405060708\"}";
+    uint32_t len = strlen(input) + 1;
+
+    int32_t ret = OnPeerMsgRequestInfoReceived(device, (const uint8_t *)input, len);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case1, TestSize.Level0)
 {
     const char *input = "{\"version\":65536,\"type\":0,\"challenge\":\"EEFFFFFFFFCDABFF\",\"info\":"
                         "\"MDAwMTAyMDMwNDA1MDYwNzA4MDkwQTBCMEMwRDBFMEYxMDExMTIxMzE0MTUxNkFBQkJDQ0RE\"}";
@@ -627,6 +818,16 @@ HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
 
     int32_t ret = OnPeerMsgResponseInfoReceived(&device, (const uint8_t *)input, len);
     EXPECT_EQ(ERR_NOEXIST_DEVICE, static_cast<int32_t>(ret));
+}
+
+HWTEST_F(DslmTest, OnPeerMsgResponseInfoReceived_case2, TestSize.Level0)
+{
+    const DeviceIdentify *device = nullptr;
+    const char *input = "{\"version\":65536,\"challenge\":\"0102030405060708\"}";
+    uint32_t len = strlen(input) + 1;
+
+    int32_t ret = OnPeerMsgResponseInfoReceived(device, (const uint8_t *)input, len);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 
 HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level0)
@@ -726,6 +927,611 @@ HWTEST_F(DslmTest, InnerKitsTest_case3, TestSize.Level0)
     int32_t ret = RequestDeviceSecurityInfo(&device, nullptr, &info);
     EXPECT_EQ(ret, ERR_NOEXIST_DEVICE);
 }
+
+HWTEST_F(DslmTest, GetSupportedCredTypes_case1, TestSize.Level0)
+{
+    int32_t ret = GetSupportedCredTypes(nullptr, 0);
+    EXPECT_EQ(0, ret);
+}
+
+HWTEST_F(DslmTest, CreateDslmCred_case1, TestSize.Level0)
+{
+    CredType type = CRED_TYPE_STANDARD;
+
+    EXPECT_EQ(nullptr, CreateDslmCred(type, 0, nullptr));
+}
+
+HWTEST_F(DslmTest, CheckAndGenerateChallenge_case1, TestSize.Level0)
+{
+    DslmDeviceInfo *device = nullptr;
+
+    int32_t ret = CheckAndGenerateChallenge(device);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, SendDeviceInfoRequest_case1, TestSize.Level0)
+{
+    DslmDeviceInfo *device = nullptr;
+
+    int32_t ret = SendDeviceInfoRequest(device);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case1, TestSize.Level0)
+{
+    DslmDeviceInfo *device = nullptr;
+
+    int32_t ret = VerifyDeviceInfoResponse(device, NULL);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case2, TestSize.Level0)
+{
+    MessageBuff msg = {.length = 0, .buff = nullptr};
+    DslmDeviceInfo device;
+    (void)memset_s(&device, sizeof(device), 0, sizeof(device));
+
+    int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case3, TestSize.Level0)
+{
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    DslmDeviceInfo device;
+    (void)memset_s(&device, sizeof(device), 0, sizeof(device));
+
+    int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
+    EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+}
+
+HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case4, TestSize.Level0)
+{
+    DslmDeviceInfo device = {.nonceTimeStamp = 0xFFFFFFFFFFFFFFFF};
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
+    EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+}
+
+HWTEST_F(DslmTest, GetDslmDeviceInfo_case1, TestSize.Level0)
+{
+    DeviceIdentify *device = nullptr;
+
+    EXPECT_EQ(nullptr, GetDslmDeviceInfo(device));
+}
+
+HWTEST_F(DslmTest, CreatOrGetDslmDeviceInfo_case1, TestSize.Level0)
+{
+    DeviceIdentify *device = nullptr;
+
+    EXPECT_EQ(nullptr, CreatOrGetDslmDeviceInfo(device));
+}
+
+HWTEST_F(DslmTest, CreatOrGetDslmDeviceInfo_case2, TestSize.Level0)
+{
+    DeviceIdentify device = {.length = DEVICE_ID_MAX_LEN - 1};
+
+    EXPECT_EQ(nullptr, CreatOrGetDslmDeviceInfo(&device));
+}
+
+HWTEST_F(DslmTest, IsSameDevice_case1, TestSize.Level0)
+{
+    DeviceIdentify *device_first = nullptr;
+    DeviceIdentify device_second;
+    (void)memset_s(&device_second, sizeof(device_second), 0, sizeof(device_second));
+
+    EXPECT_EQ(false, IsSameDevice(device_first, &device_second));
+}
+
+HWTEST_F(DslmTest, GetCurrentMachineState_case1, TestSize.Level0)
+{
+    DslmDeviceInfo *info = nullptr;
+    uint32_t ret = GetCurrentMachineState(info);
+    EXPECT_EQ(STATE_FAILED, ret);
+}
+
+HWTEST_F(DslmTest, OnMsgSendResultNotifier_case1, TestSize.Level0)
+{
+    DeviceIdentify identify = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    uint64_t transNo = 0;
+    uint32_t result = ERR_DEFAULT;
+
+    uint32_t ret = OnMsgSendResultNotifier(&identify, transNo, result);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+HWTEST_F(DslmTest, OnPeerStatusReceiver_case1, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    uint32_t status = 1234;
+    uint32_t devType = 0;
+
+    int32_t ret = OnPeerStatusReceiver(&device, status, devType);
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+HWTEST_F(DslmTest, InitDslmProcess_case1, TestSize.Level0)
+{
+    EXPECT_EQ(false, InitDslmProcess());
+}
+
+HWTEST_F(DslmTest, DeinitDslmProcess_case1, TestSize.Level0)
+{
+    EXPECT_EQ(true, DeinitDslmProcess());
+}
+
+// dslm_credential_utils.c
+
+HWTEST_F(DslmTest, VerifyDslmCredential_case1, TestSize.Level0)
+{
+    const char *cred = "test";
+    DslmCredInfo *info = nullptr;
+    AttestationList list;
+    memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
+
+    int32_t ret = VerifyDslmCredential(cred, info, &list);
+    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyDslmCredential_case2, TestSize.Level0)
+{
+    const char *cred = "test";
+    DslmCredInfo info;
+    AttestationList list;
+    memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+    memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
+
+    int32_t ret = VerifyDslmCredential(cred, &info, &list);
+    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
+}
+
+HWTEST_F(DslmTest, EcdsaVerify_case1, TestSize.Level0)
+{
+    const char *data = "test";
+    uint32_t length = strlen(data) + 1;
+    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
+    const DataBuffer sigData = {.length = length, .data = (uint8_t *)data};
+    DataBuffer *pbkData = nullptr;
+    uint32_t algorithm = TYPE_ECDSA_SHA_256;
+
+    int32_t ret = EcdsaVerify(&srcData, &sigData, pbkData, algorithm);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, EcdsaVerify_case2, TestSize.Level0)
+{
+    const char *data = "test";
+    uint32_t length = strlen(data) + 1;
+    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
+    // malformed sigData
+    const DataBuffer sigData = {.length = length, .data = nullptr};
+    const DataBuffer pbkData = {.length = length, .data = (uint8_t *)data};
+    uint32_t algorithm = TYPE_ECDSA_SHA_256;
+
+    int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, algorithm);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, EcdsaVerify_case3, TestSize.Level0)
+{
+    const char *data = "test";
+    uint32_t length = strlen(data) + 1;
+    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
+    // malformed sigData
+    const DataBuffer sigData = {.length = length, .data = (uint8_t *)data};
+    const DataBuffer pbkData = {.length = length, .data = (uint8_t *)data};
+    uint32_t algorithm = TYPE_ECDSA_SHA_256 + 2;
+
+    int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, algorithm);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+// dslm_ohos_verify.c
+HWTEST_F(DslmTest, VerifyOhosDslmCred_case1, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    uint64_t challenge = 0x1234;
+    uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
+    DslmCredBuff cred = {CRED_TYPE_STANDARD, 9, info};
+    DslmCredInfo *credInfo = nullptr;
+
+    int32_t ret = VerifyOhosDslmCred(&device, challenge, &cred, credInfo);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyOhosDslmCred_case2, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    uint64_t challenge = 0x1234;
+    uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
+    DslmCredBuff cred = {CRED_TYPE_LARGE, 9, info};
+    DslmCredInfo credInfo;
+    (void)memset_s(&credInfo, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+
+    int32_t ret = VerifyOhosDslmCred(&device, challenge, &cred, &credInfo);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+HWTEST_F(DslmTest, VerifyOhosDslmCred_case3, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
+    uint64_t challenge = 0x1234;
+    uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
+    DslmCredBuff cred = {CRED_TYPE_SMALL, 9, info};
+    DslmCredInfo credInfo;
+    (void)memset_s(&credInfo, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
+
+    int32_t ret = VerifyOhosDslmCred(&device, challenge, &cred, &credInfo);
+    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
+}
+
+// dslm_ohos_request.c
+
+// 2nd param of GetCredFromCurrentDevice() is 0
+HWTEST_F(DslmTest, GetCredFromCurrentDevice_case1, TestSize.Level0)
+{
+    const char *cred = "test";
+    uint32_t len = 0;
+
+    int32_t ret = GetCredFromCurrentDevice((char *)cred, len);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+/**
+ * @tc.name: GetPeerDeviceOnlineStatus_case1
+ * @tc.desc: function GetPeerDeviceOnlineStatus when g_messenger is NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case1, TestSize.Level0)
+{
+    EXPECT_EQ(false, GetPeerDeviceOnlineStatus(nullptr, nullptr));
+}
+
+/**
+ * @tc.name: GetPeerDeviceOnlineStatus_case2
+ * @tc.desc: function GetPeerDeviceOnlineStatus with null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case2, TestSize.Level0)
+{
+    DslmMsgInterfaceMock mockMsg;
+    EXPECT_EQ(false, GetPeerDeviceOnlineStatus(nullptr, nullptr));
+}
+
+/**
+ * @tc.name: GetSelfDevice_case1
+ * @tc.desc: function GetSelfDevice with null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, GetSelfDevice_case1, TestSize.Level0)
+{
+    (void)GetSelfDevice(nullptr);
+}
+
+/**
+ * @tc.name: DeinitMessenger_case1
+ * @tc.desc: function DeinitMessenger when g_messenger is NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, DeinitMessenger_case1, TestSize.Level0)
+{
+    DslmMsgInterfaceMock mockMsg;
+
+    uint32_t ret = DeinitMessenger();
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+ * @tc.name: DeinitMessenger_case2
+ * @tc.desc: function DeinitMessenger when g_messenger is not NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, DeinitMessenger_case2, TestSize.Level0)
+{
+    uint32_t ret = DeinitMessenger();
+    EXPECT_EQ(SUCCESS, ret);
+}
+
+/**
+ * @tc.name: SendMsgToDevice_case1
+ * @tc.desc: function SendMsgToDevice when g_messenger is NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, SendMsgToDevice_case1, TestSize.Level0)
+{
+    DslmMsgInterfaceMock mockMsg;
+    uint64_t transNo = 0xfe;
+    const DeviceIdentify devId = {DEVICE_ID_MAX_LEN, {0}};
+    const uint8_t msg[] = {'1', '2'};
+    uint32_t msgLen = 2;
+
+    mockMsg.~DslmMsgInterfaceMock();
+    EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(0));
+
+    SendMsgToDevice(transNo, &devId, msg, msgLen);
+}
+
+/**
+ * @tc.name: CheckMessage_case1
+ * @tc.desc: function CheckMessage when malformed input,
+ *           msg contains non ASCII item.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, CheckMessage_case1, TestSize.Level0)
+{
+    const uint8_t msg[] = {'1', 0x8f, '\0'};
+    uint32_t msgLen = 3;
+
+    EXPECT_EQ(false, CheckMessage(msg, msgLen));
+}
+
+// just for coverage
+/**
+ * @tc.name: FreeMessagePacket_case1
+ * @tc.desc: function FreeMessagePacket when packet->payload is NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, FreeMessagePacket_case1, TestSize.Level0)
+{
+    MessagePacket *packet = (MessagePacket *)malloc(sizeof(MessagePacket));
+    (void)memset_s(packet, sizeof(MessagePacket), 0, sizeof(MessagePacket));
+
+    FreeMessagePacket(packet);
+}
+
+// just for coverage
+/**
+ * @tc.name: FreeMessageBuff_case1
+ * @tc.desc: function FreeMessageBuff with null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, FreeMessageBuff_case1, TestSize.Level0)
+{
+    MessageBuff *buff = nullptr;
+
+    FreeMessageBuff(buff);
+}
+
+// just for coverage
+/**
+ * @tc.name: FreeMessageBuff_case2
+ * @tc.desc: function FreeMessageBuff when buff->buff is NULL
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, FreeMessageBuff_case2, TestSize.Level0)
+{
+    MessageBuff *buff = (MessageBuff *)malloc(sizeof(MessageBuff));
+    memset_s(buff, sizeof(MessageBuff), 0, sizeof(MessageBuff));
+
+    FreeMessageBuff(buff);
+}
+
+// just for coverage
+/**
+ * @tc.name: DestroyDslmInfoInCertChain_case1
+ * @tc.desc: function DestroyDslmInfoInCertChain with null/non-null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, DestroyDslmInfoInCertChain_case1, TestSize.Level0)
+{
+    struct DslmInfoInCertChain *info = (struct DslmInfoInCertChain *)malloc(sizeof(struct DslmInfoInCertChain));
+    memset_s(info, sizeof(struct DslmInfoInCertChain), 0, sizeof(struct DslmInfoInCertChain));
+
+    DestroyDslmInfoInCertChain(nullptr);
+    DestroyDslmInfoInCertChain(info);
+    free(info);
+}
+
+// just for coverage
+/**
+ * @tc.name: InitDslmInfoInCertChain_case1
+ * @tc.desc: function InitDslmInfoInCertChain with null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, InitDslmInfoInCertChain_case1, TestSize.Level0)
+{
+    InitDslmInfoInCertChain(nullptr);
+}
+
+// to split out
+// just for coverage
+/**
+ * @tc.name: HksAdapterSet_case1
+ * @tc.desc: huks adapter with null input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, HksAdapterSet_case1, TestSize.Level0)
+{
+    int32_t ret;
+
+    ret = FillHksParamSet(nullptr, nullptr, 0);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = HksGenerateKeyAdapter(nullptr);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+/**
+ * @tc.name: BufferToHksCertChain_case1
+ * @tc.desc: function BufferToHksCertChain with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, BufferToHksCertChain_case1, TestSize.Level0)
+{
+    int32_t ret;
+
+    {
+        ret = BufferToHksCertChain(nullptr, 1, nullptr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        const uint8_t data[] = {'0'};
+        uint32_t len = 1;
+        struct HksCertChain chain;
+        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+
+        ret = BufferToHksCertChain(data, len, &chain);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        uint8_t buff[8];
+        uint32_t len = 8;
+        memset_s(buff, sizeof(buff), 'c', sizeof(buff));
+        TlvCommon *ptr = (TlvCommon *)buff;
+        ptr->tag = 0x99;
+        ptr->len = 4;
+        struct HksCertChain chain;
+        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+
+        ret = BufferToHksCertChain(buff, len, &chain);
+        EXPECT_EQ(SUCCESS, ret);
+        EXPECT_EQ(0U, chain.certsCount);
+    }
+
+    {
+        uint8_t buff[8];
+        uint32_t len = 8;
+        memset_s(buff, sizeof(buff), 'c', sizeof(buff));
+        TlvCommon *ptr = (TlvCommon *)buff;
+        ptr->tag = 0x110;
+        ptr->len = 4;
+        struct HksCertChain chain;
+        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+
+        ret = BufferToHksCertChain(buff, len, &chain);
+        EXPECT_EQ(SUCCESS, ret);
+        EXPECT_EQ(0U, chain.certsCount);
+    }
+}
+
+/**
+ * @tc.name: HksCertChainToBuffer_case1
+ * @tc.desc: function HksCertChainToBuffer with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, HksCertChainToBuffer_case1, TestSize.Level0)
+{
+    int32_t ret;
+    uint32_t len = 5;
+    uint8_t *data = (uint8_t *)malloc(len);
+
+    {
+        ret = HksCertChainToBuffer(nullptr, &data, &len);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    free(data);
+}
+
+/**
+ * @tc.name: DestroyHksCertChain_case1
+ * @tc.desc: function DestroyHksCertChain with malformed inputs
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, DestroyHksCertChain_case1, TestSize.Level0)
+{
+    struct HksCertChain chain;
+    memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+
+    {
+        DestroyHksCertChain(nullptr);
+    }
+
+    { // cert != NULL && cert.certs == NULL
+        DestroyHksCertChain(&chain);
+    }
+
+    { // cert != NULL && cert.certs != NULL && cert.certsCount <= 0
+        struct HksBlob blob;
+        chain.certs = &blob;
+        DestroyHksCertChain(&chain);
+    }
+
+    { // cert != NULL && cert.certs != NULL && cert.certsCount == 1 && cert.certs[0].data == NULL
+        uint32_t size = 5;
+        struct HksBlob *blob = (struct HksBlob *)malloc(sizeof(struct HksBlob));
+        blob->size = size;
+        blob->data = nullptr;
+        chain.certs = blob;
+        chain.certsCount = 1;
+
+        DestroyHksCertChain(&chain);
+    }
+}
+
+/**
+ * @tc.name: ConstructHksCertChain_case1
+ * @tc.desc: function ConstructHksCertChain with malformed inputs
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, ConstructHksCertChain_case1, TestSize.Level0)
+{
+    int32_t ret;
+    struct HksCertChain *chain = nullptr;
+
+    {
+        ret = ConstructHksCertChain(&chain, nullptr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = false;
+        param.certCountValid = true;
+        param.certDataExist = true;
+
+        ret = ConstructHksCertChain(&chain, &param);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = true;
+        param.certCountValid = false;
+        param.certDataExist = true;
+
+        ret = ConstructHksCertChain(&chain, &param);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = true;
+        param.certCountValid = true;
+        param.certDataExist = false;
+
+        ret = ConstructHksCertChain(&chain, &param);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+}
+
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS

@@ -18,6 +18,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TLV_OK 0
 #define TLV_ERR 1001
 #define TLV_ERR_INVALID_PARA 1002
@@ -33,5 +37,9 @@ typedef struct TlvCommon {
 uint32_t Serialize(const TlvCommon *tlv, uint32_t tlvCount, uint8_t *buff, uint32_t maxBuffSize, uint32_t *buffSize);
 
 uint32_t Deserialize(const uint8_t *buff, uint32_t buffSize, TlvCommon *tlv, uint32_t maxTlvCount, uint32_t *tlvCount);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SEC_UTILS_TLV_H

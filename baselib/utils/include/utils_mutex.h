@@ -43,10 +43,7 @@ typedef struct Mutex {
 
 inline static void InitMutex(Mutex *mutex)
 {
-    int ret = pthread_mutex_init(&mutex->mutex, NULL);
-    if (ret != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_init error");
-    }
+    (void)pthread_mutex_init(&mutex->mutex, NULL);
 }
 
 inline static void InitRecursiveMutex(Mutex *mutex)
@@ -54,10 +51,7 @@ inline static void InitRecursiveMutex(Mutex *mutex)
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    int ret = pthread_mutex_init(&mutex->mutex, &attr);
-    if (ret != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_init error");
-    }
+    (void)pthread_mutex_init(&mutex->mutex, &attr);
 }
 
 inline static void LockMutex(Mutex *mutex)

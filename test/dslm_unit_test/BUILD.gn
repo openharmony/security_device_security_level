@@ -25,6 +25,7 @@ ohos_unittest("dslm_test") {
   sources = [
     "//base/security/device_security_level/oem_property/ohos/dslm_ohos_credential.c",
     "//base/security/device_security_level/services/sa/common/dslm_rpc_process.c",
+    "dslm_baselib_utils_test.cpp",
     "dslm_msg_interface_mock.cpp",
     "dslm_request_callback_mock.cpp",
     "dslm_rpc_process_test.cpp",
@@ -38,6 +39,8 @@ ohos_unittest("dslm_test") {
     "//base/security/device_security_level/services/dslm",
     "//base/security/device_security_level/services/sa/common",
     "//base/security/device_security_level/baselib/msglib/include/",
+    "//base/security/device_security_level/oem_property/common/",
+    "//base/security/device_security_level/oem_property/ohos/impl/",
   ]
 
   configs = [ "//base/security/device_security_level/common:common_configs" ]
@@ -57,5 +60,6 @@ ohos_unittest("dslm_test") {
     "c_utils:utils",
     "device_security_level:dslm_sdk",
     "hilog_native:libhilog",
+    "huks:libhukssdk",
   ]
 }
