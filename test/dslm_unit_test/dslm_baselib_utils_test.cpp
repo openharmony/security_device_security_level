@@ -161,20 +161,19 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
 {
     uint32_t ret;
     uint32_t size = 0;
+    int i = 0;
     TlvCommon tlvs[MAX_ENTRY];
     // every entry has a sizeof(void *)-byte value
     uint8_t buff[MAX_ENTRY * sizeof(TlvCommon)] = {0};
 
     {
         size = 0;
-
         ret = Serialize(nullptr, MAX_ENTRY, buff, sizeof(buff), &size);
         EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
     }
 
     {
         // malformed max buffer size
-        int i;
 
         size = 0;
         (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
@@ -193,8 +192,6 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
 
     {
         // malformed tvl.len
-        int i;
-
         size = 0;
         (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
         (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
@@ -213,8 +210,6 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
 
     {
         // malformed tvl.value
-        int i;
-
         size = 0;
         (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
         (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
@@ -369,8 +364,7 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
     int32_t arr[10] = {0};
     const char *str = "test";
     const char *strAdd = "add";
-    JsonHandle handle = (JsonHandle)malloc(sizeof(JsonHandle));
-    (void)memset_s(handle, sizeof(handle), 0, sizeof(handle));
+    JsonHandle handle =  nullptr;
 
     DestroyJson(nullptr);
     AddFieldBoolToJson(nullptr, str, true);
@@ -386,7 +380,7 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
         EXPECT_EQ(-1, ret);
 
         ret = GetJsonFieldInt(handle, nullptr);
-        EXPECT_EQ(0, ret);
+        EXPECT_EQ(-1, ret);
     }
 
     {
