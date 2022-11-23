@@ -1031,21 +1031,6 @@ HWTEST_F(DslmTest, IsSameDevice_case1, TestSize.Level0)
     EXPECT_EQ(false, IsSameDevice(device_first, &device_second));
 }
 
-// HWTEST_F(DslmTest, ForEachDeviceDump_case1, TestSize.Level0)
-// {
-//     EXPECT_EQ(nullptr, ForEachDeviceDump(nullptr, 0));
-// }
-
-// HWTEST_F(DslmTest, InitDslmStateMachine_case1, TestSize.Level0)
-// {
-//     EXPECT_EQ(nullptr, InitDslmStateMachine(nullptr));
-// }
-
-// HWTEST_F(DslmTest, ScheduleDslmStateMachine_case1, TestSize.Level0)
-// {
-//     EXPECT_EQ(nullptr, ScheduleDslmStateMachine(nullptr, 0, nullptr));
-// }
-
 HWTEST_F(DslmTest, GetCurrentMachineState_case1, TestSize.Level0)
 {
     DslmDeviceInfo *info = nullptr;
@@ -1231,7 +1216,6 @@ HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case2, TestSize.Level0)
  */
 HWTEST_F(DslmTest, GetSelfDevice_case1, TestSize.Level0)
 {
-    // const DeviceIdentify *device = GetSelfDevice(nullptr);
     (void)GetSelfDevice(nullptr);
 }
 
@@ -1510,8 +1494,7 @@ HWTEST_F(DslmTest, DestroyHksCertChain_case1, TestSize.Level0)
 HWTEST_F(DslmTest, ConstructHksCertChain_case1, TestSize.Level0)
 {
     int32_t ret;
-    struct HksCertChain *chain;
-    // memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+    struct HksCertChain *chain = nullptr;
 
     {
         ret = ConstructHksCertChain(&chain, nullptr);
