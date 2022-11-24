@@ -189,7 +189,22 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
         EXPECT_EQ((uint32_t)TLV_ERR_BUFF_NO_ENOUGH, ret);
         EXPECT_EQ(0U, size);
     }
+}
 
+/**
+ * @tc.name: Serialize_case1
+ * @tc.desc: function Serialize with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmBaselibUtilsTest, Serialize_case2, TestSize.Level0)
+{
+    uint32_t ret;
+    uint32_t size = 0;
+    int i = 0;
+    TlvCommon tlvs[MAX_ENTRY];
+    // every entry has a sizeof(void *)-byte value
+    uint8_t buff[MAX_ENTRY * sizeof(TlvCommon)] = {0};
     {
         // malformed tvl.len
         size = 0;

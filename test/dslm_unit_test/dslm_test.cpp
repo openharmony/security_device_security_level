@@ -1178,10 +1178,10 @@ HWTEST_F(DslmTest, VerifyOhosDslmCred_case3, TestSize.Level0)
 // 2nd param of GetCredFromCurrentDevice() is 0
 HWTEST_F(DslmTest, GetCredFromCurrentDevice_case1, TestSize.Level0)
 {
-    const char *cred = "test";
+    char cred[] = "test";
     uint32_t len = 0;
 
-    int32_t ret = GetCredFromCurrentDevice((char *)cred, len);
+    int32_t ret = GetCredFromCurrentDevice(cred, len);
     EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 
@@ -1447,91 +1447,6 @@ HWTEST_F(DslmTest, HksCertChainToBuffer_case1, TestSize.Level0)
 
     free(data);
 }
-
-/**
- * @tc.name: DestroyHksCertChain_case1
- * @tc.desc: function DestroyHksCertChain with malformed inputs
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, DestroyHksCertChain_case1, TestSize.Level0)
-{
-    struct HksCertChain chain;
-    memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
-
-    {
-        DestroyHksCertChain(nullptr);
-    }
-
-    { // cert != NULL && cert.certs == NULL
-        DestroyHksCertChain(&chain);
-    }
-
-    { // cert != NULL && cert.certs != NULL && cert.certsCount <= 0
-        struct HksBlob blob;
-        chain.certs = &blob;
-        DestroyHksCertChain(&chain);
-    }
-
-    { // cert != NULL && cert.certs != NULL && cert.certsCount == 1 && cert.certs[0].data == NULL
-        uint32_t size = 5;
-        struct HksBlob *blob = (struct HksBlob *)malloc(sizeof(struct HksBlob));
-        blob->size = size;
-        blob->data = nullptr;
-        chain.certs = blob;
-        chain.certsCount = 1;
-
-        DestroyHksCertChain(&chain);
-    }
-}
-
-/**
- * @tc.name: ConstructHksCertChain_case1
- * @tc.desc: function ConstructHksCertChain with malformed inputs
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, ConstructHksCertChain_case1, TestSize.Level0)
-{
-    int32_t ret;
-    struct HksCertChain *chain = nullptr;
-
-    {
-        ret = ConstructHksCertChain(&chain, nullptr);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        struct HksCertChainInitParams param;
-        param.certChainExist = false;
-        param.certCountValid = true;
-        param.certDataExist = true;
-
-        ret = ConstructHksCertChain(&chain, &param);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        struct HksCertChainInitParams param;
-        param.certChainExist = true;
-        param.certCountValid = false;
-        param.certDataExist = true;
-
-        ret = ConstructHksCertChain(&chain, &param);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        struct HksCertChainInitParams param;
-        param.certChainExist = true;
-        param.certCountValid = true;
-        param.certDataExist = false;
-
-        ret = ConstructHksCertChain(&chain, &param);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-}
-
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS
