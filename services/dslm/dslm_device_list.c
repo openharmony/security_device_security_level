@@ -107,7 +107,11 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device)
         FREE(info);
         return NULL;
     }
+
     info->result = UINT32_MAX;
+    info->notifyListSize = 0;
+    info->historyListSize = 0;
+
     InitDslmStateMachine(info);
     LockMutex(GetDeviceListMutex());
     AddListNodeBefore(&info->linkNode, GetDeviceList());

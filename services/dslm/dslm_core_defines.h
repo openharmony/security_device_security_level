@@ -54,7 +54,9 @@ typedef struct DslmDeviceInfo {
     uint32_t queryTimes;
     uint32_t result;
     DslmCredInfo credInfo;
+    uint32_t notifyListSize;
     ListHead notifyList;
+    uint32_t historyListSize;
     ListHead historyList;
 } DslmDeviceInfo;
 
