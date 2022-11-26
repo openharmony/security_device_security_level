@@ -64,6 +64,9 @@ static bool ProcessDeviceOffline(const StateMachine *machine, uint32_t event, co
 static bool ProcessVerifyCredMessage(const StateMachine *machine, uint32_t event, const void *para);
 static bool ProcessSdkTimeout(const StateMachine *machine, uint32_t event, const void *para);
 
+static void RefreshNotifyList(DslmDeviceInfo *info);
+static void RefreshHistoryList(DslmDeviceInfo *info);
+
 static uint32_t GenerateMachineId(const DeviceIdentify *identity)
 {
 #define MASK_LOW 0x00ffU
@@ -162,20 +165,9 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
 
         AddListNodeBefore(node, &info->historyList);
     }
-    int32_t historyCnt = 0;
-    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
-        historyCnt++;
-    }
-    int32_t delCnt = historyCnt > MAX_HISTORY_CNT ? (historyCnt - MAX_HISTORY_CNT) : 0;
-    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
-        if (delCnt <= 0) {
-            break;
-        }
-        delCnt--;
-        DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
-        RemoveListNode(node);
-        FREE(notifyNode);
-    }
+
+    RefreshNotifyList(info);
+    RefreshHistoryList(info);
 }
 
 static bool CheckNeedToResend(const DslmDeviceInfo *info)
@@ -244,6 +236,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
 
     DslmStartProcessTraceAsync("SDK_GET", notify->owner, notify->cookie);
     AddListNode(&notify->linkNode, &deviceInfo->notifyList);
+    RefreshNotifyList(deviceInfo);
     SECURITY_LOG_DEBUG(
         "ProcessSdkRequest, device is %{public}x, owner is %{public}u, cookie is %{public}u, keep is %{public}u",
         deviceInfo->machine.machineId, notify->owner, notify->cookie, notify->keep);
@@ -284,6 +277,7 @@ static bool ProcessDeviceOffline(const StateMachine *machine, uint32_t event, co
     info->queryTimes = 0;
     info->lastOfflineTime = GetMillisecondSinceBoot();
     StopSendDeviceInfoRequestTimer(info);
+    ProcessSendDeviceInfoCallback(info, RequestDoneChecker);
     return true;
 }
 
@@ -346,6 +340,53 @@ static bool RequestDoneChecker(const DslmDeviceInfo *devInfo, const DslmNotifyLi
         devInfo->machine.machineId, node->owner, node->cookie, node->keep);
 
     return true;
+}
+
+static void RefreshNotifyList(DslmDeviceInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+
+    // just refresh the notify list size
+    ListNode *node = NULL;
+    int32_t size = 0;
+    FOREACH_LIST_NODE (node, &info->notifyList) {
+        size++;
+    }
+    info->notifyListSize = size;
+
+    SECURITY_LOG_INFO("device %{public}x 's notify list size update to %{public}u", info->machine.machineId,
+        info->notifyListSize);
+}
+
+static void RefreshHistoryList(DslmDeviceInfo *info)
+{
+    if (info == NULL) {
+        return;
+    }
+
+    // only hold the lasted MAX_HISTORY_CNT node
+    ListNode *node = NULL;
+    ListNode *temp = NULL;
+
+    int32_t historyCnt = 0;
+    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
+        historyCnt++;
+    }
+    int32_t delCnt = historyCnt > MAX_HISTORY_CNT ? (historyCnt - MAX_HISTORY_CNT) : 0;
+
+    info->historyListSize = historyCnt - delCnt;
+
+    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
+        if (delCnt <= 0) {
+            break;
+        }
+        delCnt--;
+        DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
+        RemoveListNode(node);
+        FREE(notifyNode);
+    }
 }
 
 void InitDslmStateMachine(DslmDeviceInfo *info)
