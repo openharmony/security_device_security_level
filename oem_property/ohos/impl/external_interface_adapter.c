@@ -40,20 +40,20 @@
 #define DSLM_INFO_MAX_LEN_CRED 2048
 #define DSLM_INFO_MAX_LEN_NONCE 2048
 
-static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax);
+#define EMPTY_PK_INFO "[]"
+#define DEFAULT_PK_INFO "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]"
 
-const char *pkInfoEmpty = "[]";
-const char *pkInfoBase = "[{\"groupId\" : \"0\",\"publicKey\" : \"0\"}]";
+static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax);
 
 int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
 {
     SECURITY_LOG_INFO("start");
 
     char paramJson[DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH] = {0};
-    char *resultBuffer = NULL;
-    uint32_t resultNum = 0;
+    char *returnInfoList = NULL;
+    uint32_t returnInfoNum = 0;
 
-    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, &paramJson[0], DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH);
+    int32_t ret = GenerateFuncParamJson(isSelf, udidStr, paramJson, DEVICE_AUTH_INPUT_PARAM_STRING_LENGTH);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("GenerateFuncParamJson failed");
         return ret;
@@ -64,7 +64,7 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
         SECURITY_LOG_ERROR("GetGmInstance null");
         return ERR_CALL_EXTERNAL_FUNC;
     }
-    ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &resultBuffer, &resultNum);
+    ret = interface->getPkInfoList(ANY_OS_ACCOUNT, "dslm_service", paramJson, &returnInfoList, &returnInfoNum);
     if (ret == HC_ERR_ONLY_ACCOUNT_RELATED) {
         SECURITY_LOG_INFO("device auth cred situation");
         ret = SUCCESS;
@@ -74,20 +74,32 @@ int32_t GetPkInfoListStr(bool isSelf, const char *udidStr, char **pkInfoList)
         return ERR_CALL_EXTERNAL_FUNC;
     }
 
-    if (resultBuffer == NULL || memcmp(resultBuffer, pkInfoEmpty, strlen(pkInfoEmpty)) == 0) {
-        SECURITY_LOG_INFO("current pkInfoList is null");
-        *pkInfoList = (char *)MALLOC(strlen(pkInfoBase) + 1);
-        if (strcpy_s(*pkInfoList, strlen(pkInfoBase) + 1, pkInfoBase) != EOK) {
-            ret = ERR_MEMORY_ERR;
-        }
-    } else {
-        *pkInfoList = (char *)MALLOC(strlen(resultBuffer) + 1);
-        if (strcpy_s(*pkInfoList, strlen(resultBuffer) + 1, resultBuffer) != EOK) {
-            ret = ERR_MEMORY_ERR;
-        }
+    char *pkInfoBuff = returnInfoList;
+    if (pkInfoBuff == NULL || strcmp(pkInfoBuff, EMPTY_PK_INFO) == 0) {
+        SECURITY_LOG_INFO("current pkInfoList is %s", pkInfoBuff == NULL ? "null" : "empty");
+        pkInfoBuff = DEFAULT_PK_INFO;
     }
-    if (resultBuffer != NULL) {
-        interface->destroyInfo(&resultBuffer);
+
+    do {
+        char *output = (char *)MALLOC(strlen(pkInfoBuff) + 1);
+        if (output == NULL) {
+            SECURITY_LOG_ERROR("malloc error");
+            ret = ERR_MEMORY_ERR;
+            break;
+        }
+
+        if (strcpy_s(output, strlen(pkInfoBuff) + 1, pkInfoBuff) != EOK) {
+            SECURITY_LOG_ERROR("strcpy_s error");
+            ret = ERR_MEMORY_ERR;
+            FREE(output);
+            break;
+        }
+        *pkInfoList = output;
+        ret = SUCCESS;
+    } while (0);
+
+    if (returnInfoList != NULL) {
+        interface->destroyInfo(&returnInfoList);
     }
     return ret;
 }
