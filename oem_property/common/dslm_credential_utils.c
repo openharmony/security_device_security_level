@@ -545,6 +545,7 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
         return ERR_ECC_VERIFY_ERR;
     }
 
+    int32_t result = ERR_ECC_VERIFY_ERR;
     do {
         if (EVP_DigestVerifyInit(ctx, NULL, type, NULL, pkey) <= 0) {
             SECURITY_LOG_ERROR("EVP_DigestVerifyInit failed");
@@ -560,9 +561,11 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
             SECURITY_LOG_ERROR("EVP_DigestVerifyFinal failed");
             break;
         }
+
+        result = SUCCESS;
     } while (0);
 
     EVP_PKEY_free(pkey);
     EVP_MD_CTX_free(ctx);
-    return SUCCESS;
+    return result;
 }
