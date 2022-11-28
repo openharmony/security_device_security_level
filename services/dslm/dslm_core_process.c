@@ -44,6 +44,8 @@
 extern "C" {
 #endif
 
+#define MAX_NOTIFY_SIZE 64
+
 static const DeviceIdentify *RefreshDeviceOnlineStatus(const DeviceIdentify *deviceId);
 
 int32_t OnPeerMsgRequestInfoReceived(const DeviceIdentify *deviceId, const uint8_t *msg, uint32_t len)
@@ -159,6 +161,11 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
     if (deviceInfo->onlineStatus != ONLINE_STATUS_ONLINE) {
         SECURITY_LOG_ERROR("input device not online");
         return ERR_NOT_ONLINE;
+    }
+
+    if (deviceInfo->notifyListSize >= MAX_NOTIFY_SIZE) {
+        SECURITY_LOG_ERROR("input device's notifyList is overloaded");
+        return ERR_SA_BUSY;
     }
 
     DslmNotifyListNode notifyNode;

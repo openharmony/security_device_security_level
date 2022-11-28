@@ -688,6 +688,8 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
 {
+    constexpr uint32_t MAX_NOTIFY_SIZE = 64;
+
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a'}};
     const RequestOption option = {
         .challenge = 0xffabcdffffffffee,
@@ -707,10 +709,31 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     };
 
     uint32_t cookie = 0x4567;
-    EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, Truly(isSendRequestOut), _)).Times(AtLeast(1)).WillRepeatedly(Return(true));
-    int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
-    EXPECT_EQ(static_cast<uint32_t>(ret), 0U);
+    EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, Truly(isSendRequestOut), _)).Times(Exactly(1)).WillRepeatedly(Return(true));
+
+    DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(&device);
+    ASSERT_NE(info, nullptr);
+
+    EXPECT_EQ(info->notifyListSize, 0U);
+
+    DslmRequestCallbackMock callback;
+    EXPECT_CALL(callback, RequestCallback(cookie, Ne(0U), Ne(nullptr))).Times(Exactly(MAX_NOTIFY_SIZE));
+    for (uint32_t i = 1; i <= MAX_NOTIFY_SIZE; i++) {
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
+        EXPECT_EQ(static_cast<uint32_t>(ret), 0U);
+        EXPECT_EQ(info->notifyListSize, i);
+        EXPECT_EQ(info->historyListSize, 0U);
+    }
+    for (uint32_t i = 1; i <= MAX_NOTIFY_SIZE; i++) {
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
+        EXPECT_EQ(static_cast<uint32_t>(ret), ERR_SA_BUSY);
+        EXPECT_EQ(info->notifyListSize, MAX_NOTIFY_SIZE);
+        EXPECT_EQ(info->historyListSize, 0U);
+    }
     mockMsg.MakeDeviceOffline(&device);
+
+    EXPECT_EQ(info->notifyListSize, 0U);
+    EXPECT_EQ(info->historyListSize, 30U); // 30 is the max history list size
 }
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
