@@ -200,7 +200,9 @@ static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceId
     } while (0);
 
     FreeNonceOfCertChain(&nonce);
-    FREE(pkInfoListStr);
+    if (pkInfoListStr != NULL) {
+        FREE(pkInfoListStr);
+    }
     return ret;
 }
 
@@ -244,14 +246,14 @@ static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t cha
             break;
         }
 
-        // 2. Parses the NONCE into CHALLENGE and PK_INFO_LIST, verifies them separtely.
+        // 2. Parses the NONCE into CHALLENGE and PK_INFO_LIST, verifies them separately.
         ret = VerifyNonceOfCertChain(resultInfo.nonceStr, device, challenge);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("verifyNonceOfCertChain failed");
             break;
         }
 
-        // 3. The cred content is "<header>.<payload>.<signature>.<attestion>", parse and verify it.
+        // 3. The cred content is "<header>.<payload>.<signature>.<attestation>", parse and verify it.
         ret = VerifyDslmCredential(resultInfo.credStr, credInfo, NULL);
         if (ret != SUCCESS) {
             SECURITY_LOG_ERROR("VerifyDslmCredential failed");
