@@ -23,6 +23,8 @@
 #include "utils_log.h"
 #include "utils_mem.h"
 
+#define MAX_CRED_LEN 81920
+
 static inline ProcessDslmCredFunctions *GetFunctionCb()
 {
     static ProcessDslmCredFunctions cb = {NULL, NULL, NULL, 0, {0}};
@@ -76,7 +78,7 @@ int32_t DefaultInitDslmCred(DslmCredInfo *credInfo)
 
 int32_t GetSupportedCredTypes(CredType *list, uint32_t len)
 {
-    if ((list == NULL) || len == 0) {
+    if (list == NULL || len == 0) {
         return 0;
     }
     ProcessDslmCredFunctions *cb = GetFunctionCb();
@@ -92,9 +94,10 @@ int32_t GetSupportedCredTypes(CredType *list, uint32_t len)
 
 DslmCredBuff *CreateDslmCred(CredType type, uint32_t len, uint8_t *value)
 {
-    if ((len == 0) || (value == NULL)) {
+    if (value == NULL || len == 0 || len > MAX_CRED_LEN) {
         return NULL;
     }
+
     DslmCredBuff *outBuff = (DslmCredBuff *)MALLOC(sizeof(DslmCredBuff));
     if (outBuff == NULL) {
         return NULL;
