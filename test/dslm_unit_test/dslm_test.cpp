@@ -688,7 +688,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
 {
-    constexpr uint32_t MAX_NOTIFY_SIZE = 64;
+    constexpr uint32_t maxNotifySize = 64;
 
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a'}};
     const RequestOption option = {
@@ -717,17 +717,17 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     EXPECT_EQ(info->notifyListSize, 0U);
 
     DslmRequestCallbackMock callback;
-    EXPECT_CALL(callback, RequestCallback(cookie, Ne(0U), Ne(nullptr))).Times(Exactly(MAX_NOTIFY_SIZE));
-    for (uint32_t i = 1; i <= MAX_NOTIFY_SIZE; i++) {
+    EXPECT_CALL(callback, RequestCallback(cookie, Ne(0U), Ne(nullptr))).Times(Exactly(maxNotifySize));
+    for (uint32_t i = 1; i <= maxNotifySize; i++) {
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ(static_cast<uint32_t>(ret), 0U);
         EXPECT_EQ(info->notifyListSize, i);
         EXPECT_EQ(info->historyListSize, 0U);
     }
-    for (uint32_t i = 1; i <= MAX_NOTIFY_SIZE; i++) {
+    for (uint32_t i = 1; i <= maxNotifySize; i++) {
         int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
         EXPECT_EQ(static_cast<uint32_t>(ret), ERR_SA_BUSY);
-        EXPECT_EQ(info->notifyListSize, MAX_NOTIFY_SIZE);
+        EXPECT_EQ(info->notifyListSize, maxNotifySize);
         EXPECT_EQ(info->historyListSize, 0U);
     }
     mockMsg.MakeDeviceOffline(&device);
