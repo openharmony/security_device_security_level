@@ -27,6 +27,7 @@
 #include "utils_mutex.h"
 
 #define IS_SERVER 0
+#define MSG_BUFF_MAX_LENGTH (81920 * 4)
 
 static int MessengerOnSessionOpened(int sessionId, int result);
 static void MessengerOnSessionClosed(int sessionId);
@@ -250,6 +251,11 @@ static void MessengerOnSessionClosed(int sessionId)
 
 static void MessengerOnBytesReceived(int sessionId, const void *data, unsigned int dataLen)
 {
+    if (data == NULL || dataLen == 0 || dataLen > MSG_BUFF_MAX_LENGTH) {
+        SECURITY_LOG_ERROR("invalid msg received");
+        return;
+    }
+
     DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
     uint32_t maskId;
     bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
@@ -432,7 +438,7 @@ static void CreateNewDeviceSession(const DeviceIdentify *devId)
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
 {
-    if (devId == NULL || msg == NULL || msgLen == 0) {
+    if (devId == NULL || msg == NULL || msgLen == 0 || msgLen > MSG_BUFF_MAX_LENGTH) {
         SECURITY_LOG_ERROR("invalid params");
         return;
     }

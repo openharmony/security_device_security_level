@@ -107,6 +107,7 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
     (*certChain)->certs = (struct HksBlob *)MALLOC(sizeof(struct HksBlob) * ((*certChain)->certsCount));
     if ((*certChain)->certs == NULL) {
         FREE(*certChain);
+        *certChain = NULL;
         return ERR_NO_MEMORY;
     }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
@@ -118,6 +119,7 @@ int32_t ConstructHksCertChain(struct HksCertChain **certChain, const struct HksC
         (*certChain)->certs[i].data = (uint8_t *)MALLOC((*certChain)->certs[i].size);
         if ((*certChain)->certs[i].data == NULL) {
             DestroyHksCertChain(*certChain);
+            *certChain = NULL;
             return ERR_NO_MEMORY;
         }
         (void)memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
