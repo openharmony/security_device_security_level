@@ -136,7 +136,7 @@ static bool CheckTimesAndSendCredRequest(DslmDeviceInfo *info, bool enforce)
 static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker checker)
 {
 #ifndef MAX_HISTORY_CNT
-#define MAX_HISTORY_CNT 30
+#define MAX_HISTORY_CNT 30U
 #endif
 
     if (info == NULL || checker == NULL) {
@@ -178,7 +178,7 @@ static bool CheckNeedToResend(const DslmDeviceInfo *info)
     if (info->lastOnlineTime < info->lastRequestTime) {
         return true;
     }
-    if (info->lastOnlineTime - info->lastRequestTime > REQUEST_INTERVAL) {
+    if (info->lastOnlineTime - info->lastRequestTime > (uint64_t)REQUEST_INTERVAL) {
         return true;
     }
     return false;
@@ -350,7 +350,7 @@ static void RefreshNotifyList(DslmDeviceInfo *info)
 
     // just refresh the notify list size
     ListNode *node = NULL;
-    int32_t size = 0;
+    uint32_t size = 0;
     FOREACH_LIST_NODE (node, &info->notifyList) {
         size++;
     }
@@ -370,11 +370,11 @@ static void RefreshHistoryList(DslmDeviceInfo *info)
     ListNode *node = NULL;
     ListNode *temp = NULL;
 
-    int32_t historyCnt = 0;
+    uint32_t historyCnt = 0;
     FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
         historyCnt++;
     }
-    int32_t delCnt = historyCnt > MAX_HISTORY_CNT ? (historyCnt - MAX_HISTORY_CNT) : 0;
+    uint32_t delCnt = historyCnt > MAX_HISTORY_CNT ? (historyCnt - MAX_HISTORY_CNT) : 0;
 
     info->historyListSize = historyCnt - delCnt;
 
