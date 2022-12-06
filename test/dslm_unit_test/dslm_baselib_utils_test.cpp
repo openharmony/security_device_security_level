@@ -24,7 +24,9 @@
 
 #include "utils_base64.h"
 #include "utils_datetime.h"
+#include "utils_hexstring.h"
 #include "utils_json.h"
+#include "utils_mem.h"
 #include "utils_state_machine.h"
 #include "utils_timer.h"
 #include "utils_tlv.h"
@@ -47,39 +49,9 @@ namespace Security {
 namespace DslmUnitTest {
 void DslmBaselibUtilsTest::SetUpTestCase()
 {
-    // modify the device's systime to ensure that the certificate verification passes
-    constexpr time_t yearTimeLeast = 1640966400;
-    constexpr time_t yearTimeValid = 1648518888;
-    struct timeval timeVal = {0};
-    gettimeofday(&timeVal, nullptr);
-    if (timeVal.tv_sec <= yearTimeLeast) {
-        timeVal.tv_sec = yearTimeValid;
-        settimeofday(&timeVal, nullptr);
-    }
-
-    static const char *acls[] = {"ACCESS_IDS"};
-    static const char *perms[] = {
-        "ohos.permission.PLACE_CALL",
-        "ohos.permission.ACCESS_IDS",
-    };
-    uint64_t tokenId;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .aclsNum = 1,
-        .dcaps = nullptr,
-        .perms = perms,
-        .acls = acls,
-        .processName = "dslm_service",
-        .aplStr = "system_core",
-    };
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
-    SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 void DslmBaselibUtilsTest::TearDownTestCase()
 {
-    SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 void DslmBaselibUtilsTest::SetUp()
 {
@@ -96,7 +68,6 @@ void DslmBaselibUtilsTest::TearDown()
  */
 HWTEST_F(DslmBaselibUtilsTest, Deserialize_case1, TestSize.Level0)
 {
-    uint32_t ret;
     uint32_t cnt = 0;
     TlvCommon tlvs[MAX_ENTRY];
     // every entry has a sizeof(void *)-byte value
@@ -107,7 +78,7 @@ HWTEST_F(DslmBaselibUtilsTest, Deserialize_case1, TestSize.Level0)
         (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
         (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
 
-        ret = Deserialize(nullptr, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
+        uint32_t ret = Deserialize(nullptr, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
         EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
     }
 
@@ -126,29 +97,40 @@ HWTEST_F(DslmBaselibUtilsTest, Deserialize_case1, TestSize.Level0)
             ptr->len = 4;
         }
 
-        ret = Deserialize(buff, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
+        uint32_t ret = Deserialize(buff, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
         EXPECT_EQ((uint32_t)TLV_ERR_BUFF_NO_ENOUGH, ret);
         EXPECT_EQ(0U, cnt);
     }
+}
 
-    {
-        // malformed tlv entry's len
-        int i;
+/**
+ * @tc.name: Deserialize_case2
+ * @tc.desc: function Deserialize with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmBaselibUtilsTest, Deserialize_case2, TestSize.Level0)
+{
+    int i;
+    uint32_t cnt = 0;
+    TlvCommon tlvs[MAX_ENTRY];
+    // every entry has a sizeof(void *)-byte value
+    uint8_t buff[MAX_ENTRY * sizeof(TlvCommon)] = {0};
 
-        cnt = 0;
-        (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
-        (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
+    // malformed tlv entry's len
+    cnt = 0;
+    (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
+    (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
 
-        for (i = 0; i < MAX_ENTRY; i++) {
-            TlvCommon *ptr = (TlvCommon *)buff + i;
-            ptr->tag = 0x105;
-            ptr->len = 0x100;
-        }
-
-        ret = Deserialize(buff, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
-        EXPECT_EQ(0U, ret);
-        EXPECT_EQ(0U, cnt);
+    for (i = 0; i < MAX_ENTRY; i++) {
+        TlvCommon *ptr = (TlvCommon *)buff + i;
+        ptr->tag = 0x105;
+        ptr->len = 0x100;
     }
+
+    uint32_t ret = Deserialize(buff, sizeof(buff), &tlvs[0], MAX_ENTRY, &cnt);
+    EXPECT_EQ(0U, ret);
+    EXPECT_EQ(0U, cnt);
 }
 
 /**
@@ -159,7 +141,6 @@ HWTEST_F(DslmBaselibUtilsTest, Deserialize_case1, TestSize.Level0)
  */
 HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
 {
-    uint32_t ret;
     uint32_t size = 0;
     int i = 0;
     TlvCommon tlvs[MAX_ENTRY];
@@ -168,7 +149,7 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
 
     {
         size = 0;
-        ret = Serialize(nullptr, MAX_ENTRY, buff, sizeof(buff), &size);
+        uint32_t ret = Serialize(nullptr, MAX_ENTRY, buff, sizeof(buff), &size);
         EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
     }
 
@@ -185,7 +166,7 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
             ptr->len = 4;
         }
 
-        ret = Serialize(tlvs, MAX_ENTRY, buff, 1, &size);
+        uint32_t ret = Serialize(tlvs, MAX_ENTRY, buff, 1, &size);
         EXPECT_EQ((uint32_t)TLV_ERR_BUFF_NO_ENOUGH, ret);
         EXPECT_EQ(0U, size);
     }
@@ -199,7 +180,6 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case1, TestSize.Level0)
  */
 HWTEST_F(DslmBaselibUtilsTest, Serialize_case2, TestSize.Level0)
 {
-    uint32_t ret;
     uint32_t size = 0;
     int i = 0;
     TlvCommon tlvs[MAX_ENTRY];
@@ -217,7 +197,7 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case2, TestSize.Level0)
             ptr->len = 0;
         }
 
-        ret = Serialize(tlvs, MAX_ENTRY, buff, sizeof(buff), &size);
+        uint32_t ret = Serialize(tlvs, MAX_ENTRY, buff, sizeof(buff), &size);
         EXPECT_EQ(0U, ret);
         // (TLV_TLV_HEAD_LEN + ptr->len) * MAX_ENTRY
         EXPECT_EQ(32U, size);
@@ -236,7 +216,7 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case2, TestSize.Level0)
             ptr->value = nullptr;
         }
 
-        ret = Serialize(tlvs, MAX_ENTRY, buff, sizeof(buff), &size);
+        uint32_t ret = Serialize(tlvs, MAX_ENTRY, buff, sizeof(buff), &size);
         EXPECT_EQ(0U, ret);
         // (TLV_TLV_HEAD_LEN + ptr->len) * MAX_ENTRY
         EXPECT_EQ(64U, size);
@@ -271,21 +251,20 @@ HWTEST_F(DslmBaselibUtilsTest, GetDateTimeByMillisecondSince1970_case1, TestSize
  */
 HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
 {
-    int32_t ret;
     uint8_t src[] = {'a', '-', '_', 'd', '\0'};
     uint8_t *to = nullptr;
 
     {
-        ret = Base64UrlDecodeApp(nullptr, &to);
+        int32_t ret = Base64UrlDecodeApp(nullptr, &to);
         EXPECT_EQ(0, ret);
     }
 
     {
-        ret = Base64UrlDecodeApp(src, &to);
+        int32_t ret = Base64UrlDecodeApp(src, &to);
         EXPECT_EQ(3, ret);
         EXPECT_EQ('\xEF', to[1]);
         EXPECT_EQ('\xDD', to[2]);
-        free(to);
+        FREE(to);
     }
 }
 
@@ -297,23 +276,23 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
  */
 HWTEST_F(DslmBaselibUtilsTest, Base64DecodeApp_case1, TestSize.Level0)
 {
-    int32_t ret;
     uint8_t *to = nullptr;
 
     {
-        ret = Base64DecodeApp(nullptr, &to);
+        int32_t ret = Base64DecodeApp(nullptr, &to);
         EXPECT_EQ(0, ret);
     }
 
     {
         uint32_t maxStrLen = MAX_MALLOC_LEN / 3 * 4 + 10;
-        uint8_t *maxStr = (uint8_t *)malloc(sizeof(uint8_t) * maxStrLen);
+        uint8_t *maxStr = (uint8_t *)MALLOC(sizeof(uint8_t) * maxStrLen);
+        ASSERT_NE(nullptr, maxStr);
 
         memset_s(maxStr, maxStrLen - 1, 'c', maxStrLen - 1);
 
-        ret = Base64DecodeApp(maxStr, &to);
+        int32_t ret = Base64DecodeApp(maxStr, &to);
         EXPECT_EQ(0, ret);
-        free(maxStr);
+        FREE(maxStr);
     }
 }
 
@@ -327,17 +306,11 @@ HWTEST_F(DslmBaselibUtilsTest, Base64EncodeApp_case1, TestSize.Level0)
 {
     uint8_t src[] = {'a', 'b', 'c', 'd', '\0'};
 
-    {
-        EXPECT_EQ(nullptr, Base64EncodeApp(nullptr, sizeof(src)));
-    }
-
-    {
-        EXPECT_EQ(nullptr, Base64EncodeApp(src, 0));
-    }
+    EXPECT_EQ(nullptr, Base64EncodeApp(nullptr, sizeof(src)));
+    EXPECT_EQ(nullptr, Base64EncodeApp(src, 0));
 
     {
         uint32_t maxStrLen = MAX_MALLOC_LEN / 4 * 3;
-
         EXPECT_EQ(nullptr, Base64EncodeApp(src, maxStrLen));
     }
 }
@@ -377,51 +350,45 @@ HWTEST_F(DslmBaselibUtilsTest, InitStateMachine_case1, TestSize.Level0)
 HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
 {
     int32_t arr[10] = {0};
-    const char *str = "test";
-    const char *strAdd = "add";
-    JsonHandle handle =  nullptr;
+    const char *field = "test";
+    const char *value = "add";
+
+    const char *str = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2}";
+    JsonHandle handle = CreateJson(str);
 
     DestroyJson(nullptr);
-    AddFieldBoolToJson(nullptr, str, true);
-    AddFieldIntToJson(nullptr, str, 0);
-    AddFieldIntArrayToJson(nullptr, str, arr, sizeof(arr));
-    AddFieldStringToJson(nullptr, str, strAdd);
-    AddFieldJsonToJson(handle, str, nullptr);
+    AddFieldBoolToJson(nullptr, field, true);
+    AddFieldIntToJson(nullptr, field, 0);
+    AddFieldIntArrayToJson(nullptr, field, arr, sizeof(arr));
+    AddFieldStringToJson(nullptr, field, value);
+    AddFieldJsonToJson(handle, field, nullptr);
 
     {
-        int32_t ret;
-
-        ret = GetJsonFieldInt(nullptr, str);
+        int32_t ret = GetJsonFieldInt(nullptr, str);
         EXPECT_EQ(-1, ret);
 
         ret = GetJsonFieldInt(handle, nullptr);
-        EXPECT_EQ(-1, ret);
+        EXPECT_EQ(0, ret);
     }
 
     {
-        uint32_t ret;
-
-        ret = GetJsonFieldIntArray(nullptr, str, arr, sizeof(arr));
+        uint32_t ret = GetJsonFieldIntArray(nullptr, str, arr, sizeof(arr));
         EXPECT_EQ(0U, ret);
     }
 
     {
-        const char *ret = nullptr;
-        ret = GetJsonFieldString(nullptr, str);
+        const char *ret = GetJsonFieldString(nullptr, str);
         EXPECT_EQ(nullptr, ret);
     }
 
     {
-        const char *ret = nullptr;
-        ret = GetJsonFieldString(handle, nullptr);
+        const char *ret = GetJsonFieldString(handle, nullptr);
         EXPECT_EQ(nullptr, ret);
     }
 
-    {
-        EXPECT_EQ(false, CompareJsonData(handle, nullptr, true));
-    }
+    EXPECT_EQ(false, CompareJsonData(handle, nullptr, true));
 
-    free(handle);
+    FREE(handle);
 }
 
 /**
@@ -432,23 +399,12 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
  */
 HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldInt_case1, TestSize.Level0)
 {
-    int32_t ret;
     const char *str = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2}";
     JsonHandle handle = CreateJson(str);
 
-    {
-        ret = GetJsonFieldInt(handle, "challenge");
-        EXPECT_EQ(-1, ret);
-    }
-
-    {
-        int32_t arr[5] = {0};
-        int32_t arrLen = 10;
-
-        AddFieldIntArrayToJson(handle, "challenge", arr, arrLen);
-    }
-
-    free(handle);
+    int32_t ret = GetJsonFieldInt(handle, "challenge");
+    EXPECT_EQ(-1, ret);
+    FREE(handle);
 }
 
 /**
@@ -459,7 +415,6 @@ HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldInt_case1, TestSize.Level0)
  */
 HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldIntArray_case1, TestSize.Level0)
 {
-    uint32_t ret;
     int32_t arr[5] = {0};
     int32_t arrLen = sizeof(arr) / sizeof(arr[0]);
     const char *str = "{\"version\":131072,\"challenge\":\"test challenge\",\"arr\":[\"3C1F21EE53D3C4E2\", \"elem2\", "
@@ -467,18 +422,72 @@ HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldIntArray_case1, TestSize.Level0)
     JsonHandle handle = CreateJson(str);
 
     {
-        ret = GetJsonFieldIntArray(handle, "challenge", arr, arrLen);
+        int32_t ret = GetJsonFieldIntArray(handle, "challenge", arr, arrLen);
         EXPECT_EQ(0U, ret);
     }
 
     {
-        ret = GetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
+        int32_t ret = GetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
         EXPECT_EQ(1U, ret);
     }
 
-    free(handle);
+    FREE(handle);
 }
 
+/**
+ * @tc.name: ByteToHexString_case1
+ * @tc.desc: function ByteToHexString with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmBaselibUtilsTest, ByteToHexString_case1, TestSize.Level0)
+{
+    const uint8_t hex[] = {0x1, 0xF, 0xE, 0x8, 0xA};
+    uint32_t hexLen = sizeof(hex);
+    uint8_t str[10] = {0};
+    uint32_t strLen = 10;
+
+    ByteToHexString(nullptr, 0, str, strLen);
+    EXPECT_EQ(0U, str[0]);
+
+    ByteToHexString(hex, hexLen, nullptr, 0);
+    EXPECT_EQ(0U, str[0]);
+
+    ByteToHexString(hex, hexLen, str, strLen - 1);
+    EXPECT_EQ(0U, str[0]);
+}
+
+/**
+ * @tc.name: HexStringToByte_case1
+ * @tc.desc: function HexStringToByte with malformed input
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmBaselibUtilsTest, HexStringToByte_case1, TestSize.Level0)
+{
+    uint32_t hexLen = 5;
+    uint32_t strLen = 10;
+    uint8_t hex[5] = {0};
+    char str[10] = {0};
+
+    {
+        int32_t ret = HexStringToByte(nullptr, 0, hex, hexLen);
+        EXPECT_EQ(-1, ret);
+        EXPECT_EQ(0U, str[0]);
+    }
+
+    {
+        int32_t ret = HexStringToByte(str, strLen, nullptr, 0);
+        EXPECT_EQ(-1, ret);
+        EXPECT_EQ(0U, str[0]);
+    }
+
+    {
+        int32_t ret = HexStringToByte(str, strLen, hex, hexLen - 2);
+        EXPECT_EQ(-1, ret);
+        EXPECT_EQ(0U, str[0]);
+    }
+}
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS
