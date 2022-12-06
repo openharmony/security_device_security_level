@@ -29,14 +29,13 @@
 
 #include "device_security_defines.h"
 #include "device_security_info.h"
-
 #include "dslm_core_defines.h"
 #include "dslm_core_process.h"
 #include "dslm_credential.h"
-#include "dslm_credential_utils.h"
 #include "dslm_crypto.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
+#include "dslm_hievent.h"
 #include "dslm_inner_process.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_interface_mock.h"
@@ -45,11 +44,8 @@
 #include "dslm_ohos_request.h"
 #include "dslm_ohos_verify.h"
 #include "dslm_request_callback_mock.h"
-#include "external_interface_adapter.h"
-#include "hks_adapter.h"
-#include "hks_type.h"
 #include "utils_datetime.h"
-#include "utils_tlv.h"
+#include "utils_mem.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -58,16 +54,7 @@ using namespace testing::ext;
 
 // for testing
 extern "C" {
-extern int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
-    const struct DataBuffer *pbkData, uint32_t algorithm);
 extern bool CheckMessage(const uint8_t *msg, uint32_t length);
-extern int32_t FillHksParamSet(struct HksParamSet **paramSet, struct HksParam *param, int32_t paramNums);
-extern int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias);
-extern int32_t BufferToHksCertChain(const uint8_t *data, uint32_t dataLen, struct HksCertChain *hksCertChain);
-extern int32_t HksCertChainToBuffer(const struct HksCertChain *hksCertChain, uint8_t **data, uint32_t *dataLen);
-extern void DestroyHksCertChain(struct HksCertChain *certChain);
-extern int32_t ConstructHksCertChain(struct HksCertChain **certChain,
-    const struct HksCertChainInitParams *certChainParam);
 extern void DoTimerProcess(TimerProc callback, const void *context);
 }
 
@@ -193,9 +180,22 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoResponse_case2, TestSize.Level0)
     uint64_t random = 0x0807060504030201;
     uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
     DslmCredBuff cred = {(CredType)3, 9, info};
-    MessageBuff **msg = nullptr;
-    int32_t ret = BuildDeviceSecInfoResponse(random, (DslmCredBuff *)&cred, msg);
-    ASSERT_EQ(ERR_INVALID_PARA, ret);
+
+    {
+        MessageBuff **msg = nullptr;
+
+        int32_t ret = BuildDeviceSecInfoResponse(random, (DslmCredBuff *)&cred, msg);
+        ASSERT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        MessageBuff msg;
+        memset_s(&msg, sizeof(MessageBuff), 0, sizeof(MessageBuff));
+        MessageBuff *msgPtr = &msg;
+
+        int32_t ret = BuildDeviceSecInfoResponse(random, (DslmCredBuff *)&cred, &msgPtr);
+        ASSERT_EQ(ERR_INVALID_PARA, ret);
+    }
 }
 
 HWTEST_F(DslmTest, ParseMessage_case1, TestSize.Level0)
@@ -372,9 +372,33 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case6, TestSize.Level0)
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case7, TestSize.Level0)
 {
-    // NULL parameters
-    int32_t ret = ParseDeviceSecInfoRequest(NULL, NULL);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
+    const char *message = "{\"version\":3351057,\"challenge\":\"010203040a0b0c0d\",\"support\":[]}";
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    RequestObject obj;
+    (void)memset_s(&obj, sizeof(RequestObject), 0, sizeof(RequestObject));
+
+    {
+        int32_t ret = ParseDeviceSecInfoRequest(nullptr, &obj);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        int32_t ret = ParseDeviceSecInfoRequest(&msg, nullptr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        int32_t ret = ParseDeviceSecInfoRequest(nullptr, &obj);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        msg.buff = nullptr;
+        int32_t ret = ParseDeviceSecInfoRequest(&msg, &obj);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case8, TestSize.Level0)
@@ -486,36 +510,59 @@ HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case5, TestSize.Level0)
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case6, TestSize.Level0)
 {
-    // malformed json message
-    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"infod}";
-
+    int32_t ret;
+    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
+                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
     uint32_t messageLen = strlen(message) + 1;
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
     uint64_t challenge;
     uint32_t ver;
-    DslmCredBuff **cred = nullptr;
+    DslmCredBuff cred;
+    memset_s(&cred, sizeof(DslmCredBuff), 0, sizeof(DslmCredBuff));
+    DslmCredBuff *credPtr = &cred;
 
-    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, cred);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
+    {
+        // malformed inputs
+        ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, nullptr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        // malformed inputs, credPtr != nullptr
+        ret = ParseDeviceSecInfoResponse(&msg, &challenge, &ver, &credPtr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case7, TestSize.Level0)
 {
-    // malformed challenge
-    const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2A\",\"type\":2,\"info\":"
-                          "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
-
-    uint32_t messageLen = strlen(message) + 1;
-    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
-
+    int32_t ret;
     uint64_t challenge;
     uint32_t version;
     DslmCredBuff *cred = nullptr;
 
-    // 131072 = 0x020000
-    int32_t ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
-    EXPECT_EQ(ERR_NO_CHALLENGE, ret);
+    {
+        // malformed challenge
+        const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2A\",\"type\":2,\"info\":"
+                              "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
+        uint32_t messageLen = strlen(message) + 1;
+        MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+        // 131072 = 0x020000
+        ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
+        EXPECT_EQ(ERR_NO_CHALLENGE, ret);
+    }
+
+    {
+        // malformed json
+        const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"infod}";
+        uint32_t messageLen = strlen(message) + 1;
+        MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+        ret = ParseDeviceSecInfoResponse(&msg, &challenge, &version, &cred);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoResponse_case8, TestSize.Level0)
@@ -668,6 +715,16 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         BlockCheckDeviceStatus(&device, STATE_SUCCESS, 10000);
         mockMsg.MakeDeviceOffline(&device);
     }
+}
+
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
+
+    const RequestOption option = {
+        .challenge = 0xffffffffffffffff,
+        .timeout = 2,
+    };
 
     {
         uint32_t cookie = 0xabcd;
@@ -684,9 +741,25 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
         EXPECT_EQ(ret, 0);
         mockMsg.MakeDeviceOffline(&device);
     }
+
+    {
+        const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0, 'b', 'c', 'd', 'e', 'f', 'g'}};
+        uint32_t cookie = 0xabcd;
+        DslmMsgInterfaceMock mockMsg;
+        EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
+        EXPECT_CALL(mockMsg, GetSelfDeviceIdentify(_, _, _)).Times(AtLeast(1));
+        EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(0));
+        DslmRequestCallbackMock mockCallback;
+        auto isRightLevel = [](const DslmCallbackInfo *info) { return info->level >= 1; };
+        EXPECT_CALL(mockCallback, RequestCallback(cookie, 0, Truly(isRightLevel))).Times(Exactly(1));
+
+        int32_t ret = OnRequestDeviceSecLevelInfo(&device, &option, 0, cookie, DslmRequestCallbackMock::MockedCallback);
+        EXPECT_EQ(ret, 0);
+        mockMsg.MakeDeviceOffline(&device);
+    }
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
 {
     constexpr uint32_t maxNotifySize = 64;
 
@@ -736,7 +809,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case2, TestSize.Level0)
     EXPECT_EQ(info->historyListSize, 30U); // 30 is the max history list size
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case4, TestSize.Level0)
 {
     DslmMsgInterfaceMock mockMsg;
     DslmRequestCallbackMock mockCallback;
@@ -782,7 +855,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
     mockMsg.MakeDeviceOffline(&device);
 }
 
-HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case4, TestSize.Level0)
+HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case5, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
     const RequestOption option = {
@@ -957,6 +1030,20 @@ HWTEST_F(DslmTest, GetSupportedCredTypes_case1, TestSize.Level0)
     EXPECT_EQ(0, ret);
 }
 
+/**
+ * @tc.name: GetSupportedCredTypes_case2
+ * @tc.desc: function GetSupportedCredTypes with malformed inputs
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, GetSupportedCredTypes_case2, TestSize.Level0)
+{
+    int32_t ret;
+    CredType list[] = {CRED_TYPE_MINI, CRED_TYPE_SMALL, CRED_TYPE_STANDARD, CRED_TYPE_LARGE};
+    ret = GetSupportedCredTypes(list, 2);
+    EXPECT_EQ(2, ret);
+}
+
 HWTEST_F(DslmTest, CreateDslmCred_case1, TestSize.Level0)
 {
     CredType type = CRED_TYPE_STANDARD;
@@ -966,10 +1053,43 @@ HWTEST_F(DslmTest, CreateDslmCred_case1, TestSize.Level0)
 
 HWTEST_F(DslmTest, CheckAndGenerateChallenge_case1, TestSize.Level0)
 {
-    DslmDeviceInfo *device = nullptr;
+    DslmDeviceInfo device;
+    (void)memset_s(&device, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
 
-    int32_t ret = CheckAndGenerateChallenge(device);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
+    {
+        int32_t ret = CheckAndGenerateChallenge(nullptr);
+        EXPECT_EQ(ERR_INVALID_PARA, ret);
+    }
+
+    {
+        int32_t ret = CheckAndGenerateChallenge(&device);
+        EXPECT_EQ(SUCCESS, ret);
+    }
+}
+
+HWTEST_F(DslmTest, CheckAndGenerateChallenge_case2, TestSize.Level0)
+{
+    DslmDeviceInfo device;
+    (void)memset_s(&device, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+
+    {
+        device.nonceTimeStamp = 0xFFFFFFFFFFFFFFFF;
+        int32_t ret = CheckAndGenerateChallenge(&device);
+        EXPECT_EQ(SUCCESS, ret);
+    }
+
+    {
+        device.nonceTimeStamp = GetMillisecondSinceBoot();
+        int32_t ret = CheckAndGenerateChallenge(&device);
+        EXPECT_EQ(SUCCESS, ret);
+    }
+
+    {
+        device.nonceTimeStamp = GetMillisecondSinceBoot();
+        device.nonce = 1;
+        int32_t ret = CheckAndGenerateChallenge(&device);
+        EXPECT_EQ(SUCCESS, ret);
+    }
 }
 
 HWTEST_F(DslmTest, SendDeviceInfoRequest_case1, TestSize.Level0)
@@ -1014,14 +1134,24 @@ HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case3, TestSize.Level0)
 
 HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case4, TestSize.Level0)
 {
-    DslmDeviceInfo device = {.nonceTimeStamp = 0xFFFFFFFFFFFFFFFF};
+    DslmDeviceInfo device;
+    memset_s(&device, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+    device.nonce = 0xE2C4D353EE211F3C;
     const char *message = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2,\"info\":"
                           "\"SkFERS1BTDAwOjg3QUQyOEQzQjFCLi4u\"}";
     uint32_t messageLen = strlen(message) + 1;
     MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
 
-    int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
-    EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+    {
+        int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
+        EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+    }
+
+    {
+        device.nonceTimeStamp = 0xFFFFFFFFFFFFFFFF;
+        int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
+        EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+    }
 }
 
 HWTEST_F(DslmTest, GetDslmDeviceInfo_case1, TestSize.Level0)
@@ -1067,8 +1197,15 @@ HWTEST_F(DslmTest, OnMsgSendResultNotifier_case1, TestSize.Level0)
     uint64_t transNo = 0;
     uint32_t result = ERR_DEFAULT;
 
-    uint32_t ret = OnMsgSendResultNotifier(&identify, transNo, result);
-    EXPECT_EQ(SUCCESS, ret);
+    {
+        uint32_t ret = OnMsgSendResultNotifier(&identify, transNo, result);
+        EXPECT_EQ(SUCCESS, ret);
+    }
+
+    {
+        uint32_t ret = OnMsgSendResultNotifier(nullptr, transNo, result);
+        EXPECT_EQ(SUCCESS, ret);
+    }
 }
 
 HWTEST_F(DslmTest, OnPeerStatusReceiver_case1, TestSize.Level0)
@@ -1089,72 +1226,6 @@ HWTEST_F(DslmTest, InitDslmProcess_case1, TestSize.Level0)
 HWTEST_F(DslmTest, DeinitDslmProcess_case1, TestSize.Level0)
 {
     EXPECT_EQ(true, DeinitDslmProcess());
-}
-
-// dslm_credential_utils.c
-
-HWTEST_F(DslmTest, VerifyDslmCredential_case1, TestSize.Level0)
-{
-    const char *cred = "test";
-    DslmCredInfo *info = nullptr;
-    AttestationList list;
-    memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
-
-    int32_t ret = VerifyDslmCredential(cred, info, &list);
-    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
-}
-
-HWTEST_F(DslmTest, VerifyDslmCredential_case2, TestSize.Level0)
-{
-    const char *cred = "test";
-    DslmCredInfo info;
-    AttestationList list;
-    memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
-    memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
-
-    int32_t ret = VerifyDslmCredential(cred, &info, &list);
-    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
-}
-
-HWTEST_F(DslmTest, EcdsaVerify_case1, TestSize.Level0)
-{
-    const char *data = "test";
-    uint32_t length = strlen(data) + 1;
-    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
-    const DataBuffer sigData = {.length = length, .data = (uint8_t *)data};
-    DataBuffer *pbkData = nullptr;
-    uint32_t algorithm = TYPE_ECDSA_SHA_256;
-
-    int32_t ret = EcdsaVerify(&srcData, &sigData, pbkData, algorithm);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
-}
-
-HWTEST_F(DslmTest, EcdsaVerify_case2, TestSize.Level0)
-{
-    const char *data = "test";
-    uint32_t length = strlen(data) + 1;
-    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
-    // malformed sigData
-    const DataBuffer sigData = {.length = length, .data = nullptr};
-    const DataBuffer pbkData = {.length = length, .data = (uint8_t *)data};
-    uint32_t algorithm = TYPE_ECDSA_SHA_256;
-
-    int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, algorithm);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
-}
-
-HWTEST_F(DslmTest, EcdsaVerify_case3, TestSize.Level0)
-{
-    const char *data = "test";
-    uint32_t length = strlen(data) + 1;
-    const DataBuffer srcData = {.length = length, .data = (uint8_t *)data};
-    // malformed sigData
-    const DataBuffer sigData = {.length = length, .data = (uint8_t *)data};
-    const DataBuffer pbkData = {.length = length, .data = (uint8_t *)data};
-    uint32_t algorithm = TYPE_ECDSA_SHA_256 + 2;
-
-    int32_t ret = EcdsaVerify(&srcData, &sigData, &pbkData, algorithm);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 
 // dslm_ohos_verify.c
@@ -1312,7 +1383,8 @@ HWTEST_F(DslmTest, CheckMessage_case1, TestSize.Level0)
  */
 HWTEST_F(DslmTest, FreeMessagePacket_case1, TestSize.Level0)
 {
-    MessagePacket *packet = (MessagePacket *)malloc(sizeof(MessagePacket));
+    MessagePacket *packet = (MessagePacket *)MALLOC(sizeof(MessagePacket));
+    ASSERT_NE(nullptr, packet);
     (void)memset_s(packet, sizeof(MessagePacket), 0, sizeof(MessagePacket));
 
     FreeMessagePacket(packet);
@@ -1341,134 +1413,58 @@ HWTEST_F(DslmTest, FreeMessageBuff_case1, TestSize.Level0)
  */
 HWTEST_F(DslmTest, FreeMessageBuff_case2, TestSize.Level0)
 {
-    MessageBuff *buff = (MessageBuff *)malloc(sizeof(MessageBuff));
+    MessageBuff *buff = (MessageBuff *)MALLOC(sizeof(MessageBuff));
+    ASSERT_NE(nullptr, buff);
     memset_s(buff, sizeof(MessageBuff), 0, sizeof(MessageBuff));
 
     FreeMessageBuff(buff);
 }
 
-// just for coverage
-/**
- * @tc.name: DestroyDslmInfoInCertChain_case1
- * @tc.desc: function DestroyDslmInfoInCertChain with null/non-null input
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, DestroyDslmInfoInCertChain_case1, TestSize.Level0)
+static void dummyDump(const DslmDeviceInfo *info, int32_t fd)
 {
-    struct DslmInfoInCertChain *info = (struct DslmInfoInCertChain *)malloc(sizeof(struct DslmInfoInCertChain));
-    memset_s(info, sizeof(struct DslmInfoInCertChain), 0, sizeof(struct DslmInfoInCertChain));
-
-    DestroyDslmInfoInCertChain(nullptr);
-    DestroyDslmInfoInCertChain(info);
-    free(info);
+    (void)info;
+    (void)fd;
 }
 
-// just for coverage
-/**
- * @tc.name: InitDslmInfoInCertChain_case1
- * @tc.desc: function InitDslmInfoInCertChain with null input
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, InitDslmInfoInCertChain_case1, TestSize.Level0)
+HWTEST_F(DslmTest, ForEachDeviceDump_case1, TestSize.Level0)
 {
-    InitDslmInfoInCertChain(nullptr);
-}
-
-// to split out
-// just for coverage
-/**
- * @tc.name: HksAdapterSet_case1
- * @tc.desc: huks adapter with null input
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, HksAdapterSet_case1, TestSize.Level0)
-{
-    int32_t ret;
-
-    ret = FillHksParamSet(nullptr, nullptr, 0);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
-
-    ret = HksGenerateKeyAdapter(nullptr);
-    EXPECT_EQ(ERR_INVALID_PARA, ret);
+    ForEachDeviceDump(nullptr, 0);
+    ForEachDeviceDump(dummyDump, 0);
+    InitDslmStateMachine(nullptr);
+    ScheduleDslmStateMachine(nullptr, 0, nullptr);
 }
 
 /**
- * @tc.name: BufferToHksCertChain_case1
- * @tc.desc: function BufferToHksCertChain with malformed input
+ * @tc.name: DestroyDslmCred_case1
+ * @tc.desc: function DestroyDslmCred with malformed inputs
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(DslmTest, BufferToHksCertChain_case1, TestSize.Level0)
+HWTEST_F(DslmTest, DestroyDslmCred_case1, TestSize.Level0)
 {
-    int32_t ret;
+    DslmCredBuff *cred = (DslmCredBuff *)MALLOC(sizeof(DslmCredBuff));
+    cred->type = (CredType)3;
+    cred->credLen = 9;
+    cred->credVal = nullptr;
 
-    {
-        ret = BufferToHksCertChain(nullptr, 1, nullptr);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        const uint8_t data[] = {'0'};
-        uint32_t len = 1;
-        struct HksCertChain chain;
-        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
-
-        ret = BufferToHksCertChain(data, len, &chain);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        uint8_t buff[8];
-        uint32_t len = 8;
-        memset_s(buff, sizeof(buff), 'c', sizeof(buff));
-        TlvCommon *ptr = (TlvCommon *)buff;
-        ptr->tag = 0x99;
-        ptr->len = 4;
-        struct HksCertChain chain;
-        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
-
-        ret = BufferToHksCertChain(buff, len, &chain);
-        EXPECT_EQ(SUCCESS, ret);
-        EXPECT_EQ(0U, chain.certsCount);
-    }
-
-    {
-        uint8_t buff[8];
-        uint32_t len = 8;
-        memset_s(buff, sizeof(buff), 'c', sizeof(buff));
-        TlvCommon *ptr = (TlvCommon *)buff;
-        ptr->tag = 0x110;
-        ptr->len = 4;
-        struct HksCertChain chain;
-        memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
-
-        ret = BufferToHksCertChain(buff, len, &chain);
-        EXPECT_EQ(SUCCESS, ret);
-        EXPECT_EQ(0U, chain.certsCount);
-    }
+    DestroyDslmCred(nullptr);
+    DestroyDslmCred(cred);
 }
 
 /**
- * @tc.name: HksCertChainToBuffer_case1
- * @tc.desc: function HksCertChainToBuffer with malformed input
+ * @tc.name: ReportHiEventAppInvoke_case1
+ * @tc.desc: function ReportHiEventAppInvoke with malformed inputs
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(DslmTest, HksCertChainToBuffer_case1, TestSize.Level0)
+HWTEST_F(DslmTest, ReportHiEventAppInvoke_case1, TestSize.Level0)
 {
-    int32_t ret;
-    uint32_t len = 5;
-    uint8_t *data = (uint8_t *)malloc(len);
-
-    {
-        ret = HksCertChainToBuffer(nullptr, &data, &len);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    free(data);
+    DslmDeviceInfo info;
+    (void)memset_s(&info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+    info.lastRequestTime = 10U;
+    ReportHiEventInfoSync(nullptr);
+    ReportHiEventInfoSync(&info);
+    ReportHiEventAppInvoke(nullptr);
 }
 } // namespace DslmUnitTest
 } // namespace Security
