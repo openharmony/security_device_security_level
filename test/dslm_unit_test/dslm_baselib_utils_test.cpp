@@ -261,6 +261,8 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
 
     {
         int32_t ret = Base64UrlDecodeApp(src, &to);
+        ASSERT_NE(to, nullptr);
+
         EXPECT_EQ(3, ret);
         EXPECT_EQ('\xEF', to[1]);
         EXPECT_EQ('\xDD', to[2]);
@@ -422,12 +424,12 @@ HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldIntArray_case1, TestSize.Level0)
     JsonHandle handle = CreateJson(str);
 
     {
-        int32_t ret = GetJsonFieldIntArray(handle, "challenge", arr, arrLen);
+        uint32_t ret = GetJsonFieldIntArray(handle, "challenge", arr, arrLen);
         EXPECT_EQ(0U, ret);
     }
 
     {
-        int32_t ret = GetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
+        uint32_t ret = GetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
         EXPECT_EQ(1U, ret);
     }
 
