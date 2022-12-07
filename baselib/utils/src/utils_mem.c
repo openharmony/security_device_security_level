@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_MEM_H
-#define SEC_UTILS_MEM_H
+#include "utils_mem.h"
 
 #include <malloc.h>
-
-#define MALLOC UtilsMalloc
-#define FREE UtilsFree
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void *UtilsMalloc(size_t size);
+void *UtilsMalloc(size_t size)
+{
+    return malloc(size);
+}
 
-void UtilsFree(void *memory);
+void UtilsFree(void *memory)
+{
+    return free(memory);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // SEC_UTILS_MEM_H

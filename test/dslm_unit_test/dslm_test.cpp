@@ -38,6 +38,7 @@
 #include "dslm_fsm_process.h"
 #include "dslm_hievent.h"
 #include "dslm_inner_process.h"
+#include "dslm_memory_mock.h"
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_interface_mock.h"
 #include "dslm_msg_serialize.h"
@@ -45,6 +46,7 @@
 #include "dslm_ohos_request.h"
 #include "dslm_ohos_verify.h"
 #include "dslm_request_callback_mock.h"
+#include "external_interface_adapter.h"
 #include "utils_datetime.h"
 #include "utils_mem.h"
 
@@ -269,6 +271,71 @@ HWTEST_F(DslmTest, ParseMessage_case7, TestSize.Level0)
     uint32_t messageLen = 3;
     MessageBuff msg = {.length = messageLen, .buff = message};
     EXPECT_EQ(nullptr, ParseMessage(&msg));
+}
+
+HWTEST_F(DslmTest, ParseMessage_case8, TestSize.Level0)
+{
+    MockMalloc mock;
+
+    // mock the malloc return nullptr
+    EXPECT_CALL(mock, UtilsMalloc).WillRepeatedly(Return(nullptr));
+
+    const char *message = "{\"message\":1,\"payload\":{\"version\":131072,\"challenge\":\"0102030405060708\"}}";
+
+    uint32_t messageLen = strlen(message) + 1;
+    MessageBuff msg = {.length = messageLen, .buff = (uint8_t *)message};
+
+    MessagePacket *packet = ParseMessage(&msg);
+    ASSERT_EQ(nullptr, packet);
+}
+
+HWTEST_F(DslmTest, GetPkInfoListStr_case1, TestSize.Level0)
+{
+    const char *udidStr = "device";
+    char *pkInfoListStr = NULL;
+
+    int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
+    EXPECT_EQ(result, 0);
+}
+
+HWTEST_F(DslmTest, GetPkInfoListStr_case2, TestSize.Level0)
+{
+    const char *udidStr = "device";
+    char *pkInfoListStr = NULL;
+
+    MockMalloc mock;
+
+    // mock the malloc always return nullptr
+    EXPECT_CALL(mock, UtilsMalloc).WillOnce(Return(nullptr));
+
+    int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
+    EXPECT_EQ(result, ERR_MEMORY_ERR);
+}
+
+HWTEST_F(DslmTest, GetPkInfoListStr_case3, TestSize.Level0)
+{
+    const char *udidStr = "device";
+    char *pkInfoListStr = NULL;
+
+    MockStrcpy mock;
+    // mock the strcpy_s return a EINVAL
+    EXPECT_CALL(mock, strcpy_s).WillOnce(Return(EINVAL));
+
+    int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
+    EXPECT_EQ(result, ERR_MEMORY_ERR);
+}
+
+HWTEST_F(DslmTest, GetPkInfoListStr_case4, TestSize.Level0)
+{
+    const char *udidStr = "device";
+    char *pkInfoListStr = NULL;
+
+    MockStrcpy mock;
+    // mock the strcpy_s return a EINVAL on the second call
+    EXPECT_CALL(mock, strcpy_s).WillOnce(Invoke(MockStrcpy::defaultstrcpy_s)).WillOnce(Return(EINVAL));
+
+    int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
+    EXPECT_EQ(result, ERR_MEMORY_ERR);
 }
 
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
