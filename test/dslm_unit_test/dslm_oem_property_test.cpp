@@ -961,7 +961,7 @@ HWTEST_F(DslmOemPropertyTest, HksCertChainToBuffer_case1, TestSize.Level0)
  */
 HWTEST_F(DslmOemPropertyTest, DestroyHksCertChain_case1, TestSize.Level0)
 {
-    struct HksCertChain *chain = (struct HksCertChain *)MALLOC(sizeof(struct HksCertChain *));
+    struct HksCertChain *chain = (struct HksCertChain *)MALLOC(sizeof(struct HksCertChain));
     ASSERT_NE(nullptr, chain);
     struct HksBlob *blob = (struct HksBlob *)MALLOC(sizeof(struct HksBlob));
     ASSERT_NE(nullptr, blob);
