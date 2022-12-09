@@ -29,6 +29,7 @@
 
 #include "device_security_defines.h"
 #include "device_security_info.h"
+#include "device_security_level_defines.h"
 #include "dslm_core_defines.h"
 #include "dslm_core_process.h"
 #include "dslm_credential.h"
@@ -1465,6 +1466,49 @@ HWTEST_F(DslmTest, ReportHiEventAppInvoke_case1, TestSize.Level0)
     ReportHiEventInfoSync(nullptr);
     ReportHiEventInfoSync(&info);
     ReportHiEventAppInvoke(nullptr);
+}
+
+/**
+ * @tc.name: GetDeviceSecurityLevelValue_case1
+ * @tc.desc: function GetDeviceSecurityLevelValue with malformed inputs
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, GetDeviceSecurityLevelValue_case1, TestSize.Level0)
+{
+    int32_t ret;
+    int32_t level = 0;
+    DeviceSecurityInfo info = {.magicNum = 0xcd, .result = 0, .level = 0};
+
+    ret = GetDeviceSecurityLevelValue(nullptr, &level);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = GetDeviceSecurityLevelValue(&info, nullptr);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+}
+
+/**
+ * @tc.name: RequestDeviceSecurityInfoAsync_case1
+ * @tc.desc: function RequestDeviceSecurityInfoAsync with malformed inputs
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(DslmTest, RequestDeviceSecurityInfoAsync_case1, TestSize.Level0)
+{
+    int32_t ret;
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
+    RequestOption opt = {.challenge = 0xcd, .timeout = 400, .extra = 0};
+    auto callback = [](const DeviceIdentify *identify, struct DeviceSecurityInfo *info) { return; };
+
+    ret = RequestDeviceSecurityInfoAsync(nullptr, &opt, callback);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = RequestDeviceSecurityInfoAsync(&device, &opt, nullptr);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    // malformed option->timeout > MAX_KEEP_LEN
+    ret = RequestDeviceSecurityInfoAsync(&device, &opt, callback);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 } // namespace DslmUnitTest
 } // namespace Security
