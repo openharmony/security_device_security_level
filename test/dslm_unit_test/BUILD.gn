@@ -36,12 +36,13 @@ ohos_unittest("dslm_test") {
   include_dirs = [
     "//base/security/device_security_level/common/include",
     "//base/security/device_security_level/interfaces/inner_api/include",
+    "//base/security/device_security_level/interfaces/inner_api/src/standard",
     "//base/security/device_security_level/services/include",
     "//base/security/device_security_level/services/dslm",
     "//base/security/device_security_level/services/sa/common",
-    "//base/security/device_security_level/baselib/msglib/include/",
-    "//base/security/device_security_level/oem_property/common/",
-    "//base/security/device_security_level/oem_property/ohos/impl/",
+    "//base/security/device_security_level/baselib/msglib/include",
+    "//base/security/device_security_level/oem_property/common",
+    "//base/security/device_security_level/oem_property/ohos/impl",
   ]
 
   configs = [ "//base/security/device_security_level/common:common_configs" ]
