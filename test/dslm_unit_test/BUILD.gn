@@ -14,6 +14,10 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 
+config("dslm_cmoker") {
+  include_dirs = [ "cmocker" ]
+}
+
 # test unittest
 ohos_unittest("dslm_test") {
   install_enable = true
@@ -26,6 +30,7 @@ ohos_unittest("dslm_test") {
     "//base/security/device_security_level/oem_property/ohos/dslm_ohos_credential.c",
     "//base/security/device_security_level/services/sa/common/dslm_rpc_process.c",
     "dslm_baselib_utils_test.cpp",
+    "dslm_memory_mock.cpp",
     "dslm_msg_interface_mock.cpp",
     "dslm_oem_property_test.cpp",
     "dslm_request_callback_mock.cpp",
@@ -46,6 +51,8 @@ ohos_unittest("dslm_test") {
   ]
 
   configs = [ "//base/security/device_security_level/common:common_configs" ]
+
+  configs += [ ":dslm_cmoker" ]
 
   deps = [
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
