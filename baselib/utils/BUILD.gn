@@ -24,6 +24,7 @@ ohos_static_library("utils_static") {
     "src/utils_datetime.c",
     "src/utils_hexstring.c",
     "src/utils_json.c",
+    "src/utils_mem.c",
     "src/utils_state_machine.c",
     "src/utils_timer.cpp",
     "src/utils_tlv.c",
