@@ -891,7 +891,6 @@ HWTEST_F(DslmOemPropertyTest, InitDslmInfoInCertChain_case1, TestSize.Level0)
  */
 HWTEST_F(DslmOemPropertyTest, BufferToHksCertChain_case1, TestSize.Level0)
 {
-
     {
         int32_t ret = BufferToHksCertChain(nullptr, 1, nullptr);
         EXPECT_EQ(ERR_INVALID_PARA, ret);
