@@ -14,34 +14,38 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-ohos_fuzztest("dslm_fuzz") {
-  module_out_path = "security/device_security_level"
-  fuzz_config_file = "//base/security/device_security_level/test/dslm_fuzz_test"
+if (defined(ohos_lite)) {
+  group("dslm_fuzz") {
+  }
+} else {
+  ohos_fuzztest("dslm_fuzz") {
+    module_out_path = "security/device_security_level"
+    fuzz_config_file = "../dslm_fuzz_test"
 
-  cflags = [
-    "-g",
-    "-O0",
-    "-Wno-unused-variable",
-    "-fno-omit-frame-pointer",
-  ]
+    cflags = [
+      "-g",
+      "-O0",
+      "-Wno-unused-variable",
+      "-fno-omit-frame-pointer",
+    ]
 
-  include_dirs = [
-    "//base/security/device_security_level/baselib/utils/include",
-    "//base/security/device_security_level/interfaces/inner_api/src/standard",
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/services/sa/standard",
-  ]
+    include_dirs = [
+      "../../baselib/utils/include",
+      "../../common/include",
+      "../../interfaces/inner_api/src/standard",
+      "../../services/sa/standard",
+    ]
 
-  sources = [ "dslm_fuzzer.cpp" ]
+    sources = [ "dslm_fuzzer.cpp" ]
 
-  deps =
-      [ "//base/security/device_security_level/oem_property/ohos:dslm_service" ]
+    deps = [ "../../oem_property/ohos:dslm_service" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "device_security_level:dslm_sdk",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-  ]
+    external_deps = [
+      "c_utils:utils",
+      "device_security_level:dslm_sdk",
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+    ]
+  }
 }

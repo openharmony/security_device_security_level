@@ -212,11 +212,15 @@ int32_t ValidateCertChainAdapter(const uint8_t *data, uint32_t dataLen, struct D
 
 int32_t HksAttestIsReadyAdapter(void)
 {
+#ifdef L2_STANDARD
     if (HcmIsDeviceKeyExist(NULL) != HKS_SUCCESS) {
         SECURITY_LOG_ERROR("Hks attest not ready");
         return ERR_CALL_EXTERNAL_FUNC;
     }
     return SUCCESS;
+#else
+    return ERR_DEFAULT;
+#endif
 }
 
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax)

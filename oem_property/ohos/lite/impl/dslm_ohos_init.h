@@ -13,27 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_TIMER_H
-#define SEC_UTILS_TIMER_H
+#ifndef DSLM_OHOS_INIT_H
+#define DSLM_OHOS_INIT_H
 
 #include <stdint.h>
+
+#include "dslm_cred.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef uintptr_t TimerHandle;
-
-typedef void (*TimerProc)(const void *context);
-
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-void UtilsStopTimerTask(TimerHandle handle);
+int32_t InitOhosDslmCred(DslmCredInfo *credInfo);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // SEC_UTILS_TIMER_H
+#endif // DSLM_OHOS_INIT_H

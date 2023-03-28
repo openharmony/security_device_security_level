@@ -21,22 +21,32 @@ ohos_source_set("service_common_obj") {
   ]
 
   include_dirs = [
-    "//base/security/device_security_level/interfaces/inner_api/include",
-    "//base/security/device_security_level/services/include",
+    "../include",
+    "../../interfaces/inner_api/include",
   ]
 
-  deps = [
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//third_party/openssl:libcrypto_shared",
-  ]
+  deps = [ "../..//baselib/utils:utils_static" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-    "ipc:ipc_core",
-  ]
+  if (defined(ohos_lite)) {
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//build/lite/config/component/openssl:openssl_shared",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
+    ]
+  } else {
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+      "ipc:ipc_core",
+    ]
+  }
+
+  configs = [
+    "../../common:common_configs",
+    "../../common:common_lite_configs",
+  ]
 
   part_name = "device_security_level"
   subsystem_name = "security"

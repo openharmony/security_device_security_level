@@ -27,10 +27,14 @@ ohos_source_set("service_msg_obj") {
     "//base/security/device_security_level/baselib/utils:utils_static",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-  ]
+  if (defined(ohos_lite)) {
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+    ]
+  }
 
   configs = [ "//base/security/device_security_level/common:common_configs" ]
 

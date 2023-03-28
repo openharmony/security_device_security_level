@@ -14,39 +14,97 @@
 import("//build/ohos.gni")
 
 # sa lib
-ohos_static_library("service_sa_static") {
-  sources = [
-    "common/dslm_rpc_process.c",
-    "standard/dslm_callback_proxy.cpp",
-    "standard/dslm_ipc_process.cpp",
-    "standard/dslm_service.cpp",
-  ]
+if (defined(ohos_lite)) {
+  ohos_static_library("service_sa_static") {
+    sources = [ "common/dslm_rpc_process.c" ]
 
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-    "//base/security/device_security_level/services/include",
-    "//base/security/device_security_level/services/sa/common",
-    "//base/security/device_security_level/services/dslm",
-  ]
+    include_dirs = [
+      "common",
+      "../dslm",
+      "../include",
+      "../../common/include",
+      "../../interfaces/inner_api/include",
+    ]
 
-  deps = [
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/services/common:service_common_obj",
-    "//base/security/device_security_level/services/dfx:dslm_extension_dfx",
-    "//base/security/device_security_level/services/dslm:service_dslm_obj",
-    "//base/security/device_security_level/services/msg:service_msg_obj",
-  ]
+    deps = [
+      "../../baselib/utils:utils_static",
+      "../common:service_common_obj",
+      "../dslm:service_dslm_obj",
+      "../msg:service_msg_obj",
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//build/lite/config/component/cJSON:cjson_shared",
+      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+      "//third_party/bounds_checking_function:libsec_shared",
+    ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-  ]
+    configs = [ "../../common:common_configs" ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+    part_name = "device_security_level"
+    subsystem_name = "security"
+  }
 
-  part_name = "device_security_level"
-  subsystem_name = "security"
+  if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "linux") {
+    ohos_executable("dslm_server") {
+      sources = [
+        "lite/dslm_ipc_process.c",
+        "lite/dslm_service.c",
+        "lite/dslm_service_feature.c",
+        "lite/dslm_service_main.c",
+      ]
+
+      include_dirs = [
+        "common",
+        "../include",
+        "../../baselib/utils/include",
+        "../../interfaces/inner_api/include",
+      ]
+
+      deps = [
+        ":service_sa_static",
+        "../../oem_property/ohos/lite:dslm_ohos_cred_obj",
+        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+        "//build/lite/config/component/cJSON:cjson_shared",
+        "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
+        "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
+  }
+} else {
+  ohos_static_library("service_sa_static") {
+    sources = [
+      "common/dslm_rpc_process.c",
+      "standard/dslm_callback_proxy.cpp",
+      "standard/dslm_ipc_process.cpp",
+      "standard/dslm_service.cpp",
+    ]
+
+    include_dirs = [
+      "common",
+      "../dslm",
+      "../include",
+      "../../common/include",
+      "../../interfaces/inner_api/include",
+    ]
+
+    deps = [
+      "../../baselib/utils:utils_static",
+      "../common:service_common_obj",
+      "../dfx:dslm_extension_dfx",
+      "../dslm:service_dslm_obj",
+      "../msg:service_msg_obj",
+    ]
+
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+    ]
+
+    configs = [ "../../common:common_configs" ]
+
+    part_name = "device_security_level"
+    subsystem_name = "security"
+  }
 }

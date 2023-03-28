@@ -13,27 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_TIMER_H
-#define SEC_UTILS_TIMER_H
+#ifndef DSLM_IPC_PROCESS_H
+#define DSLM_IPC_PROCESS_H
 
-#include <stdint.h>
+#include "device_security_defines.h"
+#include "samgr_lite.h"
+#include "serializer.h"
+#include "utils_list.h"
+#include "utils_mutex.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int32_t DslmProcessGetDeviceSecurityLevel(IUnknown *iUnknown, IpcIo *req, IpcIo *reply);
 
-typedef uintptr_t TimerHandle;
+typedef struct DslmRemoteStubListNode {
+    ListNode node;
+    uint64_t key;
+    IpcIo *reply;
+} DslmRemoteStubListNode;
 
-typedef void (*TimerProc)(const void *context);
-
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-void UtilsStopTimerTask(TimerHandle handle);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // SEC_UTILS_TIMER_H
+typedef struct DslmRemoteStubList {
+    DslmRemoteStubListNode *head;
+    uint32_t size;
+    Mutex *mutex;
+} DslmRemoteStubList;
+#endif // DSLM_IPC_PROCESS_H

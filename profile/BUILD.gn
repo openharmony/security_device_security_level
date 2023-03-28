@@ -18,13 +18,18 @@ ohos_sa_profile("device_security_level_profile") {
   part_name = "device_security_level"
 }
 
-ohos_prebuilt_etc("dslm_service.rc") {
-  source = "dslm_service.cfg"
+if (defined(ohos_lite)) {
+  group("dslm_service.rc") {
+  }
+} else {
+  ohos_prebuilt_etc("dslm_service.rc") {
+    source = "dslm_service.cfg"
 
-  relative_install_dir = "init"
+    relative_install_dir = "init"
 
-  deps = [ ":device_security_level_profile" ]
+    deps = [ ":device_security_level_profile" ]
 
-  subsystem_name = "security"
-  part_name = "device_security_level"
+    subsystem_name = "security"
+    part_name = "device_security_level"
+  }
 }

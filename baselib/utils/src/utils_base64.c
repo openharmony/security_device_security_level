@@ -244,7 +244,7 @@ int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
     base64Str[alignLen] = '\0';
     const uint8_t *from = base64Str;
     int32_t realLength = Base64DecodeApp(from, to);
-    free(base64Str);
+    FREE(base64Str);
     return realLength;
 }
 

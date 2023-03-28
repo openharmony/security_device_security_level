@@ -206,7 +206,7 @@ static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceId
     return ret;
 }
 
-static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
+static int32_t VerifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     if (memcpy_s(credStr, DSLM_CRED_STR_LEN_MAX, credBuff->credVal, credBuff->credLen + 1) != EOK) {
@@ -228,7 +228,7 @@ static int32_t verifySmallDslmCred(const DeviceIdentify *device, const DslmCredB
     return SUCCESS;
 }
 
-static int32_t verifyStandardDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
+static int32_t VerifyStandardDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
     DslmCredInfo *credInfo)
 {
     struct DslmInfoInCertChain resultInfo;
@@ -284,9 +284,9 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
     credInfo->credType = credBuff->type;
     switch (credBuff->type) {
         case CRED_TYPE_SMALL:
-            return verifySmallDslmCred(device, credBuff, credInfo);
+            return VerifySmallDslmCred(device, credBuff, credInfo);
         case CRED_TYPE_STANDARD:
-            return verifyStandardDslmCred(device, challenge, credBuff, credInfo);
+            return VerifyStandardDslmCred(device, challenge, credBuff, credInfo);
         default:
             SECURITY_LOG_ERROR("invalid cred type");
             break;

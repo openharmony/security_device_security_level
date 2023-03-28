@@ -13,27 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_TIMER_H
-#define SEC_UTILS_TIMER_H
+#ifndef DEVICE_SECURITY_LEVEL_DEFINES_H
+#define DEVICE_SECURITY_LEVEL_DEFINES_H
 
-#include <stdint.h>
+#include "device_security_defines.h"
+#include "device_security_info.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define DSLM_SAMGR_SERVICE "dslm_service"
+#define DSLM_SAMGR_FEATURE "dslm_feature"
+#define SECURITY_MAGIC 0xABCD1234
 
-typedef uintptr_t TimerHandle;
+enum {
+    CMD_SET_DEVICE_SECURITY_LEVEL = 1,
+};
 
-typedef void (*TimerProc)(const void *context);
+struct DeviceSecurityInfo {
+    uint32_t magicNum;
+    uint32_t result;
+    uint32_t level;
+};
 
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-void UtilsStopTimerTask(TimerHandle handle);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // SEC_UTILS_TIMER_H
+#endif // DEVICE_SECURITY_LEVEL_DEFINES_H

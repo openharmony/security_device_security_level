@@ -13,27 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_TIMER_H
-#define SEC_UTILS_TIMER_H
+#include "dslm_ohos_credential.h"
 
-#include <stdint.h>
+#include "dslm_cred.h"
+#include "dslm_ohos_request.h"
+#include "dslm_ohos_verify.h"
+#include "impl/dslm_ohos_init.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef uintptr_t TimerHandle;
-
-typedef void (*TimerProc)(const void *context);
-
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-void UtilsStopTimerTask(TimerHandle handle);
-
-#ifdef __cplusplus
+__attribute__((constructor)) static void Constructor(void)
+{
+    const ProcessDslmCredFunctions func = {
+        .initFunc = InitOhosDslmCred,
+        .requestFunc = RequestOhosDslmCred,
+        .verifyFunc = VerifyOhosDslmCred,
+        .credTypeCnt = 2,
+        .credTypeArray = { CRED_TYPE_STANDARD, CRED_TYPE_SMALL },
+    };
+    InitDslmCredentialFunctions(&func);
 }
-#endif
-
-#endif // SEC_UTILS_TIMER_H

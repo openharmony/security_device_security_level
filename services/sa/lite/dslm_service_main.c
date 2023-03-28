@@ -13,27 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_TIMER_H
-#define SEC_UTILS_TIMER_H
+#include "dslm_service.h"
+#include "samgr_lite.h"
+#include "utils_log.h"
 
-#include <stdint.h>
+void __attribute__((weak)) OHOS_SystemInit(void)
+{
+    SAMGR_Bootstrap();
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef uintptr_t TimerHandle;
-
-typedef void (*TimerProc)(const void *context);
-
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
-
-void UtilsStopTimerTask(TimerHandle handle);
-
-#ifdef __cplusplus
+int main()
+{
+    SECURITY_LOG_INFO("dslm service bootstrap");
+    OHOS_SystemInit();
+    
+    while (1) {
+        // pause only returns when a signal was caught and the signal-catching function returned.
+        // pause only returns -1, no need to process the return value.
+        (void)pause();
+    }
 }
-#endif
-
-#endif // SEC_UTILS_TIMER_H

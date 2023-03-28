@@ -27,12 +27,22 @@ extern "C" {
 #define MILLISEC_TO_NANOSEC 1000000
 #define MILLISEC_TO_USEC 1000
 #define MICROSEC_TO_NANOSEC 1000
+#define GET_TIME_RETRY_TIMES 5
 
 uint64_t GetMillisecondSinceBoot(void)
 {
     struct timespec ts;
-    clock_gettime(CLOCK_BOOTTIME, &ts);
-    return (ts.tv_sec * SEC_TO_MILLISEC + ts.tv_nsec / MILLISEC_TO_NANOSEC);
+    uint64_t result = 0;
+    uint32_t retryTimes = 0;
+    while (retryTimes < GET_TIME_RETRY_TIMES) {
+        clock_gettime(CLOCK_BOOTTIME, &ts);
+        result = (ts.tv_sec * SEC_TO_MILLISEC + ts.tv_nsec / MILLISEC_TO_NANOSEC);
+        if (result != 0) {
+            break;
+        }
+        retryTimes++;
+    }
+    return result;
 }
 
 uint64_t GetMillisecondSince1970(void)
