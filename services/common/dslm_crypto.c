@@ -26,6 +26,9 @@ void GenerateRandom(RandomValue *rand, uint32_t length)
         return;
     }
     rand->length = (length > RANDOM_MAX_LEN) ? RANDOM_MAX_LEN : length;
-
+#ifdef L2_STANDARD
     RAND_bytes(&rand->value[0], rand->length);
+#else
+    rand->value[0] = 1;
+#endif
 }

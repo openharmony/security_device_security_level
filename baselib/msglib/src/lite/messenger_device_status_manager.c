@@ -287,7 +287,7 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devTy
     return result;
 }
 
-bool MessengerGetDeviceNetworkId(const DeviceIdentify *devId, char *networkId, uint32_t len)
+bool MessengerGetNetworkIdByDeviceIdentify(const DeviceIdentify *devId, char *networkId, uint32_t len)
 {
     if (devId == NULL || networkId == NULL || len == 0) {
         return false;
@@ -361,4 +361,12 @@ void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para)
     if (infoList != NULL) {
         FreeNodeInfo(infoList);
     }
+}
+
+bool MessengerGetDeviceIdentifyByNetworkId(const char *networkId, DeviceIdentify *devId)
+{
+    if (networkId == NULL || devId == NULL) {
+        return false;
+    }
+    return MessengerConvertNodeToIdentity(networkId, devId);
 }

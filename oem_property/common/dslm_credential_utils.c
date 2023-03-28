@@ -18,10 +18,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
-
+#ifdef L2_STANDARD
 #include <openssl/evp.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/x509.h>
+#endif // L2_STANDARD
 
 #include "securec.h"
 
@@ -520,6 +521,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
 int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
     const struct DataBuffer *pbkData, uint32_t algorithm)
 {
+#ifdef L2_STANDARD
     if (srcData == NULL || sigData == NULL || pbkData == NULL) {
         return ERR_INVALID_PARA;
     }
@@ -568,4 +570,7 @@ int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *s
     EVP_PKEY_free(pkey);
     EVP_MD_CTX_free(ctx);
     return result;
+#else
+    return SUCCESS;
+#endif // L2_STANDARD
 }

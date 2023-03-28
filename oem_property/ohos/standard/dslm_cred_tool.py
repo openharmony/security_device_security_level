@@ -317,8 +317,10 @@ class CredCreation:
             _error_message('cred create failed, please init first')
             return
 
-        with open(self.file, 'w') as fp:
-            fp.write(cred)
+        fo = os.open(self.file, os.O_RDWR | os.O_CREAT, 0o640)
+        with os.fdopen(fo, "w+") as fd:
+            fd.write(cred)
+            fd.flush()
 
 
 class CredVerificationException(Exception):

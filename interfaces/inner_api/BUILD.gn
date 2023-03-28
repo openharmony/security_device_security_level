@@ -17,33 +17,73 @@ config("device_security_level_sdk_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("dslm_sdk") {
-  sources = [
-    "src/standard/device_security_info.cpp",
-    "src/standard/device_security_level_callback_helper.cpp",
-    "src/standard/device_security_level_callback_stub.cpp",
-    "src/standard/device_security_level_loader.cpp",
-    "src/standard/device_security_level_proxy.cpp",
-  ]
+group("fwk_group") {
+  if (os_level == "standard") {
+    deps = [ ":dslm_sdk" ]
+  } else if (os_level == "small") {
+    deps = [ ":dslm_sdk_small" ]
+  }
+}
 
-  include_dirs = [
-    "//base/security/device_security_level/services/include",
-    "//base/security/device_security_level/common/include",
-  ]
+if (os_level == "standard") {
+  ohos_shared_library("dslm_sdk") {
+    sources = [
+      "src/standard/device_security_info.cpp",
+      "src/standard/device_security_level_callback_helper.cpp",
+      "src/standard/device_security_level_callback_stub.cpp",
+      "src/standard/device_security_level_loader.cpp",
+      "src/standard/device_security_level_proxy.cpp",
+    ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+    include_dirs = [
+      "../../services/include",
+      "../../common/include",
+    ]
 
-  public_configs = [ ":device_security_level_sdk_config" ]
+    configs = [ "../../common:common_configs" ]
 
-  deps = []
+    public_configs = [ ":device_security_level_sdk_config" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-    "ipc:ipc_core",
-    "samgr:samgr_proxy",
-  ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+      "ipc:ipc_core",
+      "samgr:samgr_proxy",
+    ]
 
-  part_name = "device_security_level"
-  subsystem_name = "security"
+    part_name = "device_security_level"
+    subsystem_name = "security"
+  }
+} else if (os_level == "small") {
+  ohos_shared_library("dslm_sdk_small") {
+    sources = [
+      "src/lite/device_security_info.c",
+      "src/lite/device_security_level_proxy.c",
+    ]
+
+    include_dirs = [
+      "../../services/include",
+      "../../common/include",
+    ]
+
+    configs = [
+      "../../common:common_configs",
+      "../../common:common_lite_configs",
+    ]
+
+    public_configs = [ ":device_security_level_sdk_config" ]
+
+    deps = [
+      "../../baselib/utils:utils_static",
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
+      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+    ]
+
+    part_name = "device_security_level"
+    subsystem_name = "security"
+  }
+
+  group("dslm_sdk") {
+  }
 }

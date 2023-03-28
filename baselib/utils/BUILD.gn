@@ -26,23 +26,42 @@ ohos_static_library("utils_static") {
     "src/utils_json.c",
     "src/utils_mem.c",
     "src/utils_state_machine.c",
-    "src/utils_timer.cpp",
     "src/utils_tlv.c",
     "src/utils_work_queue.c",
   ]
 
   include_dirs = [ "include" ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+  configs = [ "../../common:common_configs" ]
 
-  public_configs = [ ":utils_static_config" ]
-
-  deps = [ "//third_party/cJSON:cjson" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
+  public_configs = [
+    ":utils_static_config",
+    "../../common:common_lite_configs",
   ]
+
+  if (defined(ohos_lite)) {
+    sources += [ "src/utils_timer.c" ]
+
+    include_dirs += [
+      "//commonlibrary/utils_lite/include",
+      "//commonlibrary/utils_lite/timer_task/include",
+    ]
+
+    deps = [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//build/lite/config/component/cJSON:cjson_shared",
+      "//commonlibrary/utils_lite/timer_task:ace_kit_timer",
+    ]
+  } else {
+    sources += [ "src/utils_timer.cpp" ]
+
+    deps = [ "//third_party/cJSON:cjson" ]
+
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+    ]
+  }
 
   part_name = "device_security_level"
   subsystem_name = "security"

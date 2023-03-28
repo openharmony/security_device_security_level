@@ -82,7 +82,7 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
         }
         packet = MALLOC(sizeof(MessagePacket));
         if (packet == NULL) {
-            free(payload);
+            FREE(payload);
             break;
         }
         packet->type = (uint32_t)msgType;
