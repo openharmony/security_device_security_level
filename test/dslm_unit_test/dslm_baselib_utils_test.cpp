@@ -331,6 +331,7 @@ HWTEST_F(DslmBaselibUtilsTest, InitStateMachine_case1, TestSize.Level0)
         uint32_t initState = 0;
 
         InitStateMachine(machine, machineId, initState);
+        EXPECT_EQ(nullptr, machine);
     }
 
     {
@@ -340,6 +341,7 @@ HWTEST_F(DslmBaselibUtilsTest, InitStateMachine_case1, TestSize.Level0)
         uint32_t event = 0;
 
         ScheduleMachine(node, nodeCnt, &machine, event, nullptr);
+        EXPECT_EQ(nullptr, node);
     }
 }
 

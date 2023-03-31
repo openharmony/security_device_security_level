@@ -880,7 +880,8 @@ HWTEST_F(DslmOemPropertyTest, DestroyDslmInfoInCertChain_case1, TestSize.Level0)
  */
 HWTEST_F(DslmOemPropertyTest, InitDslmInfoInCertChain_case1, TestSize.Level0)
 {
-    InitDslmInfoInCertChain(nullptr);
+    int32_t ret = InitDslmInfoInCertChain(nullptr);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 
 /**

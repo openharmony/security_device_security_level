@@ -1378,7 +1378,10 @@ HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case2, TestSize.Level0)
  */
 HWTEST_F(DslmTest, GetSelfDevice_case1, TestSize.Level0)
 {
-    (void)GetSelfDevice(nullptr);
+    uint32_t *type = nullptr;
+    const DeviceIdentify *identify = GetSelfDevice(type);
+    EXPECT_NE(nullptr, identify);
+    EXPECT_EQ(nullptr, type);
 }
 
 /**
@@ -1461,31 +1464,18 @@ HWTEST_F(DslmTest, FreeMessagePacket_case1, TestSize.Level0)
 // just for coverage
 /**
  * @tc.name: FreeMessageBuff_case1
- * @tc.desc: function FreeMessageBuff with null input
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(DslmTest, FreeMessageBuff_case1, TestSize.Level0)
-{
-    MessageBuff *buff = nullptr;
-
-    FreeMessageBuff(buff);
-}
-
-// just for coverage
-/**
- * @tc.name: FreeMessageBuff_case2
  * @tc.desc: function FreeMessageBuff when buff->buff is NULL
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(DslmTest, FreeMessageBuff_case2, TestSize.Level0)
+HWTEST_F(DslmTest, FreeMessageBuff_case1, TestSize.Level0)
 {
     MessageBuff *buff = (MessageBuff *)MALLOC(sizeof(MessageBuff));
     ASSERT_NE(nullptr, buff);
     memset_s(buff, sizeof(MessageBuff), 0, sizeof(MessageBuff));
 
     FreeMessageBuff(buff);
+    FreeMessageBuff(nullptr);
 }
 
 static void dummyDump(const DslmDeviceInfo *info, int32_t fd)
@@ -1514,9 +1504,11 @@ HWTEST_F(DslmTest, DestroyDslmCred_case1, TestSize.Level0)
     cred->type = (CredType)3;
     cred->credLen = 9;
     cred->credVal = nullptr;
-
-    DestroyDslmCred(nullptr);
     DestroyDslmCred(cred);
+    
+    cred = nullptr;
+    DestroyDslmCred(cred);
+    EXPECT_EQ(nullptr, cred);
 }
 
 /**
