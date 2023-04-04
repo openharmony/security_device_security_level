@@ -22,26 +22,22 @@
 extern "C" {
 #endif
 
-Messenger *CreateMessengerImpl(const MessengerConfig *config) __attribute__((weak));
+Messenger *CreateMessengerImpl(const MessengerConfig *config);
 
-void DestroyMessengerImpl(Messenger *messenger) __attribute__((weak));
+void DestroyMessengerImpl(Messenger *messenger);
 
 void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
-    uint32_t msgLen) __attribute__((weak));
+    uint32_t msgLen);
 
-bool IsMessengerReadyImpl(const Messenger *messenger) __attribute__((weak));
+bool IsMessengerReadyImpl(const Messenger *messenger);
 
-bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType)
-    __attribute__((weak));
+bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType);
 
-bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType)
-    __attribute__((weak));
+bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType);
 
-void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)
-    __attribute__((weak));
+void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para);
 
-bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
-    __attribute__((weak));
+bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info);
 
 #ifdef __cplusplus
 }

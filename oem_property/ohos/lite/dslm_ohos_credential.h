@@ -13,21 +13,7 @@
  * limitations under the License.
  */
 
-#include "dslm_ohos_credential.h"
+#ifndef DSLM_OHOS_CREDENTIAL_H
+#define DSLM_OHOS_CREDENTIAL_H
 
-#include "dslm_cred.h"
-#include "impl/dslm_ohos_init.h"
-#include "impl/dslm_ohos_request.h"
-#include "impl/dslm_ohos_verify.h"
-
-__attribute__((constructor)) static void Constructor(void)
-{
-    const ProcessDslmCredFunctions func = {
-        .initFunc = InitOhosDslmCred,
-        .requestFunc = RequestOhosDslmCred,
-        .verifyFunc = VerifyOhosDslmCred,
-        .credTypeCnt = 2,
-        .credTypeArray = { CRED_TYPE_STANDARD, CRED_TYPE_SMALL },
-    };
-    InitDslmCredentialFunctions(&func);
-}
+#endif // DSLM_OHOS_CREDENTIAL_H

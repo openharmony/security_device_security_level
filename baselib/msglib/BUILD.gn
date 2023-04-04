@@ -21,27 +21,35 @@ config("messenger_static_config") {
 ohos_static_library("messenger_static") {
   include_dirs = [
     "include",
-    "src",
-    "src/standard",
+    "src/common",
   ]
 
   sources = [
-    "src/messenger.c",
-    "src/standard/messenger_device_session_manager.c",
-    "src/standard/messenger_device_status_manager.cpp",
-    "src/standard/messenger_impl.c",
+    "src/common/messenger.c",
+    "src/common/messenger_device_session_manager.c",
+    "src/common/messenger_impl.c",
   ]
 
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
+  deps = [ "../utils:utils_static" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
-    "hilog_native:libhilog",
-  ]
+  if (defined(ohos_lite)) {
+    sources += [ "src/lite/messenger_device_status_manager.c" ]
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//foundation/communication/dsoftbus/sdk:softbus_client",
+    ]
+  } else {
+    sources += [ "src/standard/messenger_device_status_manager.cpp" ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+    external_deps = [
+      "c_utils:utils",
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+      "hilog_native:libhilog",
+    ]
+  }
+
+  configs = [ "../../common:common_configs" ]
 
   public_configs = [ ":messenger_static_config" ]
   part_name = "device_security_level"

@@ -24,3 +24,15 @@ config("common_configs") {
     ldflags = [ "--coverage" ]
   }
 }
+
+config("common_lite_configs") {
+  if (defined(ohos_lite)) {
+    if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+      defines = [ "L1_SMALL" ]
+    } else if (ohos_kernel_type == "liteos_m") {
+      defines = [ "L0_MINI" ]
+    }
+  } else {
+    defines = [ "L2_STANDARD" ]
+  }
+}

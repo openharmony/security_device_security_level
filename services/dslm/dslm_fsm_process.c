@@ -99,14 +99,14 @@ static void TimerProcessSdkRequestTimeout(const void *context)
 static void StopSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
 {
     if (info->timeHandle != 0) {
-        StopTimerTask(info->timeHandle);
+        UtilsStopTimerTask(info->timeHandle);
         info->timeHandle = 0;
     }
 }
 
 static void StartSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
 {
-    info->timeHandle = StartOnceTimerTask(SEND_MSG_TIMEOUT_LEN, TimerProcessSendDeviceInfoRequestTimeOut, info);
+    info->timeHandle = UtilsStartOnceTimerTask(SEND_MSG_TIMEOUT_LEN, TimerProcessSendDeviceInfoRequestTimeOut, info);
 }
 
 static bool CheckTimesAndSendCredRequest(DslmDeviceInfo *info, bool enforce)
@@ -246,7 +246,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         return true;
     }
 
-    StartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
+    UtilsStartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
     return true;
 }
 

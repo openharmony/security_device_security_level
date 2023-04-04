@@ -25,26 +25,39 @@ service_dslm_sources = [
 ]
 
 service_dslm_include_dirs = [
-  "//base/security/device_security_level/common/include",
-  "//base/security/device_security_level/interfaces/inner_api/include",
-  "//base/security/device_security_level/services/include",
+  "../include",
+  "../../common/include",
+  "../../interfaces/inner_api/include",
 ]
 
 # service_dslm object
 ohos_source_set("service_dslm_obj") {
   sources = service_dslm_sources
   include_dirs = service_dslm_include_dirs
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-  ]
+  deps = [ "../../baselib/utils:utils_static" ]
+
+  if (defined(ohos_lite)) {
+    if (ohos_kernel_type == "liteos_m") {
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+    } else {
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    }
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+    ]
+  }
+
   defines = [
     "MAX_SEND_TIMES=5",
     "SEND_MSG_TIMEOUT_LEN=40000",
   ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+  configs = [
+    "../../common:common_configs",
+    "../../common:common_lite_configs",
+  ]
 
   part_name = "device_security_level"
   subsystem_name = "security"
@@ -55,17 +68,27 @@ ohos_source_set("service_dslm_test_obj") {
   testonly = true
   sources = service_dslm_sources
   include_dirs = service_dslm_include_dirs
-  deps = [ "//base/security/device_security_level/baselib/utils:utils_static" ]
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-  ]
+  deps = [ "../../baselib/utils:utils_static" ]
+
+  if (defined(ohos_lite)) {
+    if (ohos_kernel_type == "liteos_m") {
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+    } else {
+      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    }
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+    ]
+  }
+
   defines = [
     "MAX_SEND_TIMES=5",
     "SEND_MSG_TIMEOUT_LEN=500",
   ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+  configs = [ "../../common:common_configs" ]
 
   part_name = "device_security_level"
   subsystem_name = "security"
