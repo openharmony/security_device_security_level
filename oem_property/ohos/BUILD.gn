@@ -13,69 +13,18 @@
 
 import("//build/ohos.gni")
 
-# sa lib
-ohos_shared_library("dslm_service") {
-  sources = [ "dslm_ohos_credential.c" ]
-
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-  ]
-
-  deps = [
-    ":dslm_ohos_cred_obj",
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/services/sa:service_sa_static",
-  ]
-
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
-  ]
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
+group("dslm_service") {
+  if (defined(ohos_lite)) {
+    deps = [ "../../services/sa:dslm_server" ]
+  } else {
+    deps = [ "standard:dslm_service" ]
+  }
 }
 
-ohos_source_set("dslm_ohos_cred_obj") {
-  sources = [
-    "impl/dslm_ohos_init.c",
-    "impl/dslm_ohos_request.c",
-    "impl/dslm_ohos_verify.c",
-    "impl/external_interface_adapter.c",
-    "impl/hks_adapter.c",
-  ]
-
-  include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
-    "//base/security/device_security_level/services/include",
-    "//base/security/device_security_level/oem_property/common",
-  ]
-
-  deps = [
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//base/security/device_security_level/oem_property/common:oem_common_obj",
-  ]
-
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "device_auth:deviceauth_sdk",
-    "hilog_native:libhilog",
-    "huks:libhukssdk",
-  ]
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
-}
-
-ohos_prebuilt_etc("dslm_ohos_cred_file") {
-  source = "dslm_finger.cfg"
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
+group("dslm_ohos_cred_file") {
+  if (defined(ohos_lite)) {
+    deps = [ "lite:dslm_ohos_cred_file" ]
+  } else {
+    deps = [ "standard:dslm_ohos_cred_file" ]
+  }
 }

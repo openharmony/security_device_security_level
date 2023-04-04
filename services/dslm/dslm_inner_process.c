@@ -99,6 +99,7 @@ int32_t VerifyDeviceInfoResponse(DslmDeviceInfo *device, const MessageBuff *buff
             DestroyDslmCred(cred);
             break;
         }
+#ifdef L2_STANDARD
         uint64_t curr = GetMillisecondSinceBoot();
         if ((curr <= device->nonceTimeStamp) || (curr - device->nonceTimeStamp > NONCE_ALIVE_TIME)) {
             ret = ERR_CHALLENGE_ERR;
@@ -106,6 +107,7 @@ int32_t VerifyDeviceInfoResponse(DslmDeviceInfo *device, const MessageBuff *buff
             DestroyDslmCred(cred);
             break;
         }
+#endif // L2_STANDARD
         // process
         ret = DefaultVerifyDslmCred(&device->identity, device->nonce, cred, &device->credInfo);
         DestroyDslmCred(cred);

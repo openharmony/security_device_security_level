@@ -18,20 +18,28 @@ ohos_source_set("oem_common_obj") {
   sources = [ "dslm_credential_utils.c" ]
 
   include_dirs = [
-    "//base/security/device_security_level/common/include",
-    "//base/security/device_security_level/interfaces/inner_api/include",
+    "../../common/include",
+    "../../interfaces/inner_api/include",
   ]
 
-  deps = [
-    "//base/security/device_security_level/baselib/utils:utils_static",
-    "//third_party/openssl:libcrypto_shared",
-  ]
+  deps = [ "../../baselib/utils:utils_static" ]
 
-  configs = [ "//base/security/device_security_level/common:common_configs" ]
+  if (defined(ohos_lite)) {
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//build/lite/config/component/openssl:openssl_shared",
+    ]
+  } else {
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog_native:libhilog",
+    external_deps = [
+      "c_utils:utils",
+      "hilog_native:libhilog",
+    ]
+  }
+  configs = [
+    "../../common:common_configs",
+    "../../common:common_lite_configs",
   ]
 
   part_name = "device_security_level"
