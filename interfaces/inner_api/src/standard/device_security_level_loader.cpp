@@ -38,7 +38,7 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
         HiLog::Error(LABEL, "GetDeviceSecurityInfo get registry error.");
         return {};
     }
-    auto object = registry->GetSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
+    auto object = registry->CheckSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
     if (object != nullptr) {
         return object;
     }
