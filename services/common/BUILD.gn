@@ -29,10 +29,11 @@ ohos_source_set("service_common_obj") {
 
   if (defined(ohos_lite)) {
     deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//build/lite/config/component/openssl:openssl_shared",
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
+      "//third_party/openssl/ohos_lite:openssl_shared",
     ]
+
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
   } else {
     deps += [ "//third_party/openssl:libcrypto_shared" ]
 
