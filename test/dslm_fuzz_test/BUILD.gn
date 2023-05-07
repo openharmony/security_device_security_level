@@ -14,38 +14,11 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-if (defined(ohos_lite)) {
-  group("dslm_fuzz") {
-  }
-} else {
-  ohos_fuzztest("dslm_fuzz") {
-    module_out_path = "security/device_security_level"
-    fuzz_config_file = "../dslm_fuzz_test"
+group("dslm_fuzz") {
+  testonly = true
+  deps = []
 
-    cflags = [
-      "-g",
-      "-O0",
-      "-Wno-unused-variable",
-      "-fno-omit-frame-pointer",
-    ]
-
-    include_dirs = [
-      "../../baselib/utils/include",
-      "../../common/include",
-      "../../interfaces/inner_api/src/standard",
-      "../../services/sa/standard",
-    ]
-
-    sources = [ "dslm_fuzzer.cpp" ]
-
-    deps = [ "../../oem_property/ohos:dslm_service" ]
-
-    external_deps = [
-      "c_utils:utils",
-      "device_security_level:dslm_sdk",
-      "hiviewdfx_hilog_native:libhilog",
-      "ipc:ipc_core",
-      "safwk:system_ability_fwk",
-    ]
+  if (os_level == "standard") {
+    deps += [ "dslm_fuzzer:DslmFuzzTest" ]
   }
 }
