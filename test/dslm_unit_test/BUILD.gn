@@ -18,67 +18,63 @@ config("dslm_cmoker") {
   include_dirs = [ "cmocker" ]
 }
 
-group("dslm_test") {
-  testonly = true
-  deps = []
-
-  if (!defined(ohos_lite)) {
-    deps += [ ":DslmUnitTest" ]
+if (defined(ohos_lite)) {
+  group("dslm_test") {
   }
-}
+} else {
+  # test unittest
+  ohos_unittest("dslm_test") {
+    install_enable = true
+    testonly = true
+    part_name = "device_security_level"
+    subsystem_name = "security"
+    module_out_path = "${part_name}/${target_name}"
 
-# test unittest
-ohos_unittest("DslmUnitTest") {
-  install_enable = true
-  testonly = true
-  part_name = "device_security_level"
-  subsystem_name = "security"
-  module_out_path = "${part_name}/${target_name}"
+    sources = [
+      "../../oem_property/ohos/standard/dslm_ohos_credential.c",
+      "../../services/sa/common/dslm_rpc_process.c",
+      "dslm_baselib_utils_test.cpp",
+      "dslm_memory_mock.cpp",
+      "dslm_msg_interface_mock.cpp",
+      "dslm_oem_property_test.cpp",
+      "dslm_request_callback_mock.cpp",
+      "dslm_rpc_process_test.cpp",
+      "dslm_test.cpp",
+    ]
 
-  sources = [
-    "../../oem_property/ohos/standard/dslm_ohos_credential.c",
-    "../../services/sa/common/dslm_rpc_process.c",
-    "dslm_baselib_utils_test.cpp",
-    "dslm_memory_mock.cpp",
-    "dslm_msg_interface_mock.cpp",
-    "dslm_oem_property_test.cpp",
-    "dslm_request_callback_mock.cpp",
-    "dslm_rpc_process_test.cpp",
-    "dslm_test.cpp",
-  ]
+    include_dirs = [
+      "../../baselib/msglib/include",
+      "../../common/include",
+      "../../interfaces/inner_api/include",
+      "../../interfaces/inner_api/src/standard",
+      "../../oem_property/common",
+      "../../oem_property/ohos/common",
+      "../../oem_property/ohos/standard/impl",
+      "../../services/include",
+      "../../services/dslm",
+      "../../services/sa/common",
+    ]
 
-  include_dirs = [
-    "../../baselib/msglib/include",
-    "../../common/include",
-    "../../interfaces/inner_api/include",
-    "../../interfaces/inner_api/src/standard",
-    "../../oem_property/common",
-    "../../oem_property/ohos/common",
-    "../../oem_property/ohos/standard/impl",
-    "../../services/include",
-    "../../services/dslm",
-    "../../services/sa/common",
-  ]
+    configs = [ "../../common:common_configs" ]
 
-  configs = [ "../../common:common_configs" ]
+    configs += [ ":dslm_cmoker" ]
 
-  configs += [ ":dslm_cmoker" ]
+    deps = [
+      "../../baselib/utils:utils_static",
+      "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
+      "../../services/common:service_common_obj",
+      "../../services/dslm:service_dslm_test_obj",
+      "../../services/msg:service_msg_obj",
+      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+      "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+      "//third_party/googletest:gmock",
+    ]
 
-  deps = [
-    "../../baselib/utils:utils_static",
-    "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
-    "../../services/common:service_common_obj",
-    "../../services/dslm:service_dslm_test_obj",
-    "../../services/msg:service_msg_obj",
-    "//third_party/googletest:gmock",
-  ]
-
-  external_deps = [
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
-    "c_utils:utils",
-    "device_security_level:dslm_sdk",
-    "hilog_native:libhilog",
-    "huks:libhukssdk",
-  ]
+    external_deps = [
+      "c_utils:utils",
+      "device_security_level:dslm_sdk",
+      "hilog_native:libhilog",
+      "huks:libhukssdk",
+    ]
+  }
 }
