@@ -26,7 +26,7 @@ int main()
 {
     SECURITY_LOG_INFO("dslm service bootstrap");
     OHOS_SystemInit();
-    
+
     while (1) {
         // pause only returns when a signal was caught and the signal-catching function returned.
         // pause only returns -1, no need to process the return value.

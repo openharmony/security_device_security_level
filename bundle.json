@@ -31,15 +31,17 @@
         "ram": "2500KB",
         "deps": {
             "components": [
-                "huks",
-                "dsoftbus",
-                "safwk",
-                "utils_base",
-                "ipc",
-                "samgr",
-                "hisysevent_native",
+                "c_utils",
                 "device_auth",
-                "hilog_native"
+                "device_manager",
+                "dsoftbus",
+                "hilog_native",
+                "hisysevent_native",
+                "hitrace_native",
+                "huks",
+                "ipc",
+                "safwk",
+                "samgr"
             ],
             "third_party": [
                 "cjson"

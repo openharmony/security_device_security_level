@@ -58,8 +58,7 @@ static BOOL MessageHandle(Service *service, Request *msg)
 }
 static TaskConfig GetTaskConfig(Service *service)
 {
-    TaskConfig config = {LEVEL_HIGH, PRI_BELOW_NORMAL,
-                         0x800, 20, SHARED_TASK};
+    TaskConfig config = {LEVEL_HIGH, PRI_BELOW_NORMAL, 0x800, 20, SHARED_TASK};
     return config;
 }
 
