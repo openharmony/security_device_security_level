@@ -80,7 +80,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
     }
     SECURITY_LOG_INFO("GetDeviceSecurityInfo RequestDeviceSecurityLevel success");
     ReleaseClientProxy(proxy);
-    
+
     return SUCCESS;
 }
 

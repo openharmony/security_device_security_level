@@ -1505,7 +1505,7 @@ HWTEST_F(DslmTest, DestroyDslmCred_case1, TestSize.Level0)
     cred->credLen = 9;
     cred->credVal = nullptr;
     DestroyDslmCred(cred);
-    
+
     cred = nullptr;
     DestroyDslmCred(cred);
     EXPECT_EQ(nullptr, cred);

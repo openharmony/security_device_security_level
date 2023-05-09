@@ -23,8 +23,9 @@
 
 typedef struct DslmClientProxy {
     INHERIT_CLIENT_IPROXY;
-    BOOL (*DslmIpcAsyncCall)(IUnknown *iUnknown, const DeviceIdentify identify,
-        const RequestOption option, uint32_t cookie, DeviceSecurityInfoCallback callback);
+    BOOL(*DslmIpcAsyncCall)
+    (IUnknown *iUnknown, const DeviceIdentify identify, const RequestOption option, uint32_t cookie,
+        DeviceSecurityInfoCallback callback);
 } DslmClientProxy;
 
 typedef struct DslmClientEntry {
