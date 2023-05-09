@@ -19,9 +19,9 @@
 #include "device_security_level_defines.h"
 #include "device_security_level_proxy.h"
 
+#include "ohos_types.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-#include "ohos_types.h"
 
 #define MAX_IPC_DATA_LEN 0x100
 
@@ -33,17 +33,16 @@ static int DslmIpcCallback(IOwner owner, int code, IpcIo *reply)
 
     uint32_t cookie, result, level;
     struct DslmCallbackHolder *holder = (struct DslmCallbackHolder *)owner;
-    
+
     ReadUint32(reply, &result);
     if (result == SUCCESS) {
         ReadUint32(reply, &level);
-        SECURITY_LOG_INFO("[TID:0x%lx] Notify Remote result: %u, level: %u",
-            pthread_self(), result, level);
+        SECURITY_LOG_INFO("[TID:0x%lx] Notify Remote result: %u, level: %u", pthread_self(), result, level);
     } else {
         level = 0;
         SECURITY_LOG_ERROR("RequestDeviceSecurityLevelSendRequest result value error, ret is %d", result);
     }
-    
+
     if (holder->callback != NULL) {
         DeviceSecurityInfo *info = (DeviceSecurityInfo *)MALLOC(sizeof(DeviceSecurityInfo));
         if (info == NULL) {
@@ -55,7 +54,7 @@ static int DslmIpcCallback(IOwner owner, int code, IpcIo *reply)
         SECURITY_LOG_INFO("calling user callback");
         holder->callback(&holder->identity, info);
     }
-    
+
     return SUCCESS;
 }
 
@@ -66,7 +65,7 @@ static BOOL DslmIpcAsyncCallImpl(IUnknown *iUnknown, const DeviceIdentify identi
         SECURITY_LOG_ERROR("RequestDeviceSecurityLevel invalid para len.");
         return ERR_INVALID_PARA;
     }
-    struct DslmCallbackHolder owner = { identify, callback };
+    struct DslmCallbackHolder owner = {identify, callback};
     DslmClientProxy *proxy = (DslmClientProxy *)iUnknown;
     IpcIo request;
     char data[MAX_IPC_DATA_LEN];
@@ -80,7 +79,7 @@ static BOOL DslmIpcAsyncCallImpl(IUnknown *iUnknown, const DeviceIdentify identi
     WriteUint32(&request, option.extra);
     /* cookie */
     WriteUint32(&request, cookie);
-    
+
     int ret = proxy->Invoke((IClientProxy *)proxy, CMD_SET_DEVICE_SECURITY_LEVEL, &request, &owner, DslmIpcCallback);
     if (ret != EC_SUCCESS) {
         SECURITY_LOG_ERROR("RequestDeviceSecurityLevelSendRequest send failed, ret is %d", ret);
@@ -132,8 +131,8 @@ DslmClientProxy *GetClientProxy(void)
 
     int32_t ret = iUnknown->QueryInterface(iUnknown, CLIENT_PROXY_VER, (void **)&proxy);
     if (ret != SUCCESS || proxy == NULL) {
-        SECURITY_LOG_ERROR("[QueryInterface CLIENT_PROXY_VER S:%s, F:%s] failed",
-            DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE);
+        SECURITY_LOG_ERROR("[QueryInterface CLIENT_PROXY_VER S:%s, F:%s] failed", DSLM_SAMGR_SERVICE,
+            DSLM_SAMGR_FEATURE);
         return NULL;
     }
     SECURITY_LOG_INFO("[QueryInterface CLIENT_PROXY_VER S:%s, F:%s] success", DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE);
