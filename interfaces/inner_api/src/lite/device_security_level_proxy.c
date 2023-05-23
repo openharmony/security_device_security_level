@@ -31,7 +31,7 @@ static int DslmIpcCallback(IOwner owner, int code, IpcIo *reply)
         return ERR_INVALID_PARA;
     }
 
-    uint32_t cookie, result, level;
+    uint32_t result, level;
     struct DslmCallbackHolder *holder = (struct DslmCallbackHolder *)owner;
 
     ReadUint32(reply, &result);
