@@ -1519,12 +1519,16 @@ HWTEST_F(DslmTest, DestroyDslmCred_case1, TestSize.Level0)
  */
 HWTEST_F(DslmTest, ReportHiEventAppInvoke_case1, TestSize.Level0)
 {
-    DslmDeviceInfo info;
-    (void)memset_s(&info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
-    info.lastRequestTime = 10U;
+    DslmDeviceInfo *info = (DslmDeviceInfo *)MALLOC(sizeof(DslmDeviceInfo));
+    ASSERT_NE(nullptr, info);
+    (void)memset_s(info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+    info->lastRequestTime = 10U;
     ReportHiEventInfoSync(nullptr);
-    ReportHiEventInfoSync(&info);
+    ReportHiEventInfoSync(info);
     ReportHiEventAppInvoke(nullptr);
+    EXPECT_NE(nullptr, info);
+    FREE(info);
+    info = nullptr;
 }
 
 /**
