@@ -292,7 +292,7 @@ HWTEST_F(DslmTest, ParseMessage_case8, TestSize.Level0)
 HWTEST_F(DslmTest, GetPkInfoListStr_case1, TestSize.Level0)
 {
     const char *udidStr = "device";
-    char *pkInfoListStr = NULL;
+    char *pkInfoListStr = nullptr;
 
     int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
     EXPECT_EQ(result, 0);
