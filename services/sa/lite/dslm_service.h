@@ -44,7 +44,7 @@ typedef struct DslmFeature {
     Service *parent;
 } DslmFeature;
 
-void DslmServiceInit();
-void DslmFeatureInit();
+void DslmServiceInit(void);
+void DslmFeatureInit(void);
 
 #endif // DSLM_SERVICE_H

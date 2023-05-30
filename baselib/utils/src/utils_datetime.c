@@ -36,7 +36,7 @@ uint64_t GetMillisecondSinceBoot(void)
     uint32_t retryTimes = 0;
     while (retryTimes < GET_TIME_RETRY_TIMES) {
         clock_gettime(CLOCK_BOOTTIME, &ts);
-        result = (ts.tv_sec * SEC_TO_MILLISEC + ts.tv_nsec / MILLISEC_TO_NANOSEC);
+        result = (uint64_t)(ts.tv_sec * SEC_TO_MILLISEC + ts.tv_nsec / MILLISEC_TO_NANOSEC);
         if (result != 0) {
             break;
         }
