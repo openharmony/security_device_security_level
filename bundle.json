@@ -44,7 +44,8 @@
                 "samgr"
             ],
             "third_party": [
-                "cjson"
+                "cjson",
+                "thirdparty_openssl"
             ]
         },
         "build": {
