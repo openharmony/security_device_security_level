@@ -301,7 +301,7 @@ HWTEST_F(DslmTest, GetPkInfoListStr_case1, TestSize.Level0)
 HWTEST_F(DslmTest, GetPkInfoListStr_case2, TestSize.Level0)
 {
     const char *udidStr = "device";
-    char *pkInfoListStr = NULL;
+    char *pkInfoListStr = nullptr;
 
     MockMalloc mock;
 
@@ -315,7 +315,7 @@ HWTEST_F(DslmTest, GetPkInfoListStr_case2, TestSize.Level0)
 HWTEST_F(DslmTest, GetPkInfoListStr_case3, TestSize.Level0)
 {
     const char *udidStr = "device";
-    char *pkInfoListStr = NULL;
+    char *pkInfoListStr = nullptr;
 
     MockStrcpy mock;
     // mock the strcpy_s return a EINVAL
@@ -328,7 +328,7 @@ HWTEST_F(DslmTest, GetPkInfoListStr_case3, TestSize.Level0)
 HWTEST_F(DslmTest, GetPkInfoListStr_case4, TestSize.Level0)
 {
     const char *udidStr = "device";
-    char *pkInfoListStr = NULL;
+    char *pkInfoListStr = nullptr;
 
     MockStrcpy mock;
     // mock the strcpy_s return a EINVAL on the second call
