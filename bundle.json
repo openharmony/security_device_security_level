@@ -24,7 +24,6 @@
             "//base/security/device_security_level/hisysevent.yaml"
         ],
         "adapted_system_type": [
-            "small",
             "standard"
         ],
         "rom": "200KB",
@@ -45,7 +44,7 @@
             ],
             "third_party": [
                 "cjson",
-                "thirdparty_openssl"
+                "openssl"
             ]
         },
         "build": {
