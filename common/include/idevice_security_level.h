@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string.h>
 
+#include "dslm_service_ipc_interface_code.h"
 #include "iremote_broker.h"
 #include "message_parcel.h"
 
@@ -29,17 +30,19 @@ constexpr int32_t DEVICE_SECURITY_LEVEL_MANAGER_SA_ID = 3511;
 
 class IDeviceSecurityLevel : public IRemoteBroker {
 public:
+    using InterfaceCode = DeviceSecurityLevelInterfaceCode;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Security.DeviceSecurityLevel");
     enum {
-        CMD_GET_DEVICE_SECURITY_LEVEL = 1,
+        CMD_GET_DEVICE_SECURITY_LEVEL = static_cast<uint32_t>(InterfaceCode::CMD_GET_DEVICE_SECURITY_LEVEL),
     };
 };
 
 class IDeviceSecurityLevelCallback : public IRemoteBroker {
 public:
+    using InterfaceCode = DeviceSecurityLevelCallbackInterfaceCode;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Security.DeviceSecurityLevel.Callback");
     enum {
-        CMD_SET_DEVICE_SECURITY_LEVEL = 1,
+        CMD_SET_DEVICE_SECURITY_LEVEL = static_cast<uint32_t>(InterfaceCode::CMD_SET_DEVICE_SECURITY_LEVEL),
     };
 };
 } // namespace DeviceSecurityLevel
