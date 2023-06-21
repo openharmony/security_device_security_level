@@ -43,7 +43,7 @@
                 "samgr"
             ],
             "third_party": [
-                "cjson",
+                "cJSON",
                 "openssl"
             ]
         },
