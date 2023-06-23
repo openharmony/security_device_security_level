@@ -76,9 +76,28 @@ ohos_source_set("dslm_ohos_cred_obj") {
   subsystem_name = "security"
 }
 
-ohos_prebuilt_etc("dslm_ohos_cred_file") {
-  source = "dslm_finger.cfg"
+declare_args() {
+  device_security_level_feature_cred_sl1 = true
+  device_security_level_feature_cred_sl2 = false
+  device_security_level_feature_cred_sl3 = false
+  device_security_level_feature_cred_sl4 = false
+  device_security_level_feature_cred_sl5 = false
+}
 
+ohos_prebuilt_etc("dslm_ohos_cred_file") {
+  if (device_security_level_feature_cred_sl5) {
+    source = "dslm_finger_sl5.cfg"
+  } else if (device_security_level_feature_cred_sl4) {
+    source = "dslm_finger_sl4.cfg"
+  } else if (device_security_level_feature_cred_sl3) {
+    source = "dslm_finger_sl3.cfg"
+  } else if (device_security_level_feature_cred_sl2) {
+    source = "dslm_finger_sl2.cfg"
+  } else {
+    source = "dslm_finger.cfg"
+  }
+
+  output = "dslm_finger.cfg"
   part_name = "device_security_level"
   subsystem_name = "security"
 }
