@@ -59,7 +59,7 @@ ohos_static_library("utils_static") {
 
     external_deps = [
       "c_utils:utils",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 

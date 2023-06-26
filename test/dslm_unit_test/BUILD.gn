@@ -79,7 +79,7 @@ if (os_level == "standard") {
       "access_token:libtoken_setproc",
       "c_utils:utils",
       "device_security_level:dslm_sdk",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
       "huks:libhukssdk",
     ]
   }
