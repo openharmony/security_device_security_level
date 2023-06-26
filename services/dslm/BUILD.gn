@@ -45,7 +45,7 @@ ohos_source_set("service_dslm_obj") {
   } else {
     external_deps = [
       "c_utils:utils",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 
@@ -79,7 +79,7 @@ ohos_source_set("service_dslm_test_obj") {
   } else {
     external_deps = [
       "c_utils:utils",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 

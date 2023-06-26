@@ -39,7 +39,7 @@ ohos_source_set("service_common_obj") {
 
     external_deps = [
       "c_utils:utils",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
       "ipc:ipc_core",
     ]
   }
