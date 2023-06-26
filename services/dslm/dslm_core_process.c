@@ -221,8 +221,11 @@ bool InitSelfDeviceSecureLevel(void)
 
     if (info->credInfo.credLevel > 0) {
         info->result = SUCCESS;
+        info->machine.currState = STATE_SUCCESS;
         return true;
     }
+
+    info->machine.currState = STATE_FAILED;
     int32_t ret = DefaultInitDslmCred(&info->credInfo);
     if (ret == SUCCESS && info->credInfo.credLevel > 0) {
         info->machine.currState = STATE_SUCCESS;
