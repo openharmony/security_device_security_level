@@ -39,7 +39,7 @@ if (os_level == "standard") {
     external_deps = [
       "c_utils:utils",
       "device_security_level:dslm_sdk",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
     ]
