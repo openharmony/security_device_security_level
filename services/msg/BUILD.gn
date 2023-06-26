@@ -32,7 +32,7 @@ ohos_source_set("service_msg_obj") {
   } else {
     external_deps = [
       "c_utils:utils",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 
