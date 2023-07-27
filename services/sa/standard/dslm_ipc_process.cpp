@@ -25,6 +25,7 @@
 #include "dslm_callback_info.h"
 #include "dslm_callback_proxy.h"
 #include "dslm_core_process.h"
+#include "dslm_device_list.h"
 #include "utils_log.h"
 
 namespace {
@@ -33,6 +34,7 @@ constexpr uint32_t MAX_TIMEOUT = 60;
 constexpr uint32_t MIN_TIMEOUT = 1;
 constexpr uint32_t WARNING_GATE = 64;
 constexpr uint32_t COOKIE_SHIFT = 32;
+constexpr uint32_t UNLOAD_TIMEOUT = 10000;
 } // namespace
 
 namespace OHOS {
@@ -111,12 +113,49 @@ int32_t DslmIpcProcess::DslmSetResponseToParcel(MessageParcel &reply, uint32_t s
     return SUCCESS;
 }
 
+static void TimerProcessUnloadSystemAbility(const void *context)
+{
+    (void)context;
+
+    if (GetDeviceListSize() > 1) {
+        return;
+    }
+
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        SECURITY_LOG_ERROR("get samgr failed");
+        return;
+    }
+
+    int32_t ret = samgrProxy->UnloadSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
+    if (ret != ERR_OK) {
+        SECURITY_LOG_ERROR("unload system ability failed");
+        return;
+    }
+    SECURITY_LOG_INFO("unload system ability succeed");
+}
+
+static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
+{
+    if (GetDeviceListSize() > 1) {
+        return;
+    }
+
+    if (handle != 0) {
+        UtilsStopTimerTask(handle);
+    }
+
+    handle = UtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
+}
+
 int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply)
 {
     DeviceIdentify identity;
     RequestOption option;
     sptr<IRemoteObject> callback;
     uint32_t cookie;
+
+    SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
 
     int32_t ret = DslmGetRequestFromParcel(data, identity, option, callback, cookie);
     if (ret != SUCCESS) {
