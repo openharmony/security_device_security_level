@@ -22,11 +22,13 @@
 #include <mutex>
 
 #include "iremote_object.h"
+#include "iservice_registry.h"
 #include "message_parcel.h"
 #include "refbase.h"
 #include "singleton.h"
 
 #include "device_security_defines.h"
+#include "utils_timer.h"
 
 namespace OHOS {
 namespace Security {
@@ -45,6 +47,7 @@ public:
     };
 
 private:
+    TimerHandle unloadTimerHandle_ {0};
     int32_t DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
         sptr<IRemoteObject> &object, uint32_t &cookie);
 

@@ -44,7 +44,7 @@ static ListHead *GetDeviceList(void)
     return &list;
 }
 
-static int32_t GetDeviceListSize(void)
+int32_t GetDeviceListSize(void)
 {
     int32_t size = 0;
     ListNode *node = NULL;
