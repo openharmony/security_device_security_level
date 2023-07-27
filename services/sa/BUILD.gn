@@ -100,6 +100,7 @@ if (defined(ohos_lite)) {
       "hilog:libhilog",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
     ]
 
     configs = [ "../../common:common_configs" ]
