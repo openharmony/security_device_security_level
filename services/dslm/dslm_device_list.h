@@ -35,6 +35,8 @@ DslmDeviceInfo *CreatOrGetDslmDeviceInfo(const DeviceIdentify *device);
 
 DslmDeviceInfo *GetDslmDeviceInfo(const DeviceIdentify *device);
 
+int32_t GetDeviceListSize(void);
+
 bool IsSameDevice(const DeviceIdentify *first, const DeviceIdentify *second);
 
 void ForEachDeviceDump(const ProcessDumpFunction dumper, int32_t dumpHandle);
