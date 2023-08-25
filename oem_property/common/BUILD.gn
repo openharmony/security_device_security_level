@@ -27,7 +27,7 @@ ohos_source_set("oem_common_obj") {
   if (defined(ohos_lite)) {
     deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
 
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   } else {
     deps += [ "//third_party/openssl:libcrypto_shared" ]
 
