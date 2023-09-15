@@ -28,6 +28,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+private:
+    static bool isEnforcing_;
 };
 } // namespace DslmUnitTest
 } // namespace Security
