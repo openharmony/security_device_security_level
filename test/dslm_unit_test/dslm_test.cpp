@@ -70,6 +70,8 @@ void DslmTest::SetUpTestCase()
     constexpr time_t yearTimeLeast = 1640966400;
     constexpr time_t yearTimeValid = 1648518888;
     struct timeval timeVal = {0};
+    string isEnforcing;
+
     gettimeofday(&timeVal, nullptr);
     if (timeVal.tv_sec <= yearTimeLeast) {
         timeVal.tv_sec = yearTimeValid;
@@ -94,11 +96,17 @@ void DslmTest::SetUpTestCase()
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
-    SaveStringToFile("/sys/fs/selinux/enforce", "0");
+    LoadStringFromFile("/sys/fs/selinux/enforce", isEnforcing);
+    if (isEnforcing.compare("1") == 0) {
+        DslmTest::isEnforcing_ = true;
+        SaveStringToFile("/sys/fs/selinux/enforce", "0");
+    }
 }
 void DslmTest::TearDownTestCase()
 {
-    SaveStringToFile("/sys/fs/selinux/enforce", "1");
+    if (DslmTest::isEnforcing_) {
+        SaveStringToFile("/sys/fs/selinux/enforce", "1");
+    }
 }
 void DslmTest::SetUp()
 {
@@ -106,6 +114,7 @@ void DslmTest::SetUp()
 void DslmTest::TearDown()
 {
 }
+bool DslmTest::isEnforcing_ = false;
 
 static void BlockCheckDeviceStatus(const DeviceIdentify *device, uint32_t status, uint64_t millisec)
 {
