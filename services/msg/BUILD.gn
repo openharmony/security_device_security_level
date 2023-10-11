@@ -30,6 +30,16 @@ ohos_source_set("service_msg_obj") {
   if (defined(ohos_lite)) {
     deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
   } else {
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      blocklist = "../../cfi_blocklist.txt"
+    }
+    stack_protector_ret = true
+
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
