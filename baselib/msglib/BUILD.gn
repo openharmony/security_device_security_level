@@ -39,16 +39,6 @@ ohos_static_library("messenger_static") {
       "//foundation/communication/dsoftbus/sdk:softbus_client",
     ]
   } else {
-    sanitize = {
-      integer_overflow = true
-      ubsan = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      blocklist = "../../cfi_blocklist.txt"
-    }
-    stack_protector_ret = true
-
     sources += [ "src/standard/messenger_device_status_manager.cpp" ]
 
     external_deps = [

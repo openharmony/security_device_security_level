@@ -27,16 +27,6 @@ group("fwk_group") {
 
 if (os_level == "standard") {
   ohos_shared_library("dslm_sdk") {
-    sanitize = {
-      integer_overflow = true
-      ubsan = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      blocklist = "../../cfi_blocklist.txt"
-    }
-    stack_protector_ret = true
-
     sources = [
       "src/standard/device_security_info.cpp",
       "src/standard/device_security_level_callback_helper.cpp",
