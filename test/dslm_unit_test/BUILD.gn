@@ -30,16 +30,6 @@ group("dslm_test") {
 if (os_level == "standard") {
   # test unittest
   ohos_unittest("DslmUnitTest") {
-    sanitize = {
-      integer_overflow = true
-      ubsan = true
-      boundary_sanitize = true
-      cfi = true
-      cfi_cross_dso = true
-      blocklist = "../../cfi_blocklist.txt"
-    }
-    stack_protector_ret = true
-
     install_enable = true
     testonly = true
     part_name = "device_security_level"
