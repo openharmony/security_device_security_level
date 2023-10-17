@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 if (os_level == "standard") {
   ohos_fuzztest("DslmFuzzTest") {
-    module_out_path = "security/device_security_level"
+    module_out_path = "device_security_level/device_security_level"
     fuzz_config_file = "../dslm_fuzzer"
 
     cflags = [
