@@ -1,0 +1,3 @@
+src:*base/security/device_security_level/test/dslm_unit_test/cmocker/c_moker.h
+src:*base/security/device_security_level/test/dslm_unit_test/dslm_msg_interface_mock.h
+src:*third_party/googletest/googlemock/include/gmock/gmock-spec-builders.h
