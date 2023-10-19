@@ -72,6 +72,16 @@ if (defined(ohos_lite)) {
   }
 } else {
   ohos_static_library("service_sa_static") {
+    sanitize = {
+      integer_overflow = true
+      ubsan = true
+      boundary_sanitize = true
+      cfi = true
+      cfi_cross_dso = true
+      blocklist = "../../cfi_blocklist.txt"
+    }
+    stack_protector_ret = true
+
     sources = [
       "common/dslm_rpc_process.c",
       "standard/dslm_callback_proxy.cpp",
