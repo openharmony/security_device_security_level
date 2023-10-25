@@ -43,7 +43,7 @@ ohos_source_set("service_common_obj") {
       cfi_cross_dso = true
       blocklist = "../../cfi_blocklist.txt"
     }
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
 
     deps += [ "//third_party/openssl:libcrypto_shared" ]
 
