@@ -80,7 +80,7 @@ if (defined(ohos_lite)) {
       cfi_cross_dso = true
       blocklist = "../../cfi_blocklist.txt"
     }
-    stack_protector_ret = true
+    branch_protector_ret = "pac_ret"
 
     sources = [
       "common/dslm_rpc_process.c",
