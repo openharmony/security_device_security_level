@@ -23,7 +23,7 @@ ohos_shared_library("dslm_service") {
     cfi_cross_dso = true
     blocklist = "../../../cfi_blocklist.txt"
   }
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
 
   sources = [ "dslm_ohos_credential.c" ]
 
@@ -59,7 +59,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
     cfi_cross_dso = true
     blocklist = "../../../cfi_blocklist.txt"
   }
-  stack_protector_ret = true
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "../common/dslm_ohos_request.c",
