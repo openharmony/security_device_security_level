@@ -31,8 +31,13 @@ uint32_t InitMessenger(const MessageReceiver messageReceiver, const StatusReceiv
 {
     MessengerConfig config = {
         .pkgName = GetMessengerPackageName(),
+        #ifdef L2_STANDARD
+        .primarySockName = GetMessengerPrimarySessionName(),
+        .secondarySockName = GetMessengerSecondarySessionName(),
+        #else
         .primarySessName = GetMessengerPrimarySessionName(),
         .secondarySessName = GetMessengerSecondarySessionName(),
+        #endif
         .messageReceiver = messageReceiver,
         .statusReceiver = statusReceiver,
         .sendResultNotifier = notifier,

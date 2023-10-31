@@ -24,21 +24,26 @@ ohos_static_library("messenger_static") {
     "src/common",
   ]
 
-  sources = [
-    "src/common/messenger.c",
-    "src/common/messenger_device_session_manager.c",
-    "src/common/messenger_impl.c",
-  ]
+  sources = [ "src/common/messenger.c" ]
 
   deps = [ "../utils:utils_static" ]
 
   if (defined(ohos_lite)) {
-    sources += [ "src/lite/messenger_device_status_manager.c" ]
+    sources += [
+      "src/lite/messenger_device_session_manager.c",
+      "src/lite/messenger_device_status_manager.c",
+      "src/lite/messenger_impl.c",
+    ]
     deps += [
       "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//foundation/communication/dsoftbus/sdk:softbus_client",
     ]
   } else {
+    sources += [
+      "src/standard/messenger_device_socket_manager.c",
+      "src/standard/messenger_device_status_manager.cpp",
+      "src/standard/messenger_impl.c",
+    ]
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -49,8 +54,6 @@ ohos_static_library("messenger_static") {
     }
     stack_protector_ret = true
 
-    sources += [ "src/standard/messenger_device_status_manager.cpp" ]
-
     external_deps = [
       "c_utils:utils",
       "device_manager:devicemanagersdk",
@@ -59,7 +62,10 @@ ohos_static_library("messenger_static") {
     ]
   }
 
-  configs = [ "../../common:common_configs" ]
+  configs = [
+    "../../common:common_configs",
+    "../../common:common_lite_configs",
+  ]
 
   public_configs = [ ":messenger_static_config" ]
   part_name = "device_security_level"
