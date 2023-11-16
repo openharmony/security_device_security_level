@@ -252,10 +252,10 @@ static void PrintDefaultStatus(int fd)
 
     GetDefaultStatus(&requestResult, &verifyResult, &credLevel);
 
-    const time_t YEAR_TIME_2022 = 1640966400;
+    const time_t YEAR_TIME_2023 = 1699977600;
     struct timeval timeVal = {0};
     gettimeofday(&timeVal, NULL);
-    char *notice = timeVal.tv_sec <= YEAR_TIME_2022 ? "(please check the system time)" : "";
+    char *notice = timeVal.tv_sec <= YEAR_TIME_2023 ? "(please check the system time)" : "";
 
     dprintf(fd, SPLIT_LINE END_LINE);
     dprintf(fd, "REQUEST_TEST              : %s" END_LINE, requestResult == SUCCESS ? "success" : "failed");

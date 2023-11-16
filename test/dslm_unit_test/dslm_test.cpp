@@ -67,8 +67,8 @@ namespace DslmUnitTest {
 void DslmTest::SetUpTestCase()
 {
     // modify the device's systime to ensure that the certificate verification passes
-    constexpr time_t yearTimeLeast = 1640966400;
-    constexpr time_t yearTimeValid = 1648518888;
+    constexpr time_t yearTimeLeast = 1699977600;
+    constexpr time_t yearTimeValid = 1704038400;
     struct timeval timeVal = {0};
     string isEnforcing;
 
