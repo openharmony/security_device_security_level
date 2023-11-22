@@ -41,8 +41,13 @@ typedef int32_t (*DeviceProcessor)(const DeviceIdentify *devId, uint32_t devType
 
 typedef struct MessengerConfig {
     const char *pkgName;
+#ifdef L2_STANDARD
+    const char *primarySockName;
+    const char *secondarySockName;
+#else
     const char *primarySessName;
     const char *secondarySessName;
+#endif
     DeviceMessageReceiver messageReceiver;
     DeviceStatusReceiver statusReceiver;
     MessageSendResultNotifier sendResultNotifier;
