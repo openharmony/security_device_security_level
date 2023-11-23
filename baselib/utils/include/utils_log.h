@@ -27,7 +27,7 @@
 #ifdef LOG_DOMAIN
 #undef LOG_DOMAIN
 #endif
-#define LOG_DOMAIN 0xD002F00
+#define LOG_DOMAIN 0xD002F05
 
 #define SECURITY_LOG_DEBUG(fmt, ...) HILOG_DEBUG(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
 #define SECURITY_LOG_INFO(fmt, ...) HILOG_INFO(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
