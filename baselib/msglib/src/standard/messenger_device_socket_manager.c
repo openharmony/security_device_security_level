@@ -201,7 +201,12 @@ static void TimerProcessWaitingTimeOut(const void *context)
     if (context == NULL) {
         return;
     }
-    const int32_t socket = (const int32_t)context;
+    uint64_t input;
+    if (memcpy_s(&input, sizeof(input), &context, sizeof(context)) != EOK) {
+        SECURITY_LOG_ERROR("memcpy input error");
+        return;
+    }
+    uint32_t socket = (uint32_t)input;
 
     Shutdown(socket);
     ShutdownReason reason = SHUTDOWN_REASON_LOCAL;
@@ -214,7 +219,6 @@ static void CreateOrRestartSocketCloseTimer(int32_t socket)
     DeviceSocketManager *instance = GetDeviceSocketManagerInstance();
 
     ListNode *node = NULL;
-    int32_t timeSocket = socket;
     SocketNodeInfo *socketInfo = NULL;
     FOREACH_LIST_NODE (node, &instance->clientSocketList) {
         SocketNodeInfo *curr = LIST_ENTRY(node, SocketNodeInfo, link);
@@ -233,7 +237,7 @@ static void CreateOrRestartSocketCloseTimer(int32_t socket)
     }
     SECURITY_LOG_INFO("SocketTimerWaiting, socket is %{public}d", socket);
     socketInfo->timeHandle =
-        UtilsStartOnceTimerTask(WAITING_TIMEOUT_LEN, TimerProcessWaitingTimeOut, (const void *)timeSocket);
+        UtilsStartOnceTimerTask(WAITING_TIMEOUT_LEN, TimerProcessWaitingTimeOut, (const void *)(uint64_t)socket);
 }
 
 static void CreateOrRestartSocketCloseTimerWithLock(int32_t socket)
