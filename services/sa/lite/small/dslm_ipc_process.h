@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef DEVICE_SECURITY_LEVEL_PROXY
-#define DEVICE_SECURITY_LEVEL_PROXY
-
-#include "iproxy_client.h"
-#include "samgr_lite.h"
+#ifndef DSLM_IPC_PROCESS_H
+#define DSLM_IPC_PROCESS_H
 
 #include "device_security_defines.h"
+#include "samgr_lite.h"
+#include "serializer.h"
+#include "utils_dslm_list.h"
+#include "utils_mutex.h"
 
-typedef struct DslmClientProxy {
-    INHERIT_CLIENT_IPROXY;
-    BOOL(*DslmIpcAsyncCall)
-    (IUnknown *iUnknown, const DeviceIdentify identify, const RequestOption option, uint32_t cookie,
-        DeviceSecurityInfoCallback callback);
-} DslmClientProxy;
+int32_t DslmProcessGetDeviceSecurityLevel(IUnknown *iUnknown, IpcIo *req, IpcIo *reply);
 
-typedef struct DslmClientEntry {
-    INHERIT_IUNKNOWNENTRY(DslmClientProxy);
-} DslmClientEntry;
+typedef struct DslmRemoteStubListNode {
+    ListNode node;
+    uint64_t key;
+    IpcIo *reply;
+} DslmRemoteStubListNode;
 
-struct DslmCallbackHolder {
-    DeviceIdentify identity;
-    DeviceSecurityInfoCallback *callback;
-};
-
-#endif // DEVICE_SECURITY_LEVEL_PROXY
+typedef struct DslmRemoteStubList {
+    DslmRemoteStubListNode *head;
+    uint32_t size;
+    Mutex *mutex;
+} DslmRemoteStubList;
+#endif // DSLM_IPC_PROCESS_H

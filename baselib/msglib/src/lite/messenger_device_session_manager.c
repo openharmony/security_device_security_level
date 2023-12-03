@@ -21,7 +21,7 @@
 
 #include "messenger_device_status_manager.h"
 #include "messenger_utils.h"
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
@@ -170,6 +170,43 @@ static bool GetDeviceIdentityFromSessionId(int sessionId, DeviceIdentify *identi
     return true;
 }
 
+#ifdef L0_MINI
+static int MessengerOnSessionOpened(int sessionId, int result)
+{
+    int side = GetSessionSide(sessionId);
+    SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s, result=%{public}d", sessionId,
+        (side == IS_SERVER) ? "server" : "client", result);
+    if (side != IS_SERVER) {
+        return 0;
+    }
+    if (result != 0) {
+        return 0;
+    }
+
+    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
+    uint32_t maskId;
+    bool ret = GetDeviceIdentityFromSessionId(sessionId, &identity, &maskId);
+    if (ret == false) {
+        SECURITY_LOG_ERROR("GetDeviceIdentityFromSessionId failed");
+        return 0;
+    }
+
+    SessionInfo *sessionInfo = MALLOC(sizeof(SessionInfo));
+    if (sessionInfo == NULL) {
+        SECURITY_LOG_ERROR("malloc failed, sessionInfo is null");
+        return 0;
+    }
+    sessionInfo->sessionId = sessionId;
+    sessionInfo->maskId = maskId;
+    (void)memcpy_s(&sessionInfo->identity, sizeof(DeviceIdentify), &identity, sizeof(DeviceIdentify));
+
+    DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
+    LockMutex(&instance->mutex);
+    AddListNodeBefore(&sessionInfo->link, &instance->openedSessionList);
+    UnlockMutex(&instance->mutex);
+    return 0;
+}
+#else
 static int MessengerOnSessionOpened(int sessionId, int result)
 {
     int side = GetSessionSide(sessionId);
@@ -224,15 +261,18 @@ static int MessengerOnSessionOpened(int sessionId, int result)
     UnlockMutex(&instance->mutex);
     return 0;
 }
+#endif /* L0_MINI */
 
 static void MessengerOnSessionClosed(int sessionId)
 {
     int side = GetSessionSide(sessionId);
     SECURITY_LOG_INFO("sessionId=%{public}d, side=%{public}s", sessionId, (side == IS_SERVER) ? "server" : "client");
 
+#ifndef L0_MINI
     if (side == IS_SERVER) {
         return;
     }
+#endif
 
     DeviceSessionManager *instance = GetDeviceSessionManagerInstance();
     LockMutex(&instance->mutex);
@@ -464,5 +504,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     }
 
     PushMsgDataToPendingList(transNo, devId, msg, msgLen);
+#ifndef L0_MINI
     CreateNewDeviceSession(devId);
+#endif
 }

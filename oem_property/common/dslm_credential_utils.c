@@ -350,21 +350,21 @@ static bool ParsePayloadAttestation(CredentialCb *credCb, PayloadAttestation *at
     return result;
 }
 
-static bool ParsePublicKeyAttestation(JsonHandle json, uint32_t attestationIndex, PublicKeyAttestation *attestation)
+static bool ParsePublicKeyAttestation(DslmJsonHandle json, uint32_t attestationIndex, PublicKeyAttestation *attestation)
 {
     if (json == NULL || attestation == NULL || attestationIndex > PK_ATTEST_INDEX_ROOT) {
         return false;
     }
     (void)memset_s(attestation, sizeof(PublicKeyAttestation), 0, sizeof(PublicKeyAttestation));
 
-    JsonHandle item = GetJsonFieldJsonArray(json, attestationIndex);
+    DslmJsonHandle item = DslmGetJsonFieldJsonArray(json, attestationIndex);
     if (item == NULL) {
         return false;
     }
 
     bool result = false;
     do {
-        const char *sigData = GetJsonFieldString(item, JSON_KEY_SIGNATURE);
+        const char *sigData = DslmGetJsonFieldString(item, JSON_KEY_SIGNATURE);
         if (sigData == NULL) {
             break;
         }
@@ -373,7 +373,7 @@ static bool ParsePublicKeyAttestation(JsonHandle json, uint32_t attestationIndex
             break;
         }
 
-        const char *pbkData = GetJsonFieldString(item, JSON_KEY_USER_PUBLIC_KEY);
+        const char *pbkData = DslmGetJsonFieldString(item, JSON_KEY_USER_PUBLIC_KEY);
         if (pbkData == NULL) {
             break;
         }
@@ -382,7 +382,7 @@ static bool ParsePublicKeyAttestation(JsonHandle json, uint32_t attestationIndex
             break;
         }
 
-        attestation->algorithm = GetAlgorithmType(GetJsonFieldString(item, JSON_KEY_ALGORITHM));
+        attestation->algorithm = GetAlgorithmType(DslmGetJsonFieldString(item, JSON_KEY_ALGORITHM));
 
         result = true;
     } while (0);
@@ -399,7 +399,7 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
         return false;
     }
     uint8_t *buffer = NULL;
-    JsonHandle json = NULL;
+    DslmJsonHandle json = NULL;
     bool result = false;
     do {
         if (!ParsePayloadAttestation(credCb, &credCb->load)) {
@@ -411,12 +411,12 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
             SECURITY_LOG_ERROR("Base64DecodeApp failed");
             break;
         }
-        json = CreateJson((char *)buffer);
+        json = DslmCreateJson((char *)buffer);
         if (json == NULL) {
             break;
         }
-        if (GetJsonFieldJsonArraySize(json) != PK_ATTEST_LIST_LEN) {
-            SECURITY_LOG_ERROR("GetJsonFieldJsonArraySize failed");
+        if (DslmGetJsonFieldJsonArraySize(json) != PK_ATTEST_LIST_LEN) {
+            SECURITY_LOG_ERROR("DslmGetJsonFieldJsonArraySize failed");
             break;
         }
         if (!ParsePublicKeyAttestation(json, PK_ATTEST_INDEX_ROOT, &credCb->root)) {
@@ -440,7 +440,7 @@ static bool SplitCredentialAttestationList(CredentialCb *credCb)
     }
 
     if (json) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
     }
 
     return result;
@@ -464,9 +464,9 @@ static void MovePublicKeysToAttestationList(CredentialCb *credCb, AttestationLis
     credCb->last.publicKey.data = NULL;
 }
 
-static int32_t GetDataFromJson(JsonHandle json, const char *paramKey, char *dest, uint32_t destLen)
+static int32_t GetDataFromJson(DslmJsonHandle json, const char *paramKey, char *dest, uint32_t destLen)
 {
-    const char *data = GetJsonFieldString(json, paramKey);
+    const char *data = DslmGetJsonFieldString(json, paramKey);
     if (data == NULL) {
         return ERR_INVALID_PARA;
     }
@@ -493,7 +493,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
         return;
     }
 
-    JsonHandle json = CreateJson((char *)buffer);
+    DslmJsonHandle json = DslmCreateJson((char *)buffer);
     if (json == NULL) {
         return;
     }
@@ -515,7 +515,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
     }
 
     FREE(buffer);
-    DestroyJson(json);
+    DslmDestroyJson(json);
 }
 
 int32_t EcdsaVerify(const struct DataBuffer *srcData, const struct DataBuffer *sigData,
