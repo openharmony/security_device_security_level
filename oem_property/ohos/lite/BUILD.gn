@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 ohos_source_set("dslm_ohos_cred_obj") {
@@ -35,13 +36,21 @@ ohos_source_set("dslm_ohos_cred_obj") {
   deps = [
     "../../../baselib/utils:utils_static",
     "../../common:oem_common_obj",
-    "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
   ]
 
+  if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+    deps += [ "$dslm_hilog_path/featured:hilog_shared" ]
+  } else if (ohos_kernel_type == "liteos_m") {
+    deps += [ "$dslm_hilog_path/featured:hilog_static" ]
+  }
+
   external_deps = [ "device_auth:deviceauth_sdk" ]
 
-  configs = [ "../../../common:common_configs" ]
+  configs = [
+    "../../../common:common_configs",
+    "../../../common:common_lite_configs",
+  ]
 
   part_name = "device_security_level"
   subsystem_name = "security"

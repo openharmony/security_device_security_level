@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SEC_UTILS_LIST_H
-#define SEC_UTILS_LIST_H
+#ifndef SEC_UTILS_DSLM_LIST_H
+#define SEC_UTILS_DSLM_LIST_H
 
 typedef struct TagListHead {
     struct TagListHead *next;
@@ -65,4 +65,4 @@ static inline void InitListHead(ListHead *head)
 
 #define LIST_ENTRY(item, type, member) ((type *)((char *)(item) - (char *)(&((type *)0)->member)))
 
-#endif /* SEC_UTILS_LIST_H */
+#endif /* SEC_UTILS_DSLM_LIST_H */

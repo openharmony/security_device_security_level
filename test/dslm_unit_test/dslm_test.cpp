@@ -141,8 +141,8 @@ HWTEST_F(DslmTest, BuildDeviceSecInfoRequest_case1, TestSize.Level0)
     uint64_t random = 0x0807060504030201;
     MessageBuff *msg = nullptr;
     // 0d196608 = 0x030000
-    const char *except =
-        "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"0102030405060708\",\"support\":[3000,2000]}}";
+    const char *except = "{\"message\":1,\"payload\":{\"version\":196608,\"challenge\":\"0102030405060708\","
+                         "\"support\":[3000,2000,1000]}}";
     int32_t ret = BuildDeviceSecInfoRequest(random, &msg);
     ASSERT_EQ(0, ret);
     EXPECT_STREQ(except, (const char *)msg->buff);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef DSLM_OHOS_CREDENTIAL_H
-#define DSLM_OHOS_CREDENTIAL_H
+#ifndef DEVICE_SECURITY_LEVEL_INNER_H
+#define DEVICE_SECURITY_LEVEL_INNER_H
 
-#ifdef L0_MINI
-void DslmCredFunctionsConstructor(void);
-#endif
+#include "dslm_service.h"
+#include "device_security_level_defines.h"
 
-#endif // DSLM_OHOS_CREDENTIAL_H
+#define DEFAULT_KEEP_LEN 45
+#define MAX_KEEP_LEN 300
+
+#endif // DEVICE_SECURITY_LEVEL_PROXY

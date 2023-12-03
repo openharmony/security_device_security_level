@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 # messenger_static lib
@@ -34,10 +35,17 @@ ohos_static_library("messenger_static") {
       "src/lite/messenger_device_status_manager.c",
       "src/lite/messenger_impl.c",
     ]
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//foundation/communication/dsoftbus/sdk:softbus_client",
-    ]
+    if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+      deps += [
+        "$dslm_dsoftbus_path/sdk:softbus_client",
+        "$dslm_hilog_path/featured:hilog_shared",
+      ]
+    } else if (ohos_kernel_type == "liteos_m") {
+      deps += [
+        "$dslm_dsoftbus_path/sdk:softbus_client",
+        "$dslm_hilog_path/featured:hilog_static",
+      ]
+    }
   } else {
     sources += [
       "src/standard/messenger_device_socket_manager.c",

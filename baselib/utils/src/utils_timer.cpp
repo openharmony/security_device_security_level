@@ -52,21 +52,21 @@ void DoTimerProcess(TimerProc callback, const void *context)
     }
 }
 
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context)
+TimerHandle DslmUtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context)
 {
     UtilsTimer &st = DelayedRefSingleton<UtilsTimer>::GetInstance();
     uint32_t timerId = st.Register(std::bind(&DoTimerProcess, callback, context), interval, false);
     return static_cast<TimerHandle>(timerId);
 }
 
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context)
+TimerHandle DslmUtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context)
 {
     UtilsTimer &st = DelayedRefSingleton<UtilsTimer>::GetInstance();
     uint32_t timerId = st.Register(std::bind(&DoTimerProcess, callback, context), interval, true);
     return static_cast<TimerHandle>(timerId);
 }
 
-void UtilsStopTimerTask(TimerHandle handle)
+void DslmUtilsStopTimerTask(TimerHandle handle)
 {
     UtilsTimer &st = DelayedRefSingleton<UtilsTimer>::GetInstance();
     st.Unregister(static_cast<uint32_t>(handle));
