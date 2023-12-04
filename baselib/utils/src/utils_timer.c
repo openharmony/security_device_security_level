@@ -18,21 +18,21 @@
 #include "nativeapi_timer_task.h"
 #include "ohos_types.h"
 
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context)
+TimerHandle DslmUtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context)
 {
     timerHandle_t handle = NULL;
     StartTimerTask(TRUE, interval, callback, context, &handle);
     return (TimerHandle)handle;
 }
 
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context)
+TimerHandle DslmUtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context)
 {
     timerHandle_t handle = NULL;
     StartTimerTask(FALSE, interval, callback, context, &handle);
     return (TimerHandle)handle;
 }
 
-void UtilsStopTimerTask(TimerHandle handle)
+void DslmUtilsStopTimerTask(TimerHandle handle)
 {
     StopTimerTask((timerHandle_t)handle);
 }

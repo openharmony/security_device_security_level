@@ -34,7 +34,7 @@ static char HexToChar(uint8_t hex)
     return (hex > 9) ? (hex + 0x37) : (hex + 0x30); /* check if bigger than 9, then add 0x37 or 0x30 */
 }
 
-void ByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t strLen)
+void DslmByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t strLen)
 {
     if ((hex == NULL) || (str == NULL) || (strLen < hexLen * BYTE_TO_HEX_OPER_LENGTH)) {
         return;
@@ -46,7 +46,7 @@ void ByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t
     }
 }
 
-int32_t HexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t hexLen)
+int32_t DslmHexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t hexLen)
 {
     if ((str == NULL) || (hex == NULL) || (strLen % BYTE_TO_HEX_OPER_LENGTH)) { /* even number or not */
         return ERR;

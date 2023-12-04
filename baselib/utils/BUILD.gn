@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 config("utils_static_config") {
@@ -32,6 +33,8 @@ ohos_static_library("utils_static") {
 
   include_dirs = [ "include" ]
 
+  deps = []
+
   configs = [ "../../common:common_configs" ]
 
   public_configs = [
@@ -43,15 +46,23 @@ ohos_static_library("utils_static") {
     sources += [ "src/utils_timer.c" ]
 
     include_dirs += [
-      "//commonlibrary/utils_lite/include",
-      "//commonlibrary/utils_lite/timer_task/include",
+      "$dslm_common_lib_path/include",
+      "$dslm_common_lib_path/timer_task/include",
     ]
 
-    deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//build/lite/config/component/cJSON:cjson_shared",
-      "//commonlibrary/utils_lite/timer_task:ace_kit_timer",
-    ]
+    if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+      deps += [
+        "$dslm_common_lib_path/timer_task:ace_kit_timer",
+        "$dslm_hilog_path/featured:hilog_shared",
+        "$dslm_lite_component_path/cJSON:cjson_shared",
+      ]
+    } else if (ohos_kernel_type == "liteos_m") {
+      deps += [
+        "$dslm_common_lib_path/timer_task:ace_kit_timer",
+        "$dslm_hilog_path/featured:hilog_static",
+        "$dslm_lite_component_path/cJSON:cjson_static",
+      ]
+    }
   } else {
     sanitize = {
       integer_overflow = true
@@ -65,7 +76,7 @@ ohos_static_library("utils_static") {
 
     sources += [ "src/utils_timer.cpp" ]
 
-    deps = [ "//third_party/cJSON:cjson" ]
+    deps += [ "//third_party/cJSON:cjson" ]
 
     external_deps = [
       "c_utils:utils",

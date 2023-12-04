@@ -11,49 +11,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 # sa lib
 if (defined(ohos_lite)) {
-  ohos_static_library("service_sa_static") {
-    sources = [ "common/dslm_rpc_process.c" ]
-
-    include_dirs = [
-      "common",
-      "../dslm",
-      "../include",
-      "../../common/include",
-      "../../interfaces/inner_api/include",
-    ]
-
-    deps = [
-      "../../baselib/utils:utils_static",
-      "../common:service_common_obj",
-      "../dslm:service_dslm_obj",
-      "../msg:service_msg_obj",
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//build/lite/config/component/cJSON:cjson_shared",
-      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
-
-    configs = [ "../../common:common_configs" ]
-
-    part_name = "device_security_level"
-    subsystem_name = "security"
-  }
-
   if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "linux") {
+    ohos_static_library("service_sa_static") {
+      sources = [ "common/dslm_rpc_process.c" ]
+
+      include_dirs = [
+        "common",
+        "../dslm",
+        "../include",
+        "../../common/include",
+        "../../interfaces/inner_api/include",
+      ]
+
+      deps = [
+        "$dslm_hilog_path/featured:hilog_shared",
+        "$dslm_lite_component_path/cJSON:cjson_static",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
+        "../../baselib/utils:utils_static",
+        "../common:service_common_obj",
+        "../dslm:service_dslm_obj",
+        "../msg:service_msg_obj",
+      ]
+
+      configs = [
+        "../../common:common_configs",
+        "../../common:common_lite_configs",
+      ]
+
+      part_name = "device_security_level"
+      subsystem_name = "security"
+    }
+
     ohos_executable("dslm_server") {
       sources = [
-        "lite/dslm_ipc_process.c",
         "lite/dslm_service.c",
-        "lite/dslm_service_feature.c",
-        "lite/dslm_service_main.c",
+        "lite/small/dslm_ipc_process.c",
+        "lite/small/dslm_service_feature.c",
+        "lite/small/dslm_service_main.c",
       ]
 
       include_dirs = [
         "common",
+        "lite/small",
         "../include",
         "../../baselib/utils/include",
         "../../interfaces/inner_api/include",
@@ -61,12 +65,72 @@ if (defined(ohos_lite)) {
 
       deps = [
         ":service_sa_static",
+        "$dslm_hilog_path/featured:hilog_shared",
+        "$dslm_ipc_path/interfaces/innerkits/c/ipc:ipc_single",
+        "$dslm_lite_component_path/cJSON:cjson_shared",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
         "../../oem_property/ohos/lite:dslm_ohos_cred_obj",
-        "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
-        "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-        "//third_party/bounds_checking_function:libsec_shared",
+      ]
+    }
+  } else if (ohos_kernel_type == "liteos_m") {
+    ohos_source_set("service_sa_obj") {
+      sources = [ "common/dslm_rpc_process.c" ]
+
+      include_dirs = [
+        "common",
+        "../dslm",
+        "../include",
+        "../../common/include",
+        "../../interfaces/inner_api/include",
+        "../../oem_property/ohos/lite",
+      ]
+
+      deps = [
+        "$dslm_hilog_path/featured:hilog_static",
+        "$dslm_lite_component_path/cJSON:cjson_shared",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
+        "../../baselib/utils:utils_static",
+        "../common:service_common_obj",
+        "../dslm:service_dslm_obj",
+        "../msg:service_msg_obj",
+      ]
+
+      configs = [
+        "../../common:common_configs",
+        "../../common:common_lite_configs",
+      ]
+
+      part_name = "device_security_level"
+      subsystem_name = "security"
+    }
+
+    ohos_static_library("dslm_server") {
+      sources = [
+        "lite/dslm_service.c",
+        "lite/mini/dslm_inner_process.c",
+        "lite/mini/dslm_service_feature.c",
+      ]
+
+      include_dirs = [
+        "common",
+        "lite/mini",
+        "../include",
+        "../../baselib/utils/include",
+        "../../interfaces/inner_api/include",
+        "../../interfaces/inner_api/src/lite/include",
+      ]
+
+      configs = [
+        "../../common:common_configs",
+        "../../common:common_lite_configs",
+      ]
+
+      deps = [
+        ":service_sa_obj",
+        "$dslm_hilog_path/featured:hilog_static",
+        "$dslm_lite_component_path/cJSON:cjson_static",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
+        "../../oem_property/ohos/lite:dslm_ohos_cred_obj",
       ]
     }
   }

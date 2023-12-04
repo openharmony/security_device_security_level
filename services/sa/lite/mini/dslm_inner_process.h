@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef DSLM_IPC_PROCESS_H
-#define DSLM_IPC_PROCESS_H
+#ifndef DSLM_INNER_PROCESS_H
+#define DSLM_INNER_PROCESS_H
 
 #include "device_security_defines.h"
+#include "device_security_level_defines.h"
+
 #include "samgr_lite.h"
-#include "serializer.h"
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_mutex.h"
 
-int32_t DslmProcessGetDeviceSecurityLevel(IUnknown *iUnknown, IpcIo *req, IpcIo *reply);
+typedef struct DslmAsyncCallParams {
+    const DeviceIdentify *identity;
+    const RequestOption *option;
+    uint32_t cookie;
+} DslmAsyncCallParams;
 
 typedef struct DslmRemoteStubListNode {
     ListNode node;
     uint64_t key;
-    IpcIo *reply;
+    DeviceSecurityInfoCallback *callback;
+    const DeviceIdentify *identify;
 } DslmRemoteStubListNode;
 
 typedef struct DslmRemoteStubList {
@@ -35,4 +41,7 @@ typedef struct DslmRemoteStubList {
     uint32_t size;
     Mutex *mutex;
 } DslmRemoteStubList;
-#endif // DSLM_IPC_PROCESS_H
+
+int32_t DslmProcessGetDeviceSecurityLevel(IUnknown *iUnknown, DslmAsyncCallParams *req,
+    DeviceSecurityInfoCallback callback);
+#endif // DSLM_INNER_PROCESS_H

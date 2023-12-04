@@ -190,7 +190,7 @@ HWTEST_F(DslmOemPropertyTest, VerifyDslmCredential_case4, TestSize.Level0)
     memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
 
     // malformed attestation makes SplitCredentialAttestationList()
-    // failed when CreateJson()
+    // failed when DslmCreateJson()
     const char *cred =
         "eyJ0eXAiOiAiRFNMIn0=."
         "eyJ0eXBlIjogImRlYnVnIiwgIm1hbnVmYWN0dXJlIjogIk9IT1MiLCAiYnJhbmQiOiAicmszNTY4IiwgIm1vZGVsIjogInJrMzU2OCIsIC"
@@ -232,7 +232,7 @@ HWTEST_F(DslmOemPropertyTest, VerifyDslmCredential_case5, TestSize.Level0)
     memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
 
     // malformed attestation makes SplitCredentialAttestationList()
-    // failed when GetJsonFieldJsonArraySize()
+    // failed when DslmGetJsonFieldJsonArraySize()
     const char *cred =
         "eyJ0eXAiOiAiRFNMIn0=."
         "eyJ0eXBlIjogImRlYnVnIiwgIm1hbnVmYWN0dXJlIjogIk9IT1MiLCAiYnJhbmQiOiAicmszNTY4IiwgIm1vZGVsIjogInJrMzU2OCIsIC"
@@ -603,7 +603,7 @@ HWTEST_F(DslmOemPropertyTest, VerifyDslmCredential_case14, TestSize.Level0)
     memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
 
     // malformed payload makes CredentialCbToDslmCredInfo()
-    // failed when CreateJson()
+    // failed when DslmCreateJson()
     const char *cred =
         "eyJ0eXAiOiAiRFNMIn0=."
         "eyJ0eXBlIjogImRlYnVnIxxxIm1hbnVmYWN0dXJlIxxxIk9IT1MiLCAiYnJhbmQiOiAixxxxNTY4IiwgIm1vZGVsIjogInJrMzU2OCIsIC"

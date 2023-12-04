@@ -42,7 +42,7 @@ static inline uint32_t MaskDeviceIdentity(const char *deviceId, uint32_t length)
     }
 
     uint16_t maskId = 0;
-    HexStringToByte(deviceId, MASK_LEN, (uint8_t *)&maskId, sizeof(maskId));
+    DslmHexStringToByte(deviceId, MASK_LEN, (uint8_t *)&maskId, sizeof(maskId));
     return ((maskId & MASK_HIGH) >> SHIFT_LENGTH) | ((maskId & MASK_LOW) << SHIFT_LENGTH);
 }
 

@@ -22,9 +22,9 @@
 extern "C" {
 #endif
 
-void ByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t strLen);
+void DslmByteToHexString(const uint8_t *hex, uint32_t hexLen, uint8_t *str, uint32_t strLen);
 
-int32_t HexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t hexLen);
+int32_t DslmHexStringToByte(const char *str, uint32_t strLen, uint8_t *hex, uint32_t hexLen);
 
 #ifdef __cplusplus
 }

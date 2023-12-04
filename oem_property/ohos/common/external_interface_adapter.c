@@ -225,20 +225,20 @@ int32_t HksAttestIsReadyAdapter(void)
 
 static int32_t GenerateFuncParamJson(bool isSelfPk, const char *udidStr, char *dest, uint32_t destMax)
 {
-    JsonHandle json = CreateJson(NULL);
+    DslmJsonHandle json = DslmCreateJson(NULL);
     if (json == NULL) {
         return ERR_INVALID_PARA;
     }
 
-    AddFieldBoolToJson(json, "isSelfPk", isSelfPk);
-    AddFieldStringToJson(json, "udid", udidStr);
+    DslmAddFieldBoolToJson(json, "isSelfPk", isSelfPk);
+    DslmAddFieldStringToJson(json, "udid", udidStr);
 
-    char *paramsJsonBuffer = ConvertJsonToString(json);
+    char *paramsJsonBuffer = DslmConvertJsonToString(json);
     if (paramsJsonBuffer == NULL) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_MEMORY_ERR;
     }
-    DestroyJson(json);
+    DslmDestroyJson(json);
     if (strcpy_s(dest, destMax, paramsJsonBuffer) != EOK) {
         FREE(paramsJsonBuffer);
         paramsJsonBuffer = NULL;
