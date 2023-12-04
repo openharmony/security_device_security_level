@@ -15,13 +15,14 @@
 
 #include "utils_work_queue.h"
 
-#include <stddef.h>
 #include <pthread.h>
+#include <stddef.h>
 #include <sys/prctl.h>
 
 #include "securec.h"
 
-#include "utils_list.h"
+#include "utils_dslm_list.h"
+#include "utils_log.h"
 #include "utils_mem.h"
 
 #define RUN 0
@@ -50,7 +51,9 @@ static void *WorkQueueThread(void *data)
     WorkQueue *queue = (WorkQueue *)data;
     Worker *worker = NULL;
 
+#ifndef L0_MINI
     prctl(PR_SET_NAME, queue->name, 0, 0, 0);
+#endif
 
     (void)pthread_mutex_lock(&queue->mutex);
     while (queue->state == RUN) {
@@ -84,6 +87,7 @@ static void *WorkQueueThread(void *data)
     return NULL;
 }
 
+#ifndef L0_MINI
 WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name)
 {
     WorkQueue *queue = MALLOC(sizeof(WorkQueue));
@@ -121,6 +125,66 @@ WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name)
 
     return queue;
 }
+#else
+WorkQueue *CreateWorkQueue(uint32_t capacity, const char *name)
+{
+    pthread_attr_t attr;
+    WorkQueue *queue = MALLOC(sizeof(WorkQueue));
+    if (queue == NULL) {
+        return NULL;
+    }
+    (void)memset_s(queue, sizeof(WorkQueue), 0, sizeof(WorkQueue));
+
+    InitListHead(&(queue->head));
+    queue->state = RUN;
+    queue->capacity = capacity;
+    queue->size = 0;
+    queue->name = name;
+
+    int32_t iRet = pthread_mutex_init(&(queue->mutex), NULL);
+    if (iRet != 0) {
+        FREE(queue);
+        return NULL;
+    }
+
+    iRet = pthread_cond_init(&queue->cond, NULL);
+    if (iRet != 0) {
+        (void)pthread_mutex_destroy(&(queue->mutex));
+        FREE(queue);
+        return NULL;
+    }
+
+    iRet = pthread_attr_init(&attr);
+    if (iRet != 0) {
+        (void)pthread_cond_destroy(&(queue->cond));
+        (void)pthread_mutex_destroy(&(queue->mutex));
+        (void)pthread_attr_destroy(&attr);
+        FREE(queue);
+        return NULL;
+    }
+
+    iRet = pthread_attr_setstacksize(&attr, 0x10000);
+    if (iRet != 0) {
+        (void)pthread_cond_destroy(&(queue->cond));
+        (void)pthread_mutex_destroy(&(queue->mutex));
+        (void)pthread_attr_destroy(&attr);
+        FREE(queue);
+        return NULL;
+    }
+
+    iRet = pthread_create(&queue->pthreadId, &attr, WorkQueueThread, queue);
+    if (iRet != 0) {
+        (void)pthread_cond_destroy(&(queue->cond));
+        (void)pthread_mutex_destroy(&(queue->mutex));
+        (void)pthread_attr_destroy(&attr);
+        FREE(queue);
+        return NULL;
+    }
+    (void)pthread_attr_destroy(&attr);
+
+    return queue;
+}
+#endif
 
 uint32_t DestroyWorkQueue(WorkQueue *queue)
 {

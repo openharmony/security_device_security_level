@@ -22,8 +22,15 @@
 #include "ohos_types.h"
 #include "utils_log.h"
 #include "utils_mem.h"
+#include "utils_mutex.h"
 
 #define MAX_IPC_DATA_LEN 0x100
+
+static inline Mutex *GetMutex(void)
+{
+    static Mutex mutex = INITED_MUTEX;
+    return &mutex;
+}
 
 static int DslmIpcCallback(IOwner owner, int code, IpcIo *reply)
 {
@@ -118,7 +125,7 @@ void DslmDestroyClient(const char *service, const char *feature, void *proxy)
     FREE(proxy);
 }
 
-DslmClientProxy *GetClientProxy(void)
+static DslmClientProxy *GetClientProxy(void)
 {
     SAMGR_RegisterFactory(DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE, DslmCreatClient, DslmDestroyClient);
     DslmClientProxy *proxy = NULL;
@@ -139,7 +146,7 @@ DslmClientProxy *GetClientProxy(void)
     return proxy;
 }
 
-void ReleaseClientProxy(DslmClientProxy *clientProxy)
+static void ReleaseClientProxy(DslmClientProxy *clientProxy)
 {
     if (clientProxy == NULL) {
         return;
@@ -147,4 +154,45 @@ void ReleaseClientProxy(DslmClientProxy *clientProxy)
 
     int32 ret = clientProxy->Release((IUnknown *)clientProxy);
     SECURITY_LOG_INFO("[Release api S:%s, F:%s]: ret:%d", DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE, ret);
+}
+
+int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
+    DeviceSecurityInfoCallback callback)
+{
+    static uint32_t generated = 0;
+    if (identify == NULL || callback == NULL) {
+        SECURITY_LOG_ERROR("GetDeviceSecurityInfo input error");
+        return ERR_INVALID_PARA;
+    }
+
+    static RequestOption defaultOption = {0, DEFAULT_KEEP_LEN, 0};
+    if (option == NULL) {
+        option = &defaultOption;
+    }
+    if (option->timeout > MAX_KEEP_LEN) {
+        SECURITY_LOG_ERROR("GetDeviceSecurityInfo input error, timeout too long");
+        return ERR_INVALID_PARA;
+    }
+
+    LockMutex(GetMutex());
+    uint32_t cookie = ++generated;
+    UnlockMutex(GetMutex());
+    DslmClientProxy *proxy = GetClientProxy();
+    if (proxy == NULL) {
+        SECURITY_LOG_ERROR("[GetFeatureApi S:%s F:%s]: failed", DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE);
+        return ERR_IPC_PROXY_ERR;
+    }
+
+    if (proxy->DslmIpcAsyncCall == NULL) {
+        SECURITY_LOG_ERROR("proxy has NULL api");
+        return ERR_IPC_PROXY_ERR;
+    }
+    BOOL result = proxy->DslmIpcAsyncCall((IUnknown *)proxy, *identify, *option, cookie, callback);
+    if (result != SUCCESS) {
+        SECURITY_LOG_ERROR("GetDeviceSecurityInfo RequestDeviceSecurityLevel error");
+        return result;
+    }
+    SECURITY_LOG_INFO("GetDeviceSecurityInfo RequestDeviceSecurityLevel success");
+    ReleaseClientProxy(proxy);
+    return SUCCESS;
 }

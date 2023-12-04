@@ -19,7 +19,7 @@
 #include "dslm_core_process.h"
 #include "ipc_skeleton.h"
 #include "securec.h"
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
@@ -44,6 +44,10 @@ static DslmRemoteStubList *GetRemoteStubList(void)
 
 static inline void SetRemoteStubStatus(IpcIo *reply, int32_t status)
 {
+    if (reply == NULL) {
+        SECURITY_LOG_ERROR("unexpected input, reply is NULL");
+        return;
+    }
     WriteInt32(reply, status);
 }
 
