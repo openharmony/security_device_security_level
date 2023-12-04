@@ -17,7 +17,7 @@ group("dslm_service") {
   if (defined(ohos_lite)) {
     deps = [ "../../services/sa:dslm_server" ]
   } else {
-    deps = [ "standard:dslm_service" ]
+    deps = [ "../../services/sa:dslm_service" ]
   }
 }
 
