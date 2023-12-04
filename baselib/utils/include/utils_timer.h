@@ -26,11 +26,11 @@ typedef uintptr_t TimerHandle;
 
 typedef void (*TimerProc)(const void *context);
 
-TimerHandle UtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
+TimerHandle DslmUtilsStartPeriodicTimerTask(uint32_t interval, TimerProc callback, const void *context);
 
-TimerHandle UtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
+TimerHandle DslmUtilsStartOnceTimerTask(uint32_t interval, TimerProc callback, const void *context);
 
-void UtilsStopTimerTask(TimerHandle handle);
+void DslmUtilsStopTimerTask(TimerHandle handle);
 
 #ifdef __cplusplus
 }

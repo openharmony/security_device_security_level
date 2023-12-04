@@ -23,28 +23,28 @@
 extern "C" {
 #endif
 
-typedef void *JsonHandle;
+typedef void *DslmJsonHandle;
 
-JsonHandle CreateJson(const char *data);
-void DestroyJson(JsonHandle handle);
+DslmJsonHandle DslmCreateJson(const char *data);
+void DslmDestroyJson(DslmJsonHandle handle);
 
-int32_t GetJsonFieldInt(JsonHandle handle, const char *field);
-uint32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen);
-const char *GetJsonFieldString(JsonHandle handle, const char *field);
-JsonHandle GetJsonFieldJson(JsonHandle handle, const char *field);
+int32_t DslmGetJsonFieldInt(DslmJsonHandle handle, const char *field);
+uint32_t DslmGetJsonFieldIntArray(DslmJsonHandle handle, const char *field, int32_t *array, int32_t arrayLen);
+const char *DslmGetJsonFieldString(DslmJsonHandle handle, const char *field);
+DslmJsonHandle DslmGetJsonFieldJson(DslmJsonHandle handle, const char *field);
 
-JsonHandle GetJsonFieldJsonArray(JsonHandle handle, uint32_t num);
-int32_t GetJsonFieldJsonArraySize(JsonHandle handle);
+DslmJsonHandle DslmGetJsonFieldJsonArray(DslmJsonHandle handle, uint32_t num);
+int32_t DslmGetJsonFieldJsonArraySize(DslmJsonHandle handle);
 
-void AddFieldIntToJson(JsonHandle handle, const char *field, int32_t value);
-void AddFieldIntArrayToJson(JsonHandle handle, const char *field, const int32_t *array, int32_t arrayLen);
-void AddFieldBoolToJson(JsonHandle handle, const char *field, bool value);
-void AddFieldStringToJson(JsonHandle handle, const char *field, const char *value);
-void AddFieldJsonToJson(JsonHandle handle, const char *field, JsonHandle json);
+void DslmAddFieldIntToJson(DslmJsonHandle handle, const char *field, int32_t value);
+void DslmAddFieldIntArrayToJson(DslmJsonHandle handle, const char *field, const int32_t *array, int32_t arrayLen);
+void DslmAddFieldBoolToJson(DslmJsonHandle handle, const char *field, bool value);
+void DslmAddFieldStringToJson(DslmJsonHandle handle, const char *field, const char *value);
+void DslmAddFieldJsonToJson(DslmJsonHandle handle, const char *field, DslmJsonHandle json);
 
-char *ConvertJsonToString(JsonHandle handle);
+char *DslmConvertJsonToString(DslmJsonHandle handle);
 
-bool CompareJsonData(JsonHandle handleA, JsonHandle handleB, bool caseSensitive);
+bool DslmCompareJsonData(DslmJsonHandle handleA, DslmJsonHandle handleB, bool caseSensitive);
 
 #ifdef __cplusplus
 }

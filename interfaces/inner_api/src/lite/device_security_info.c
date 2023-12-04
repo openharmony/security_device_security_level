@@ -18,70 +18,21 @@
 #include "ohos_types.h"
 #include "utils_log.h"
 #include "utils_mem.h"
-#include "utils_mutex.h"
 
 #include "device_security_level_defines.h"
+#ifdef L0_MINI
+#include "device_security_level_inner.h"
+#else
 #include "device_security_level_proxy.h"
+#endif
 
-#define DEFAULT_KEEP_LEN 45
-#define MAX_KEEP_LEN 300
-
-DslmClientProxy *GetClientProxy(void);
-void ReleaseClientProxy(DslmClientProxy *clientProxy);
-
-static inline Mutex *GetMutex(void)
-{
-    static Mutex mutex = INITED_MUTEX;
-    return &mutex;
-}
+int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
+    DeviceSecurityInfoCallback callback);
 
 static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info)
 {
     return ERR_IPC_ERR;
-}
-
-static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify, const RequestOption *option,
-    DeviceSecurityInfoCallback callback)
-{
-    static uint32_t generated = 0;
-    if (identify == NULL || callback == NULL) {
-        SECURITY_LOG_ERROR("GetDeviceSecurityInfo input error");
-        return ERR_INVALID_PARA;
-    }
-
-    static RequestOption defaultOption = {0, DEFAULT_KEEP_LEN, 0};
-    if (option == NULL) {
-        option = &defaultOption;
-    }
-    if (option->timeout > MAX_KEEP_LEN) {
-        SECURITY_LOG_ERROR("GetDeviceSecurityInfo input error, timeout too long");
-        return ERR_INVALID_PARA;
-    }
-
-    DslmClientProxy *proxy = GetClientProxy();
-    if (proxy == NULL) {
-        SECURITY_LOG_ERROR("[GetFeatureApi S:%s F:%s]: failed", DSLM_SAMGR_SERVICE, DSLM_SAMGR_FEATURE);
-        return ERR_IPC_PROXY_ERR;
-    }
-
-    if (proxy->DslmIpcAsyncCall == NULL) {
-        SECURITY_LOG_ERROR("proxy has NULL api");
-        return ERR_IPC_PROXY_ERR;
-    }
-
-    LockMutex(GetMutex());
-    uint32_t cookie = ++generated;
-    UnlockMutex(GetMutex());
-    BOOL result = proxy->DslmIpcAsyncCall((IUnknown *)proxy, *identify, *option, cookie, callback);
-    if (result != SUCCESS) {
-        SECURITY_LOG_ERROR("GetDeviceSecurityInfo RequestDeviceSecurityLevel error");
-        return result;
-    }
-    SECURITY_LOG_INFO("GetDeviceSecurityInfo RequestDeviceSecurityLevel success");
-    ReleaseClientProxy(proxy);
-
-    return SUCCESS;
 }
 
 static void FreeDeviceSecurityInfoImpl(DeviceSecurityInfo *info)

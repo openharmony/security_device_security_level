@@ -35,41 +35,41 @@ static uint8_t *GenerateSecInfoResponseJson(uint64_t challenge, const DslmCredBu
     uint8_t *credBase64Str = NULL;
     uint8_t *out = NULL;
 
-    JsonHandle head = CreateJson(NULL);
+    DslmJsonHandle head = DslmCreateJson(NULL);
     if (head == NULL) {
         return NULL;
     }
 
-    JsonHandle body = CreateJson(NULL);
+    DslmJsonHandle body = DslmCreateJson(NULL);
     if (body == NULL) {
-        DestroyJson(head);
+        DslmDestroyJson(head);
         return NULL;
     }
 
-    AddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_RESPONSE);
-    AddFieldJsonToJson(head, FIELD_PAYLOAD, body);
+    DslmAddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_RESPONSE);
+    DslmAddFieldJsonToJson(head, FIELD_PAYLOAD, body);
 
-    AddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
-    AddFieldIntToJson(body, FIELD_CRED_TYPE, cred->type);
+    DslmAddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
+    DslmAddFieldIntToJson(body, FIELD_CRED_TYPE, cred->type);
 
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     char *nonce = &challengeStr[0];
-    ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)nonce, CHALLENGE_STRING_LENGTH);
+    DslmByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)nonce, CHALLENGE_STRING_LENGTH);
     challengeStr[CHALLENGE_STRING_LENGTH - 1] = 0;
-    AddFieldStringToJson(body, FIELD_CHALLENGE, nonce);
+    DslmAddFieldStringToJson(body, FIELD_CHALLENGE, nonce);
 
     credBase64Str = Base64EncodeApp(cred->credVal, cred->credLen);
     // it is ok when credBase64Str is NULL
-    AddFieldStringToJson(body, FIELD_CRED_INFO, (char *)credBase64Str);
-    out = (uint8_t *)ConvertJsonToString(head);
+    DslmAddFieldStringToJson(body, FIELD_CRED_INFO, (char *)credBase64Str);
+    out = (uint8_t *)DslmConvertJsonToString(head);
 
     if (head != NULL) {
-        DestroyJson(head);
+        DslmDestroyJson(head);
         body = NULL; // no need to free body
     }
 
     if (body != NULL) {
-        DestroyJson(body);
+        DslmDestroyJson(body);
     }
     if (credBase64Str != NULL) {
         FREE(credBase64Str);
@@ -79,40 +79,40 @@ static uint8_t *GenerateSecInfoResponseJson(uint64_t challenge, const DslmCredBu
 
 static uint8_t *GenerateSecInfoRequestJson(uint64_t challenge)
 {
-    JsonHandle head = CreateJson(NULL);
+    DslmJsonHandle head = DslmCreateJson(NULL);
     if (head == NULL) {
         return NULL;
     }
-    JsonHandle body = CreateJson(NULL);
+    DslmJsonHandle body = DslmCreateJson(NULL);
     if (body == NULL) {
-        DestroyJson(head);
+        DslmDestroyJson(head);
         return NULL;
     }
 
     char challengeStr[CHALLENGE_STRING_LENGTH] = {0};
     char *nonce = &challengeStr[0];
-    ByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)nonce, CHALLENGE_STRING_LENGTH);
+    DslmByteToHexString((uint8_t *)&challenge, sizeof(challenge), (uint8_t *)nonce, CHALLENGE_STRING_LENGTH);
     challengeStr[CHALLENGE_STRING_LENGTH - 1] = 0;
 
-    AddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_REQUEST);
-    AddFieldJsonToJson(head, FIELD_PAYLOAD, body);
-    AddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
+    DslmAddFieldIntToJson(head, FIELD_MESSAGE, MSG_TYPE_DSLM_CRED_REQUEST);
+    DslmAddFieldJsonToJson(head, FIELD_PAYLOAD, body);
+    DslmAddFieldIntToJson(body, FIELD_VERSION, (int32_t)GetCurrentVersion());
 
-    AddFieldStringToJson(body, FIELD_CHALLENGE, nonce);
+    DslmAddFieldStringToJson(body, FIELD_CHALLENGE, nonce);
 
     CredType credTypeArray[MAX_CRED_ARRAY_SIZE] = {0};
     int32_t arraySize = GetSupportedCredTypes(credTypeArray, MAX_CRED_ARRAY_SIZE);
-    AddFieldIntArrayToJson(body, FIELD_SUPPORT, (const int32_t *)credTypeArray, arraySize);
+    DslmAddFieldIntArrayToJson(body, FIELD_SUPPORT, (const int32_t *)credTypeArray, arraySize);
 
-    uint8_t *out = (uint8_t *)ConvertJsonToString(head);
+    uint8_t *out = (uint8_t *)DslmConvertJsonToString(head);
 
     if (head != NULL) {
-        DestroyJson(head);
+        DslmDestroyJson(head);
         body = NULL; // no need to free body
     }
 
     if (body != NULL) {
-        DestroyJson(body);
+        DslmDestroyJson(body);
     }
     return out;
 }
@@ -146,27 +146,27 @@ int32_t ParseDeviceSecInfoRequest(const MessageBuff *msg, RequestObject *obj)
     }
     SECURITY_LOG_DEBUG("ParseDeviceSecInfoRequest msg is %s", (char *)msg->buff);
 
-    JsonHandle handle = CreateJson((const char *)msg->buff);
+    DslmJsonHandle handle = DslmCreateJson((const char *)msg->buff);
     if (handle == NULL) {
         return ERR_INVALID_PARA;
     }
 
-    const char *nonceStr = GetJsonFieldString(handle, FIELD_CHALLENGE);
+    const char *nonceStr = DslmGetJsonFieldString(handle, FIELD_CHALLENGE);
     if (nonceStr == NULL) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
 
-    int32_t ret = HexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&obj->challenge, sizeof(obj->challenge));
+    int32_t ret = DslmHexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&obj->challenge, sizeof(obj->challenge));
     if (ret != 0) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
 
-    obj->version = (uint32_t)GetJsonFieldInt(handle, FIELD_VERSION);
-    obj->arraySize = GetJsonFieldIntArray(handle, FIELD_SUPPORT, (int32_t *)obj->credArray, MAX_CRED_ARRAY_SIZE);
+    obj->version = (uint32_t)DslmGetJsonFieldInt(handle, FIELD_VERSION);
+    obj->arraySize = DslmGetJsonFieldIntArray(handle, FIELD_SUPPORT, (int32_t *)obj->credArray, MAX_CRED_ARRAY_SIZE);
 
-    DestroyJson(handle);
+    DslmDestroyJson(handle);
 
     return SUCCESS;
 }
@@ -202,47 +202,47 @@ int32_t ParseDeviceSecInfoResponse(const MessageBuff *msg, uint64_t *challenge, 
         return ERR_INVALID_PARA;
     }
 
-    JsonHandle handle = CreateJson((const char *)msg->buff);
+    DslmJsonHandle handle = DslmCreateJson((const char *)msg->buff);
     if (handle == NULL) {
         return ERR_INVALID_PARA;
     }
 
-    const char *nonceStr = GetJsonFieldString(handle, FIELD_CHALLENGE);
+    const char *nonceStr = DslmGetJsonFieldString(handle, FIELD_CHALLENGE);
     if (nonceStr == NULL) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
     uint64_t nonceNum = 0;
-    int32_t ret = HexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&nonceNum, sizeof(uint64_t));
+    int32_t ret = DslmHexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&nonceNum, sizeof(uint64_t));
     if (ret != 0) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
 
-    uint32_t type = (uint32_t)GetJsonFieldInt(handle, FIELD_CRED_TYPE);
-    uint32_t verNum = (uint32_t)GetJsonFieldInt(handle, FIELD_VERSION);
+    uint32_t type = (uint32_t)DslmGetJsonFieldInt(handle, FIELD_CRED_TYPE);
+    uint32_t verNum = (uint32_t)DslmGetJsonFieldInt(handle, FIELD_VERSION);
 
-    const char *credStr = GetJsonFieldString(handle, FIELD_CRED_INFO);
+    const char *credStr = DslmGetJsonFieldString(handle, FIELD_CRED_INFO);
     if (credStr == NULL) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CRED;
     }
 
     uint8_t *credBuf = NULL;
     uint32_t credLen = (uint32_t)Base64DecodeApp((uint8_t *)credStr, &credBuf);
     if (credBuf == NULL) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         return ERR_NO_CRED;
     }
 
     DslmCredBuff *out = CreateDslmCred((CredType)type, credLen, credBuf);
     if (out == NULL) {
-        DestroyJson(handle);
+        DslmDestroyJson(handle);
         FREE(credBuf);
         return ERR_NO_MEMORY;
     }
 
-    DestroyJson(handle);
+    DslmDestroyJson(handle);
     FREE(credBuf);
     *version = verNum;
     *challenge = nonceNum;

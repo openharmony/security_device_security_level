@@ -20,14 +20,22 @@
 #include "dslm_ohos_verify.h"
 #include "impl/dslm_ohos_init.h"
 
+#ifndef L0_MINI
 __attribute__((constructor)) static void Constructor(void)
+#else
+void DslmCredFunctionsConstructor(void)
+#endif
 {
     const ProcessDslmCredFunctions func = {
         .initFunc = InitOhosDslmCred,
         .requestFunc = RequestOhosDslmCred,
         .verifyFunc = VerifyOhosDslmCred,
         .credTypeCnt = 1,
+#ifndef L0_MINI
         .credTypeArray = { CRED_TYPE_SMALL },
+#else
+        .credTypeArray = { CRED_TYPE_MINI },
+#endif
     };
     InitDslmCredentialFunctions(&func);
 }

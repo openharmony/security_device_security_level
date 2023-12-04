@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_mutex.h"
 
 #ifdef __cplusplus

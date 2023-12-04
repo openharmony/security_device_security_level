@@ -142,10 +142,10 @@ static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
     }
 
     if (handle != 0) {
-        UtilsStopTimerTask(handle);
+        DslmUtilsStopTimerTask(handle);
     }
 
-    handle = UtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
+    handle = DslmUtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
 }
 
 int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply)

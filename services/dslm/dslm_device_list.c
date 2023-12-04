@@ -24,7 +24,7 @@
 #include "device_security_defines.h"
 #include "dslm_core_defines.h"
 #include "dslm_fsm_process.h"
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
