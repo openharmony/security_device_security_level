@@ -16,11 +16,15 @@ import("//build/ohos.gni")
 
 # oem_common_obj object
 ohos_source_set("oem_common_obj") {
-  sources = [ "dslm_credential_utils.c" ]
+  sources = [
+    "dslm_credential.c",
+    "dslm_credential_utils.c",
+  ]
 
   include_dirs = [
     "../../common/include",
     "../../interfaces/inner_api/include",
+    "../include",
   ]
 
   deps = [ "../../baselib/utils:utils_static" ]
