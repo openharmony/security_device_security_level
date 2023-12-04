@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 config("device_security_level_sdk_config") {
@@ -22,10 +23,81 @@ group("fwk_group") {
     deps = [ ":dslm_sdk" ]
   } else if (os_level == "small") {
     deps = [ ":dslm_sdk_small" ]
+  } else if (os_level == "mini") {
+    deps = [ ":dslm_sdk_mini" ]
   }
 }
 
-if (os_level == "standard") {
+if (defined(ohos_lite)) {
+  if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+    ohos_shared_library("dslm_sdk_small") {
+      sources = [
+        "src/lite/device_security_info.c",
+        "src/lite/small/device_security_level_proxy.c",
+      ]
+
+      include_dirs = [
+        "src/lite/include",
+        "src/lite/small",
+        "../../services/include",
+        "../../common/include",
+      ]
+
+      configs = [
+        "../../common:common_configs",
+        "../../common:common_lite_configs",
+      ]
+
+      public_configs = [ ":device_security_level_sdk_config" ]
+
+      deps = [
+        "$dslm_hilog_path/featured:hilog_shared",
+        "$dslm_ipc_path/interfaces/innerkits/c/ipc:ipc_single",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
+        "../../baselib/utils:utils_static",
+      ]
+
+      part_name = "device_security_level"
+      subsystem_name = "security"
+    }
+    group("dslm_sdk") {
+    }
+  } else if (ohos_kernel_type == "liteos_m") {
+    ohos_static_library("dslm_sdk_mini") {
+      sources = [
+        "src/lite/device_security_info.c",
+        "src/lite/mini/device_security_level_inner.c",
+      ]
+
+      include_dirs = [
+        "src/lite/include",
+        "src/lite/mini",
+        "../../common/include",
+        "../../interfaces/inner_api/src/lite",
+        "../../services/include",
+        "../../services/sa/lite/mini",
+      ]
+
+      configs = [
+        "../../common:common_configs",
+        "../../common:common_lite_configs",
+      ]
+
+      public_configs = [ ":device_security_level_sdk_config" ]
+
+      deps = [
+        "$dslm_hilog_path/featured:hilog_static",
+        "$dslm_samgr_path/samgr_lite/samgr:samgr",
+        "../../baselib/utils:utils_static",
+      ]
+
+      part_name = "device_security_level"
+      subsystem_name = "security"
+    }
+    group("dslm_sdk") {
+    }
+  }
+} else {
   ohos_shared_library("dslm_sdk") {
     sanitize = {
       integer_overflow = true
@@ -63,37 +135,5 @@ if (os_level == "standard") {
 
     part_name = "device_security_level"
     subsystem_name = "security"
-  }
-} else if (os_level == "small") {
-  ohos_shared_library("dslm_sdk_small") {
-    sources = [
-      "src/lite/device_security_info.c",
-      "src/lite/device_security_level_proxy.c",
-    ]
-
-    include_dirs = [
-      "../../services/include",
-      "../../common/include",
-    ]
-
-    configs = [
-      "../../common:common_configs",
-      "../../common:common_lite_configs",
-    ]
-
-    public_configs = [ ":device_security_level_sdk_config" ]
-
-    deps = [
-      "../../baselib/utils:utils_static",
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
-      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-    ]
-
-    part_name = "device_security_level"
-    subsystem_name = "security"
-  }
-
-  group("dslm_sdk") {
   }
 }

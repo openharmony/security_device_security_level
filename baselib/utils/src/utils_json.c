@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-JsonHandle CreateJson(const char *data)
+DslmJsonHandle DslmCreateJson(const char *data)
 {
     cJSON *root = NULL;
 
@@ -35,14 +35,14 @@ JsonHandle CreateJson(const char *data)
     return (void *)root;
 }
 
-void DestroyJson(JsonHandle handle)
+void DslmDestroyJson(DslmJsonHandle handle)
 {
     if (handle != NULL) {
         cJSON_Delete((cJSON *)handle);
     }
 }
 
-int32_t GetJsonFieldInt(JsonHandle handle, const char *field)
+int32_t DslmGetJsonFieldInt(DslmJsonHandle handle, const char *field)
 {
     int32_t ret = -1;
 
@@ -57,7 +57,7 @@ int32_t GetJsonFieldInt(JsonHandle handle, const char *field)
     cJSON *objValue = NULL;
 
     do {
-        objValue = (cJSON *)GetJsonFieldJson(handle, field);
+        objValue = (cJSON *)DslmGetJsonFieldJson(handle, field);
         if (objValue == NULL) {
             break;
         }
@@ -70,7 +70,7 @@ int32_t GetJsonFieldInt(JsonHandle handle, const char *field)
     return ret;
 }
 
-uint32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *array, int32_t arrayLen)
+uint32_t DslmGetJsonFieldIntArray(DslmJsonHandle handle, const char *field, int32_t *array, int32_t arrayLen)
 {
     if (handle == NULL || field == NULL || array == NULL) {
         return 0;
@@ -100,7 +100,7 @@ uint32_t GetJsonFieldIntArray(JsonHandle handle, const char *field, int32_t *arr
     return index;
 }
 
-void AddFieldBoolToJson(JsonHandle handle, const char *field, bool value)
+void DslmAddFieldBoolToJson(DslmJsonHandle handle, const char *field, bool value)
 {
     if (handle == NULL || field == NULL) {
         return;
@@ -108,7 +108,7 @@ void AddFieldBoolToJson(JsonHandle handle, const char *field, bool value)
     (void)cJSON_AddBoolToObject((cJSON *)handle, field, value);
 }
 
-const char *GetJsonFieldString(JsonHandle handle, const char *field)
+const char *DslmGetJsonFieldString(DslmJsonHandle handle, const char *field)
 {
     if (handle == NULL) {
         return NULL;
@@ -120,7 +120,7 @@ const char *GetJsonFieldString(JsonHandle handle, const char *field)
     const char *payload = NULL;
 
     do {
-        objValue = (cJSON *)GetJsonFieldJson(handle, field);
+        objValue = (cJSON *)DslmGetJsonFieldJson(handle, field);
         if (objValue == NULL) {
             break;
         }
@@ -132,22 +132,22 @@ const char *GetJsonFieldString(JsonHandle handle, const char *field)
     return payload;
 }
 
-JsonHandle GetJsonFieldJson(JsonHandle handle, const char *field)
+DslmJsonHandle DslmGetJsonFieldJson(DslmJsonHandle handle, const char *field)
 {
     return cJSON_GetObjectItem((cJSON *)handle, field);
 }
 
-JsonHandle GetJsonFieldJsonArray(JsonHandle handle, uint32_t num)
+DslmJsonHandle DslmGetJsonFieldJsonArray(DslmJsonHandle handle, uint32_t num)
 {
     return cJSON_GetArrayItem((cJSON *)handle, num);
 }
 
-int32_t GetJsonFieldJsonArraySize(JsonHandle handle)
+int32_t DslmGetJsonFieldJsonArraySize(DslmJsonHandle handle)
 {
     return cJSON_GetArraySize((cJSON *)handle);
 }
 
-void AddFieldIntToJson(JsonHandle handle, const char *field, int32_t value)
+void DslmAddFieldIntToJson(DslmJsonHandle handle, const char *field, int32_t value)
 {
     if (handle == NULL || field == NULL) {
         return;
@@ -155,7 +155,7 @@ void AddFieldIntToJson(JsonHandle handle, const char *field, int32_t value)
     (void)cJSON_AddNumberToObject((cJSON *)handle, field, value);
 }
 
-void AddFieldIntArrayToJson(JsonHandle handle, const char *field, const int32_t *array, int32_t arrayLen)
+void DslmAddFieldIntArrayToJson(DslmJsonHandle handle, const char *field, const int32_t *array, int32_t arrayLen)
 {
     if (handle == NULL || field == NULL || array == NULL) {
         return;
@@ -167,7 +167,7 @@ void AddFieldIntArrayToJson(JsonHandle handle, const char *field, const int32_t 
     (void)cJSON_AddItemToObject((cJSON *)handle, field, arrayObj);
 }
 
-void AddFieldStringToJson(JsonHandle handle, const char *field, const char *value)
+void DslmAddFieldStringToJson(DslmJsonHandle handle, const char *field, const char *value)
 {
     if (handle == NULL || field == NULL || value == NULL) {
         return;
@@ -175,7 +175,7 @@ void AddFieldStringToJson(JsonHandle handle, const char *field, const char *valu
     (void)cJSON_AddStringToObject((cJSON *)handle, field, value);
 }
 
-void AddFieldJsonToJson(JsonHandle handle, const char *field, JsonHandle json)
+void DslmAddFieldJsonToJson(DslmJsonHandle handle, const char *field, DslmJsonHandle json)
 {
     if (handle == NULL || field == NULL || json == NULL) {
         return;
@@ -183,7 +183,7 @@ void AddFieldJsonToJson(JsonHandle handle, const char *field, JsonHandle json)
     (void)cJSON_AddItemToObject((cJSON *)handle, field, json);
 }
 
-char *ConvertJsonToString(JsonHandle handle)
+char *DslmConvertJsonToString(DslmJsonHandle handle)
 {
     if (handle != NULL) {
         char *ret = cJSON_PrintUnformatted((cJSON *)handle);
@@ -192,7 +192,7 @@ char *ConvertJsonToString(JsonHandle handle)
     return NULL;
 }
 
-bool CompareJsonData(JsonHandle handleA, JsonHandle handleB, bool caseSensitive)
+bool DslmCompareJsonData(DslmJsonHandle handleA, DslmJsonHandle handleB, bool caseSensitive)
 {
     if (handleA == NULL || handleB == NULL) {
         return false;

@@ -347,7 +347,7 @@ HWTEST_F(DslmBaselibUtilsTest, InitStateMachine_case1, TestSize.Level0)
 
 /**
  * @tc.name: DestroyJson_case1
- * @tc.desc: function DestroyJson with malformed input
+ * @tc.desc: function DslmDestroyJson with malformed input
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -358,62 +358,62 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
     const char *value = "add";
 
     const char *str = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2}";
-    JsonHandle handle = CreateJson(str);
+    DslmJsonHandle handle = DslmCreateJson(str);
 
-    DestroyJson(nullptr);
-    AddFieldBoolToJson(nullptr, field, true);
-    AddFieldIntToJson(nullptr, field, 0);
-    AddFieldIntArrayToJson(nullptr, field, arr, sizeof(arr));
-    AddFieldStringToJson(nullptr, field, value);
-    AddFieldJsonToJson(handle, field, nullptr);
+    DslmDestroyJson(nullptr);
+    DslmAddFieldBoolToJson(nullptr, field, true);
+    DslmAddFieldIntToJson(nullptr, field, 0);
+    DslmAddFieldIntArrayToJson(nullptr, field, arr, sizeof(arr));
+    DslmAddFieldStringToJson(nullptr, field, value);
+    DslmAddFieldJsonToJson(handle, field, nullptr);
 
     {
-        int32_t ret = GetJsonFieldInt(nullptr, str);
+        int32_t ret = DslmGetJsonFieldInt(nullptr, str);
         EXPECT_EQ(-1, ret);
 
-        ret = GetJsonFieldInt(handle, nullptr);
+        ret = DslmGetJsonFieldInt(handle, nullptr);
         EXPECT_EQ(0, ret);
     }
 
     {
-        uint32_t ret = GetJsonFieldIntArray(nullptr, str, arr, sizeof(arr));
+        uint32_t ret = DslmGetJsonFieldIntArray(nullptr, str, arr, sizeof(arr));
         EXPECT_EQ(0U, ret);
     }
 
     {
-        const char *ret = GetJsonFieldString(nullptr, str);
+        const char *ret = DslmGetJsonFieldString(nullptr, str);
         EXPECT_EQ(nullptr, ret);
     }
 
     {
-        const char *ret = GetJsonFieldString(handle, nullptr);
+        const char *ret = DslmGetJsonFieldString(handle, nullptr);
         EXPECT_EQ(nullptr, ret);
     }
 
-    EXPECT_EQ(false, CompareJsonData(handle, nullptr, true));
+    EXPECT_EQ(false, DslmCompareJsonData(handle, nullptr, true));
 
     FREE(handle);
 }
 
 /**
  * @tc.name: GetJsonFieldInt_case1
- * @tc.desc: function GetJsonFieldInt with malformed input
+ * @tc.desc: function DslmGetJsonFieldInt with malformed input
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldInt_case1, TestSize.Level0)
 {
     const char *str = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2}";
-    JsonHandle handle = CreateJson(str);
+    DslmJsonHandle handle = DslmCreateJson(str);
 
-    int32_t ret = GetJsonFieldInt(handle, "challenge");
+    int32_t ret = DslmGetJsonFieldInt(handle, "challenge");
     EXPECT_EQ(-1, ret);
     FREE(handle);
 }
 
 /**
  * @tc.name: GetJsonFieldIntArray_case1
- * @tc.desc: function GetJsonFieldIntArray with malformed input
+ * @tc.desc: function DslmGetJsonFieldIntArray with malformed input
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -423,15 +423,15 @@ HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldIntArray_case1, TestSize.Level0)
     int32_t arrLen = sizeof(arr) / sizeof(arr[0]);
     const char *str = "{\"version\":131072,\"challenge\":\"test challenge\",\"arr\":[\"3C1F21EE53D3C4E2\", \"elem2\", "
                       "3, 4, 5],\"type\":2}";
-    JsonHandle handle = CreateJson(str);
+    DslmJsonHandle handle = DslmCreateJson(str);
 
     {
-        uint32_t ret = GetJsonFieldIntArray(handle, "challenge", arr, arrLen);
+        uint32_t ret = DslmGetJsonFieldIntArray(handle, "challenge", arr, arrLen);
         EXPECT_EQ(0U, ret);
     }
 
     {
-        uint32_t ret = GetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
+        uint32_t ret = DslmGetJsonFieldIntArray(handle, "arr", arr, arrLen - 2);
         EXPECT_EQ(1U, ret);
     }
 
@@ -440,7 +440,7 @@ HWTEST_F(DslmBaselibUtilsTest, GetJsonFieldIntArray_case1, TestSize.Level0)
 
 /**
  * @tc.name: ByteToHexString_case1
- * @tc.desc: function ByteToHexString with malformed input
+ * @tc.desc: function DslmByteToHexString with malformed input
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -451,19 +451,19 @@ HWTEST_F(DslmBaselibUtilsTest, ByteToHexString_case1, TestSize.Level0)
     uint8_t str[10] = {0};
     uint32_t strLen = 10;
 
-    ByteToHexString(nullptr, 0, str, strLen);
+    DslmByteToHexString(nullptr, 0, str, strLen);
     EXPECT_EQ(0U, str[0]);
 
-    ByteToHexString(hex, hexLen, nullptr, 0);
+    DslmByteToHexString(hex, hexLen, nullptr, 0);
     EXPECT_EQ(0U, str[0]);
 
-    ByteToHexString(hex, hexLen, str, strLen - 1);
+    DslmByteToHexString(hex, hexLen, str, strLen - 1);
     EXPECT_EQ(0U, str[0]);
 }
 
 /**
  * @tc.name: HexStringToByte_case1
- * @tc.desc: function HexStringToByte with malformed input
+ * @tc.desc: function DslmHexStringToByte with malformed input
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -475,19 +475,19 @@ HWTEST_F(DslmBaselibUtilsTest, HexStringToByte_case1, TestSize.Level0)
     char str[10] = {0};
 
     {
-        int32_t ret = HexStringToByte(nullptr, 0, hex, hexLen);
+        int32_t ret = DslmHexStringToByte(nullptr, 0, hex, hexLen);
         EXPECT_EQ(-1, ret);
         EXPECT_EQ(0U, str[0]);
     }
 
     {
-        int32_t ret = HexStringToByte(str, strLen, nullptr, 0);
+        int32_t ret = DslmHexStringToByte(str, strLen, nullptr, 0);
         EXPECT_EQ(-1, ret);
         EXPECT_EQ(0U, str[0]);
     }
 
     {
-        int32_t ret = HexStringToByte(str, strLen, hex, hexLen - 2);
+        int32_t ret = DslmHexStringToByte(str, strLen, hex, hexLen - 2);
         EXPECT_EQ(-1, ret);
         EXPECT_EQ(0U, str[0]);
     }

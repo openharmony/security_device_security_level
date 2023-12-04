@@ -22,7 +22,7 @@
 
 #include "messenger_device_status_manager.h"
 #include "messenger_utils.h"
-#include "utils_list.h"
+#include "utils_dslm_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
@@ -233,11 +233,11 @@ static void CreateOrRestartSocketCloseTimer(int32_t socket)
     }
 
     if (socketInfo->timeHandle != 0) {
-        UtilsStopTimerTask(socketInfo->timeHandle);
+        DslmUtilsStopTimerTask(socketInfo->timeHandle);
     }
     SECURITY_LOG_INFO("SocketTimerWaiting, socket is %{public}d", socket);
     socketInfo->timeHandle =
-        UtilsStartOnceTimerTask(WAITING_TIMEOUT_LEN, TimerProcessWaitingTimeOut, (const void *)(uint64_t)socket);
+        DslmUtilsStartOnceTimerTask(WAITING_TIMEOUT_LEN, TimerProcessWaitingTimeOut, (const void *)(uint64_t)socket);
 }
 
 static void CreateOrRestartSocketCloseTimerWithLock(int32_t socket)
@@ -249,7 +249,7 @@ static void CreateOrRestartSocketCloseTimerWithLock(int32_t socket)
     UnlockMutex(&inst->mutex);
 }
 
-static bool GetIdentityByServerSocket(int32_t socket, DeviceIdentify *identity)
+static bool GetIdentityBySocketId(int32_t socket, DeviceIdentify *identity, bool isServer)
 {
     if (identity == NULL) {
         return false;
@@ -261,7 +261,8 @@ static bool GetIdentityByServerSocket(int32_t socket, DeviceIdentify *identity)
     LockMutex(&instance->mutex);
     ListNode *node = NULL;
     SocketNodeInfo *socketInfo;
-    FOREACH_LIST_NODE (node, &instance->serverSocketList) {
+    ListHead *list = isServer ? &instance->serverSocketList : &instance->clientSocketList;
+    FOREACH_LIST_NODE (node, list) {
         socketInfo = LIST_ENTRY(node, SocketNodeInfo, link);
         if (socketInfo->socket == socket) {
             *identity = socketInfo->identity;
@@ -272,6 +273,16 @@ static bool GetIdentityByServerSocket(int32_t socket, DeviceIdentify *identity)
     UnlockMutex(&instance->mutex);
 
     return find;
+}
+
+static bool GetIdentityByServerSocket(int32_t socket, DeviceIdentify *identity)
+{
+    return GetIdentityBySocketId(socket, identity, true);
+}
+
+static bool GetIdentityByClientSocket(int32_t socket, DeviceIdentify *identity)
+{
+    return GetIdentityBySocketId(socket, identity, false);
 }
 
 static SocketNodeInfo *CreateSocketNodeInfo(int32_t socket, const DeviceIdentify *identity)
@@ -373,6 +384,23 @@ static void ServerOnBytes(int32_t socket, const void *data, unsigned int dataLen
     SECURITY_LOG_INFO("ServerOnBytes, socket is %{public}d", socket);
     DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
     if (GetIdentityByServerSocket(socket, &identity) == false) {
+        SECURITY_LOG_ERROR("Get identity by server list failed");
+        return;
+    }
+
+    OnSocketMessageReceived(&identity, (const uint8_t *)data, (uint32_t)dataLen);
+}
+
+static void ClientOnBytes(int32_t socket, const void *data, unsigned int dataLen)
+{
+    if (data == NULL) {
+        SECURITY_LOG_ERROR("empty data");
+        return;
+    }
+
+    SECURITY_LOG_INFO("ClientOnBytes, socket is %{public}d", socket);
+    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
+    if (GetIdentityByClientSocket(socket, &identity) == false) {
         SECURITY_LOG_ERROR("Get identity by server list failed");
         return;
     }
@@ -597,8 +625,9 @@ static void BindSync(int32_t socket, const DeviceIdentify *devId)
         {.qos = QOS_TYPE_MAX_BUFFER, .value = 10000},
     };
     static ISocketListener clientListener = {
-        .OnShutdown = ClientOnShutdown,
         .OnBind = ClientOnFakeBind,
+        .OnShutdown = ClientOnShutdown,
+        .OnBytes = ClientOnBytes,
     };
     int32_t ret = Bind(socket, clientQos, sizeof(clientQos) / sizeof(QosTV), &clientListener);
     SECURITY_LOG_INFO("Primary Bind ret is %{public}d", ret);

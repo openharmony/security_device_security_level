@@ -63,7 +63,7 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
         return NULL;
     }
 
-    JsonHandle handle = CreateJson((const char *)buff->buff);
+    DslmJsonHandle handle = DslmCreateJson((const char *)buff->buff);
     if (handle == NULL) {
         SECURITY_LOG_DEBUG("ERR JSON MSG");
         return NULL;
@@ -72,11 +72,11 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
     char *payload = NULL;
     MessagePacket *packet = NULL;
     do {
-        int32_t msgType = GetJsonFieldInt(handle, FIELD_MESSAGE);
+        int32_t msgType = DslmGetJsonFieldInt(handle, FIELD_MESSAGE);
         if (msgType < 0) {
             break;
         }
-        payload = ConvertJsonToString(GetJsonFieldJson(handle, FIELD_PAYLOAD));
+        payload = DslmConvertJsonToString(DslmGetJsonFieldJson(handle, FIELD_PAYLOAD));
         if (payload == NULL) {
             break;
         }
@@ -90,7 +90,7 @@ MessagePacket *ParseMessage(const MessageBuff *buff)
         packet->length = strlen(payload) + 1; // for the end flag '\0'
     } while (0);
 
-    DestroyJson(handle);
+    DslmDestroyJson(handle);
     return packet;
 }
 

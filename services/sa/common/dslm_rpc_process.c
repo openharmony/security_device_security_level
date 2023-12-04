@@ -27,6 +27,10 @@
 #include "dslm_messenger_wrapper.h"
 #include "dslm_msg_serialize.h"
 
+#ifdef L0_MINI
+#include "dslm_ohos_credential.h"
+#endif
+
 #define SLEEP_TIME (1000 * 500)
 #define TRY_TIMES 20
 
@@ -76,7 +80,12 @@ int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint
 uint32_t InitService(void)
 {
     uint32_t times = 0;
+    SECURITY_LOG_INFO("InitService");
+#ifdef L0_MINI
     DslmStartProcessTrace("InitService");
+    DslmCredFunctionsConstructor();
+    InitDeviceManager();
+#endif
     uint32_t ret = InitMessenger(OnPeerMsgReceived, OnPeerStatusReceiver, OnSendResultNotifier);
     if (ret != SUCCESS) {
         DslmFinishProcessTrace();

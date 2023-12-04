@@ -39,7 +39,11 @@ int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
         SECURITY_LOG_ERROR("verifyCredData failed!");
         return ret;
     }
+#ifdef L0_MINI
+    credInfo->credType = CRED_TYPE_MINI;
+#else
     credInfo->credType = CRED_TYPE_SMALL;
+#endif
 
     SECURITY_LOG_INFO("success, self security level is %{public}d", credInfo->credLevel);
     return SUCCESS;

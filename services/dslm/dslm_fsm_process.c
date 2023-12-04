@@ -21,8 +21,8 @@
 
 #include "device_security_defines.h"
 #include "utils_datetime.h"
+#include "utils_dslm_list.h"
 #include "utils_hexstring.h"
-#include "utils_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
 #include "utils_mutex.h"
@@ -74,7 +74,7 @@ static uint32_t GenerateMachineId(const DeviceIdentify *identity)
 #define SHIFT_LENGTH 8U
 #define MASK_HIGH 0xff00U
     uint16_t machineId = 0;
-    HexStringToByte((const char *)identity->identity, MACHINE_ID_LENGTH, (uint8_t *)&machineId, sizeof(machineId));
+    DslmHexStringToByte((const char *)identity->identity, MACHINE_ID_LENGTH, (uint8_t *)&machineId, sizeof(machineId));
     return ((machineId & MASK_HIGH) >> SHIFT_LENGTH) | ((machineId & MASK_LOW) << SHIFT_LENGTH);
 }
 
@@ -99,14 +99,15 @@ static void TimerProcessSdkRequestTimeout(const void *context)
 static void StopSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
 {
     if (info->timeHandle != 0) {
-        UtilsStopTimerTask(info->timeHandle);
+        DslmUtilsStopTimerTask(info->timeHandle);
         info->timeHandle = 0;
     }
 }
 
 static void StartSendDeviceInfoRequestTimer(DslmDeviceInfo *info)
 {
-    info->timeHandle = UtilsStartOnceTimerTask(SEND_MSG_TIMEOUT_LEN, TimerProcessSendDeviceInfoRequestTimeOut, info);
+    info->timeHandle =
+        DslmUtilsStartOnceTimerTask(SEND_MSG_TIMEOUT_LEN, TimerProcessSendDeviceInfoRequestTimeOut, info);
 }
 
 static bool CheckTimesAndSendCredRequest(DslmDeviceInfo *info, bool enforce)
@@ -246,7 +247,7 @@ static bool ProcessSdkRequest(const StateMachine *machine, uint32_t event, const
         return true;
     }
 
-    UtilsStartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
+    DslmUtilsStartOnceTimerTask(notify->keep, TimerProcessSdkRequestTimeout, deviceInfo);
     return true;
 }
 

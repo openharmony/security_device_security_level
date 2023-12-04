@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
 # service_msg object
@@ -28,7 +29,11 @@ ohos_source_set("service_msg_obj") {
   ]
 
   if (defined(ohos_lite)) {
-    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
+      deps += [ "$dslm_hilog_path/featured:hilog_shared" ]
+    } else if (ohos_kernel_type == "liteos_m") {
+      deps += [ "$dslm_hilog_path/featured:hilog_static" ]
+    }
   } else {
     sanitize = {
       integer_overflow = true

@@ -67,33 +67,33 @@ static int32_t CheckCredInfo(const struct DeviceIdentify *device, DslmCredInfo *
 
 static int32_t ParseNonceOfCertChain(const char *jsonBuffer, struct NonceOfCertChain *nonce)
 {
-    JsonHandle json = CreateJson(jsonBuffer);
+    DslmJsonHandle json = DslmCreateJson(jsonBuffer);
     if (json == NULL) {
         return ERR_INVALID_PARA;
     }
 
     // 1. Get challenge.
-    const char *challengeStr = GetJsonFieldString(json, "challenge");
+    const char *challengeStr = DslmGetJsonFieldString(json, "challenge");
     if (challengeStr == NULL) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_PARSE_NONCE;
     }
     int32_t ret =
-        HexStringToByte(challengeStr, strlen(challengeStr), (uint8_t *)&nonce->challenge, sizeof(nonce->challenge));
+        DslmHexStringToByte(challengeStr, strlen(challengeStr), (uint8_t *)&nonce->challenge, sizeof(nonce->challenge));
     if (ret != SUCCESS) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_PARSE_NONCE;
     }
 
     // 2. Get PublicKey Info.
-    const char *pkInfoListStr = GetJsonFieldString(json, "pkInfoList");
+    const char *pkInfoListStr = DslmGetJsonFieldString(json, "pkInfoList");
     if (pkInfoListStr == NULL) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_PARSE_NONCE;
     }
     nonce->pbkInfoList = (uint8_t *)MALLOC(strlen(pkInfoListStr) + 1);
     if (nonce->pbkInfoList == NULL) {
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_NO_MEMORY;
     }
 
@@ -101,10 +101,10 @@ static int32_t ParseNonceOfCertChain(const char *jsonBuffer, struct NonceOfCertC
     if (ret != EOK) {
         FREE(nonce->pbkInfoList);
         nonce->pbkInfoList = NULL;
-        DestroyJson(json);
+        DslmDestroyJson(json);
         return ERR_MEMORY_ERR;
     }
-    DestroyJson(json);
+    DslmDestroyJson(json);
     return SUCCESS;
 }
 
@@ -125,29 +125,29 @@ static int32_t FindCommonPkInfo(const char *bufferA, const char *bufferB)
     if (bufferA == NULL || bufferB == NULL) {
         return ERR_INVALID_PARA;
     }
-    JsonHandle jsonA = CreateJson(bufferA);
+    DslmJsonHandle jsonA = DslmCreateJson(bufferA);
     if (jsonA == NULL) {
         return ERR_INVALID_PARA;
     }
-    JsonHandle jsonB = CreateJson(bufferB);
+    DslmJsonHandle jsonB = DslmCreateJson(bufferB);
     if (jsonB == NULL) {
-        DestroyJson(jsonA);
+        DslmDestroyJson(jsonA);
         return ERR_INVALID_PARA;
     }
-    uint32_t sizeA = (uint32_t)GetJsonFieldJsonArraySize(jsonA);
-    uint32_t sizeB = (uint32_t)GetJsonFieldJsonArraySize(jsonB);
+    uint32_t sizeA = (uint32_t)DslmGetJsonFieldJsonArraySize(jsonA);
+    uint32_t sizeB = (uint32_t)DslmGetJsonFieldJsonArraySize(jsonB);
 
     for (uint32_t i = 0; i < sizeA; i++) {
         for (uint32_t j = 0; j < sizeB; j++) {
-            if (CompareJsonData(GetJsonFieldJsonArray(jsonA, i), GetJsonFieldJsonArray(jsonB, j), true)) {
-                DestroyJson(jsonA);
-                DestroyJson(jsonB);
+            if (DslmCompareJsonData(DslmGetJsonFieldJsonArray(jsonA, i), DslmGetJsonFieldJsonArray(jsonB, j), true)) {
+                DslmDestroyJson(jsonA);
+                DslmDestroyJson(jsonB);
                 return SUCCESS;
             }
         }
     }
-    DestroyJson(jsonA);
-    DestroyJson(jsonB);
+    DslmDestroyJson(jsonA);
+    DslmDestroyJson(jsonB);
     return ERR_NOEXIST_COMMON_PK_INFO;
 }
 
@@ -206,7 +206,7 @@ static int32_t VerifyNonceOfCertChain(const char *jsonStr, const struct DeviceId
     return ret;
 }
 
-static int32_t VerifySmallDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
+static int32_t VerifyLiteDslmCred(const DeviceIdentify *device, const DslmCredBuff *credBuff, DslmCredInfo *credInfo)
 {
     char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
     if (memcpy_s(credStr, DSLM_CRED_STR_LEN_MAX, credBuff->credVal, credBuff->credLen + 1) != EOK) {
@@ -283,10 +283,11 @@ int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, con
     SECURITY_LOG_INFO("start");
     credInfo->credType = credBuff->type;
     switch (credBuff->type) {
-        case CRED_TYPE_SMALL:
-            return VerifySmallDslmCred(device, credBuff, credInfo);
         case CRED_TYPE_STANDARD:
             return VerifyStandardDslmCred(device, challenge, credBuff, credInfo);
+        case CRED_TYPE_SMALL:
+        case CRED_TYPE_MINI:
+            return VerifyLiteDslmCred(device, credBuff, credInfo);
         default:
             SECURITY_LOG_ERROR("invalid cred type");
             break;

@@ -58,7 +58,11 @@ static BOOL MessageHandle(Service *service, Request *msg)
 }
 static TaskConfig GetTaskConfig(Service *service)
 {
+#ifdef L0_MINI
+    TaskConfig config = {LEVEL_HIGH, PRI_BELOW_NORMAL, 0xffff, 20, SINGLE_TASK};
+#else
     TaskConfig config = {LEVEL_HIGH, PRI_BELOW_NORMAL, 0x800, 20, SHARED_TASK};
+#endif
     return config;
 }
 
