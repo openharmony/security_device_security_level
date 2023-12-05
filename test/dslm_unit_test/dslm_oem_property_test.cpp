@@ -22,6 +22,7 @@
 #include "securec.h"
 #include "token_setproc.h"
 
+#include "device_security_defines.h"
 #include "dslm_credential.h"
 #include "dslm_credential_utils.h"
 #include "dslm_crypto.h"

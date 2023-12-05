@@ -452,8 +452,8 @@ static int32_t ProcessCreateServer(const char *session, const char *pkg, int32_t
         return socket;
     }
     ret = Listen(socket, serverQos, sizeof(serverQos) / sizeof(QosTV), &serverListener);
+    SECURITY_LOG_INFO("Listen %{public}s with socket %{public}d ret is %{public}d", sessionName, socket, ret);
     if (ret != 0) {
-        SECURITY_LOG_ERROR("Listen Socket %{public}d failed", socket);
         Shutdown(socket);
         return ret;
     }
@@ -471,11 +471,9 @@ static bool CreateServer(DeviceSocketManager *inst)
 
     int32_t socket = 0;
     if (ProcessCreateServer(inst->primarySockName, inst->pkgName, &socket) == 0) {
-        SECURITY_LOG_INFO("Listen success, socket is %{public}d", socket);
         inst->primarySocket = socket;
     }
     if (ProcessCreateServer(inst->secondarySockName, inst->pkgName, &socket) == 0) {
-        SECURITY_LOG_INFO("Listen success, socket is %{public}d", socket);
         inst->secondarySocket = socket;
     }
 
@@ -630,14 +628,11 @@ static void BindSync(int32_t socket, const DeviceIdentify *devId)
         .OnBytes = ClientOnBytes,
     };
     int32_t ret = Bind(socket, clientQos, sizeof(clientQos) / sizeof(QosTV), &clientListener);
-    SECURITY_LOG_INFO("Primary Bind ret is %{public}d", ret);
+    SECURITY_LOG_INFO("Bind socket %{public}d ret is %{public}d", socket, ret);
     if (ret == 0) {
-        SECURITY_LOG_INFO("Bind Success");
         ClientOnBind(socket, devId);
         return;
     }
-
-    SECURITY_LOG_ERROR("Bind Failed");
 }
 
 static int32_t ProcessBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId)
@@ -661,13 +656,12 @@ static int32_t ProcessBindSocket(const char *socketName, DeviceIdentify *devId, 
         return ret;
     }
     char clientName[SOCKET_NAME_LEN + 1] = {0};
-    ret = snprintf_s(clientName, SOCKET_NAME_LEN, SOCKET_NAME_LEN - 1, "device.security.level.%lu",
-        (unsigned long)maskId);
+    ret = snprintf_s(clientName, SOCKET_NAME_LEN, SOCKET_NAME_LEN - 1, "device.security.level.%x", maskId);
     if (ret < 0) {
         SECURITY_LOG_ERROR("snprintf failed");
         return ret;
     }
-    SECURITY_LOG_INFO("clientName is %{public}s", clientName);
+
     char pkgName[PKG_NAME_LEN + 1] = {0};
     ret = memcpy_s(pkgName, PKG_NAME_LEN, inst->pkgName, PKG_NAME_LEN);
     if (ret != EOK) {
@@ -683,6 +677,7 @@ static int32_t ProcessBindSocket(const char *socketName, DeviceIdentify *devId, 
         .dataType = DATA_TYPE_BYTES,
     };
     int32_t socket = Socket(socketInfo);
+    SECURITY_LOG_INFO("clientName is %{public}s to socket %{public}s %{public}d", clientName, socketName, socket);
     if (socket <= 0) {
         return -1;
     }
@@ -705,12 +700,10 @@ void *BindSyncWithPthread(void *arg)
 
     int32_t socket = 0;
     if (ProcessBindSocket(inst->primarySockName, &identity, &socket) == 0) {
-        SECURITY_LOG_INFO("Socket is %{public}d ", socket);
         BindSync(socket, &identity);
     }
 
     if (ProcessBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
-        SECURITY_LOG_INFO("Socket is %{public}d ", socket);
         BindSync(socket, &identity);
     }
 

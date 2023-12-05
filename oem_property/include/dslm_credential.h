@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 
-#include "device_security_defines.h"
 #include "dslm_cred.h"
 
 #ifdef __cplusplus
@@ -33,6 +32,15 @@ int32_t DefaultVerifyDslmCred(const DeviceIdentify *device, uint64_t challenge, 
 int32_t DefaultInitDslmCred(DslmCredInfo *credInfo);
 
 int32_t GetSupportedCredTypes(CredType *list, uint32_t len);
+
+int32_t VerifyOhosDslmCred(const DeviceIdentify *device, uint64_t challenge, const DslmCredBuff *credBuff,
+    DslmCredInfo *credInfo);
+
+int32_t RequestOhosDslmCred(const DeviceIdentify *device, const RequestObject *obj, DslmCredBuff **credBuff);
+
+int32_t InitOhosDslmCred(DslmCredInfo *credInfo);
+
+int32_t GetCredFromCurrentDevice(char *credStr, uint32_t maxLen);
 
 #ifdef __cplusplus
 }

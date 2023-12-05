@@ -134,5 +134,9 @@ __attribute__((weak)) const char *GetMessengerPrimarySessionName(void)
 
 __attribute__((weak)) const char *GetMessengerSecondarySessionName(void)
 {
+#ifdef SECONDARY_SOCKET_NAME
+    return SECONDARY_SOCKET_NAME;
+#else
     return NULL;
+#endif
 }

@@ -15,6 +15,7 @@
 
 #include "dslm_service.h"
 
+#include <dlfcn.h>
 #include <thread>
 
 #include "iremote_object.h"
@@ -39,7 +40,7 @@ DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, r
 void DslmService::OnStart()
 {
     SECURITY_LOG_INFO("start");
-
+    ProcessLoadPlugin();
     std::thread thread([this]() {
         if (InitService() == SUCCESS) {
             SECURITY_LOG_INFO("init service success");
@@ -84,6 +85,16 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
 int32_t DslmService::ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply)
 {
     return Singleton<DslmIpcProcess>::GetInstance().DslmProcessGetDeviceSecurityLevel(data, reply);
+}
+
+void DslmService::ProcessLoadPlugin(void)
+{
+#ifdef PLUGIN_SO_PATH
+    auto *handle = dlopen(PLUGIN_SO_PATH, RTLD_NOW);
+    if (!handle) {
+        SECURITY_LOG_ERROR("load %{public}s failed for %{public}s", PLUGIN_SO_PATH, dlerror());
+    }
+#endif
 }
 } // namespace DeviceSecurityLevel
 } // namespace Security
