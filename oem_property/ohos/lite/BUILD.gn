@@ -28,6 +28,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "impl",
     "../common",
     "../../common",
+    "../../include",
     "../../../common/include",
     "../../../interfaces/inner_api/include",
     "../../../services/include",

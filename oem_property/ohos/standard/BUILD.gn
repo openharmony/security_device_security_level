@@ -14,42 +14,6 @@
 import("//build/ohos.gni")
 
 # sa lib
-ohos_shared_library("dslm_service") {
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    blocklist = "../../../cfi_blocklist.txt"
-  }
-  branch_protector_ret = "pac_ret"
-
-  sources = [ "dslm_ohos_credential.c" ]
-
-  include_dirs = [
-    "../common",
-    "../../../common/include",
-    "../../../interfaces/inner_api/include",
-  ]
-
-  deps = [
-    ":dslm_ohos_cred_obj",
-    "../../../baselib/utils:utils_static",
-    "../../../services/sa:service_sa_static",
-  ]
-
-  configs = [ "../../../common:common_configs" ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-
-  part_name = "device_security_level"
-  subsystem_name = "security"
-}
-
 ohos_source_set("dslm_ohos_cred_obj") {
   sanitize = {
     integer_overflow = true
@@ -73,6 +37,7 @@ ohos_source_set("dslm_ohos_cred_obj") {
     "impl",
     "../common",
     "../../common",
+    "../../include",
     "../../../common/include",
     "../../../interfaces/inner_api/include",
     "../../../services/include",

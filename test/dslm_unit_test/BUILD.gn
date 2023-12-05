@@ -64,6 +64,7 @@ if (os_level == "standard") {
       "../../interfaces/inner_api/include",
       "../../interfaces/inner_api/src/standard",
       "../../oem_property/common",
+      "../../oem_property/include",
       "../../oem_property/ohos/common",
       "../../oem_property/ohos/standard/impl",
       "../../services/include",

@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "device_security_defines.h"
+typedef struct DeviceIdentify DeviceIdentify;
 
 #define CRED_INFO_VERSION_LEN 32
 #define CRED_INFO_TYPE_LEN 32
