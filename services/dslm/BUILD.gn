@@ -16,7 +16,6 @@ import("//build/ohos.gni")
 
 service_dslm_sources = [
   "dslm_core_process.c",
-  "dslm_credential.c",
   "dslm_device_list.c",
   "dslm_dfx_default.c",
   "dslm_fsm_process.c",
@@ -28,6 +27,8 @@ service_dslm_sources = [
 service_dslm_include_dirs = [
   "../include",
   "../../common/include",
+  "../../oem_property/common",
+  "../../oem_property/include",
   "../../interfaces/inner_api/include",
 ]
 

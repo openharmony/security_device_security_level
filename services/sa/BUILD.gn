@@ -26,6 +26,7 @@ if (defined(ohos_lite)) {
         "../include",
         "../../common/include",
         "../../interfaces/inner_api/include",
+        "../../oem_property/include",
       ]
 
       deps = [
@@ -82,6 +83,7 @@ if (defined(ohos_lite)) {
         "../include",
         "../../common/include",
         "../../interfaces/inner_api/include",
+        "../../oem_property/include",
         "../../oem_property/ohos/lite",
       ]
 
@@ -135,7 +137,7 @@ if (defined(ohos_lite)) {
     }
   }
 } else {
-  ohos_static_library("service_sa_static") {
+  ohos_shared_library("dslm_service") {
     sanitize = {
       integer_overflow = true
       ubsan = true
@@ -163,6 +165,7 @@ if (defined(ohos_lite)) {
 
     deps = [
       "../../baselib/utils:utils_static",
+      "../../oem_property:dslm_oem_ext",
       "../common:service_common_obj",
       "../dfx:dslm_extension_dfx",
       "../dslm:service_dslm_obj",
