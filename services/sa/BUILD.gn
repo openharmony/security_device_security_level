@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 
 # sa lib
 if (defined(ohos_lite)) {
+  group("dslm_service") {
+  }
   if (ohos_kernel_type == "liteos_a" || ohos_kernel_type == "linux") {
     ohos_static_library("service_sa_static") {
       sources = [ "common/dslm_rpc_process.c" ]
@@ -137,6 +139,12 @@ if (defined(ohos_lite)) {
     }
   }
 } else {
+  config("dslm_service_config") {
+    include_dirs = [ "../../oem_property/include" ]
+  }
+  declare_args() {
+    device_security_level_feature_plugin_path = ""
+  }
   ohos_shared_library("dslm_service") {
     sanitize = {
       integer_overflow = true
@@ -163,6 +171,11 @@ if (defined(ohos_lite)) {
       "../../interfaces/inner_api/include",
     ]
 
+    if (device_security_level_feature_plugin_path != "") {
+      defines =
+          [ "PLUGIN_SO_PATH=\"${device_security_level_feature_plugin_path}\"" ]
+    }
+
     deps = [
       "../../baselib/utils:utils_static",
       "../../oem_property:dslm_oem_ext",
@@ -181,7 +194,7 @@ if (defined(ohos_lite)) {
     ]
 
     configs = [ "../../common:common_configs" ]
-
+    public_configs = [ ":dslm_service_config" ]
     part_name = "device_security_level"
     subsystem_name = "security"
   }

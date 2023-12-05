@@ -67,6 +67,17 @@
                         ],
                         "header_base": "//base/security/device_security_level/interfaces/inner_api/include"
                     }
+                },
+                {
+                    "name": "//base/security/device_security_level/services/sa:dslm_service",
+                    "header": {
+                        "header_files": [
+                            "dslm_cred.h",
+                            "dslm_credential_utils.h",
+                            "dslm_credential.h"
+                        ],
+                        "header_base": "//base/security/device_security_level/oem_property/include"
+                    }
                 }
             ],
             "test": [
