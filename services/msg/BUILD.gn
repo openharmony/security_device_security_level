@@ -14,6 +14,10 @@
 import("//base/security/device_security_level/common/dslm.gni")
 import("//build/ohos.gni")
 
+declare_args() {
+  device_security_level_feature_secondary_session_name = ""
+}
+
 # service_msg object
 ohos_source_set("service_msg_obj") {
   sources = [ "dslm_messenger_wrapper.c" ]
@@ -49,6 +53,10 @@ ohos_source_set("service_msg_obj") {
       "c_utils:utils",
       "hilog:libhilog",
     ]
+  }
+
+  if (device_security_level_feature_secondary_session_name != "") {
+    defines = [ "SECONDARY_SOCKET_NAME=\"${device_security_level_feature_secondary_session_name}\"" ]
   }
 
   configs = [ "../../common:common_configs" ]

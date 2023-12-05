@@ -34,7 +34,7 @@ if (os_level == "standard") {
 
     sources = [ "dslm_fuzzer.cpp" ]
 
-    deps = [ "../../../services/sa:dslm_service" ]
+    deps = [ "../../../oem_property/ohos:dslm_service" ]
 
     external_deps = [
       "c_utils:utils",
