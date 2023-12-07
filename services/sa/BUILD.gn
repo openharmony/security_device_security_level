@@ -146,6 +146,9 @@ if (defined(ohos_lite)) {
     device_security_level_feature_plugin_path = ""
   }
   ohos_shared_library("dslm_service") {
+    shlib_type = "sa"
+    version_script = "dslm.versionscript"
+
     sanitize = {
       integer_overflow = true
       ubsan = true
