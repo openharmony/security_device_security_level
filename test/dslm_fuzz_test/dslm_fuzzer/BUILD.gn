@@ -29,12 +29,28 @@ if (os_level == "standard") {
       "../../../baselib/utils/include",
       "../../../common/include",
       "../../../interfaces/inner_api/src/standard",
+      "../../../services/sa/common",
       "../../../services/sa/standard",
+      "../../../services/include",
+      "../../../services/dslm",
     ]
 
-    sources = [ "dslm_fuzzer.cpp" ]
+    sources = [
+      "../../../services/sa/common/dslm_rpc_process.c",
+      "../../../services/sa/standard/dslm_callback_proxy.cpp",
+      "../../../services/sa/standard/dslm_ipc_process.cpp",
+      "../../../services/sa/standard/dslm_service.cpp",
+      "dslm_fuzzer.cpp",
+    ]
 
-    deps = [ "../../../oem_property/ohos:dslm_service" ]
+    deps = [
+      "../../../baselib/utils:utils_static",
+      "../../../oem_property:dslm_oem_ext",
+      "../../../services/common:service_common_obj",
+      "../../../services/dfx:dslm_extension_dfx",
+      "../../../services/dslm:service_dslm_obj",
+      "../../../services/msg:service_msg_obj",
+    ]
 
     external_deps = [
       "c_utils:utils",
@@ -42,6 +58,7 @@ if (os_level == "standard") {
       "hilog:libhilog",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
     ]
   }
 }
