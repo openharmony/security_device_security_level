@@ -160,11 +160,7 @@ static void OnSocketMessageReceived(const DeviceIdentify *devId, const uint8_t *
 static void RemoveSocketNode(int32_t socket, ShutdownReason reason, bool isServer)
 {
     DeviceSocketManager *instance = GetDeviceSocketManagerInstance();
-
-    ListHead *socketList = &instance->clientSocketList;
-    if (isServer) {
-        socketList = &instance->serverSocketList;
-    }
+    ListHead *socketList = isServer ? &instance->serverSocketList : &instance->clientSocketList;
 
     LockMutex(&instance->mutex);
     ListNode *node = NULL;
@@ -249,7 +245,7 @@ static void CreateOrRestartSocketCloseTimerWithLock(int32_t socket)
     UnlockMutex(&inst->mutex);
 }
 
-static bool GetIdentityBySocketId(int32_t socket, DeviceIdentify *identity, bool isServer)
+static bool GetIdentityBySocketId(int32_t socket, bool isServer, DeviceIdentify *identity)
 {
     if (identity == NULL) {
         return false;
@@ -261,8 +257,9 @@ static bool GetIdentityBySocketId(int32_t socket, DeviceIdentify *identity, bool
     LockMutex(&instance->mutex);
     ListNode *node = NULL;
     SocketNodeInfo *socketInfo;
-    ListHead *list = isServer ? &instance->serverSocketList : &instance->clientSocketList;
-    FOREACH_LIST_NODE (node, list) {
+    ListHead *socketList = isServer ? &instance->serverSocketList : &instance->clientSocketList;
+
+    FOREACH_LIST_NODE (node, socketList) {
         socketInfo = LIST_ENTRY(node, SocketNodeInfo, link);
         if (socketInfo->socket == socket) {
             *identity = socketInfo->identity;
@@ -277,12 +274,12 @@ static bool GetIdentityBySocketId(int32_t socket, DeviceIdentify *identity, bool
 
 static bool GetIdentityByServerSocket(int32_t socket, DeviceIdentify *identity)
 {
-    return GetIdentityBySocketId(socket, identity, true);
+    return GetIdentityBySocketId(socket, true, identity);
 }
 
 static bool GetIdentityByClientSocket(int32_t socket, DeviceIdentify *identity)
 {
-    return GetIdentityBySocketId(socket, identity, false);
+    return GetIdentityBySocketId(socket, false, identity);
 }
 
 static SocketNodeInfo *CreateSocketNodeInfo(int32_t socket, const DeviceIdentify *identity)
@@ -308,37 +305,7 @@ static SocketNodeInfo *CreateSocketNodeInfo(int32_t socket, const DeviceIdentify
     return socketInfo;
 }
 
-static void ServerOnBind(int32_t socket, PeerSocketInfo info)
-{
-    DeviceSocketManager *instance = GetDeviceSocketManagerInstance();
-
-    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
-    if (!MessengerGetDeviceIdentifyByNetworkId(info.deviceId, &identity)) {
-        SECURITY_LOG_ERROR("MessengerGetDeviceIdentifyByNetworkId failed");
-        return;
-    }
-    LockMutex(&instance->mutex);
-    ListNode *node = NULL;
-    ListNode *temp = NULL;
-    FOREACH_LIST_NODE_SAFE (node, &instance->serverSocketList, temp) {
-        SocketNodeInfo *Nodeinfo = LIST_ENTRY(node, SocketNodeInfo, link);
-        if (IsSameDevice(&Nodeinfo->identity, &identity)) {
-            RemoveListNode(node);
-            FREE(Nodeinfo);
-        }
-    }
-    UnlockMutex(&instance->mutex);
-
-    SocketNodeInfo *socketInfo = CreateSocketNodeInfo(socket, &identity);
-    if (socketInfo == NULL) {
-        return;
-    }
-    LockMutex(&instance->mutex);
-    AddListNodeBefore(&socketInfo->link, &instance->serverSocketList);
-    UnlockMutex(&instance->mutex);
-}
-
-static void ClientOnBind(int socket, const DeviceIdentify *devId)
+static void ProcessBindDevice(int socket, const DeviceIdentify *devId, bool isServer)
 {
     if (devId == NULL) {
         SECURITY_LOG_ERROR("client on bind invalid params");
@@ -351,8 +318,10 @@ static void ClientOnBind(int socket, const DeviceIdentify *devId)
         return;
     }
 
+    ListHead *socketList = isServer ? &instance->serverSocketList : &instance->clientSocketList;
+
     LockMutex(&instance->mutex);
-    AddListNodeBefore(&socketInfo->link, &instance->clientSocketList);
+    AddListNodeBefore(&socketInfo->link, socketList);
     ListNode *node = NULL;
     ListNode *temp = NULL;
     FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
@@ -366,12 +335,25 @@ static void ClientOnBind(int socket, const DeviceIdentify *devId)
         if (sent != 0) {
             SECURITY_LOG_ERROR("SendBytes error code = %{public}d", sent);
         }
-        CreateOrRestartSocketCloseTimer(socket);
         FREE(msgData);
     }
     UnlockMutex(&instance->mutex);
-
     return;
+}
+
+static void ServerOnBind(int32_t socket, PeerSocketInfo info)
+{
+    DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
+    if (!MessengerGetDeviceIdentifyByNetworkId(info.deviceId, &identity)) {
+        SECURITY_LOG_ERROR("MessengerGetDeviceIdentifyByNetworkId failed");
+        return;
+    }
+    ProcessBindDevice(socket, &identity, true);
+}
+
+static void ClientOnBind(int socket, const DeviceIdentify *devId)
+{
+    ProcessBindDevice(socket, devId, false);
 }
 
 static void ServerOnBytes(int32_t socket, const void *data, unsigned int dataLen)
@@ -548,18 +530,19 @@ bool DeInitDeviceSocketManager(void)
     return true;
 }
 
-static bool GetSocketByClientSocketList(const DeviceIdentify *devId, int32_t *socket)
+static bool GetSocketBySocketList(const DeviceIdentify *devId, bool isServer, int32_t *socket)
 {
     if (devId == NULL || socket == NULL) {
         return false;
     }
 
     DeviceSocketManager *instance = GetDeviceSocketManagerInstance();
+    ListHead *socketList = isServer ? &instance->serverSocketList : &instance->clientSocketList;
 
     bool find = false;
     LockMutex(&instance->mutex);
     ListNode *node = NULL;
-    FOREACH_LIST_NODE (node, &instance->clientSocketList) {
+    FOREACH_LIST_NODE (node, socketList) {
         SocketNodeInfo *socketInfo = LIST_ENTRY(node, SocketNodeInfo, link);
         if (IsSameDevice(&socketInfo->identity, devId)) {
             *socket = socketInfo->socket;
@@ -570,6 +553,16 @@ static bool GetSocketByClientSocketList(const DeviceIdentify *devId, int32_t *so
     UnlockMutex(&instance->mutex);
 
     return find;
+}
+
+static bool GetSocketByClientSocketList(const DeviceIdentify *devId, int32_t *socket)
+{
+    return GetSocketBySocketList(devId, false, socket);
+}
+
+static bool GetSocketByServerSocketList(const DeviceIdentify *devId, int32_t *socket)
+{
+    return GetSocketBySocketList(devId, true, socket);
 }
 
 static void PushMsgDataToPendingList(uint32_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
@@ -635,7 +628,7 @@ static void BindSync(int32_t socket, const DeviceIdentify *devId)
     }
 }
 
-static int32_t ProcessBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId)
+static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId)
 {
     if (socketName == NULL || devId == NULL || socketId == NULL) {
         SECURITY_LOG_ERROR("invalid params bind socket");
@@ -699,14 +692,13 @@ void *BindSyncWithPthread(void *arg)
     FREE(devId);
 
     int32_t socket = 0;
-    if (ProcessBindSocket(inst->primarySockName, &identity, &socket) == 0) {
+    if (PrepareBindSocket(inst->primarySockName, &identity, &socket) == 0) {
         BindSync(socket, &identity);
     }
 
-    if (ProcessBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
+    if (PrepareBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
         BindSync(socket, &identity);
     }
-
     return NULL;
 }
 
@@ -745,7 +737,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     }
 
     int32_t socket = 0;
-    bool find = GetSocketByClientSocketList(devId, &socket);
+    bool find = GetSocketByClientSocketList(devId, &socket) || GetSocketByServerSocketList(devId, &socket);
     if (find && socket != 0) {
         int32_t ret = SendBytes(socket, msg, msgLen);
         if (ret != 0) {
