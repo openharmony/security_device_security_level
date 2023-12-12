@@ -603,11 +603,11 @@ static void ClientOnFakeBind(int32_t socket, PeerSocketInfo info)
     SECURITY_LOG_INFO("Start FakeBind");
 }
 
-static void BindSync(int32_t socket, const DeviceIdentify *devId)
+static bool BindSync(int32_t socket, const DeviceIdentify *devId)
 {
     if (devId == NULL) {
         SECURITY_LOG_ERROR("Bind sync invalid params");
-        return;
+        return false;
     }
     static QosTV clientQos[] = {
         {.qos = QOS_TYPE_MIN_BW, .value = 20},
@@ -624,8 +624,9 @@ static void BindSync(int32_t socket, const DeviceIdentify *devId)
     SECURITY_LOG_INFO("Bind socket %{public}d ret is %{public}d", socket, ret);
     if (ret == 0) {
         ClientOnBind(socket, devId);
-        return;
+        return true;
     }
+    return false;
 }
 
 static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId)
@@ -692,12 +693,17 @@ void *BindSyncWithPthread(void *arg)
     FREE(devId);
 
     int32_t socket = 0;
+    bool succ = false;
     if (PrepareBindSocket(inst->primarySockName, &identity, &socket) == 0) {
-        BindSync(socket, &identity);
+        succ = BindSync(socket, &identity);
+    }
+
+    if (succ) {
+        return NULL;
     }
 
     if (PrepareBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
-        BindSync(socket, &identity);
+        (void)BindSync(socket, &identity);
     }
     return NULL;
 }
