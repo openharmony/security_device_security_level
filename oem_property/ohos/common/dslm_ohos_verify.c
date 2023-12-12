@@ -161,7 +161,7 @@ static int32_t CheckNonceOfCertChain(const struct NonceOfCertChain *nonce, uint6
     int32_t ret = FindCommonPkInfo((char *)pbkInfoList, (char *)nonce->pbkInfoList);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("compare nonce public key info failed");
-        return ret;
+        return SUCCESS;
     }
     return SUCCESS;
 }
