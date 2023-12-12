@@ -626,6 +626,7 @@ static bool BindSync(int32_t socket, const DeviceIdentify *devId)
         ClientOnBind(socket, devId);
         return true;
     }
+    Shutdown(socket);
     return false;
 }
 
@@ -697,17 +698,14 @@ void *BindSyncWithPthread(void *arg)
     if (PrepareBindSocket(inst->primarySockName, &identity, &socket) == 0) {
         succ = BindSync(socket, &identity);
     }
+
     if (succ) {
         return NULL;
     }
 
     if (PrepareBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
-        succ = BindSync(socket, &identity);
+        (void)BindSync(socket, &identity);
     }
-    if (succ) {
-        return NULL;
-    }
-    Shutdown(socket);
     return NULL;
 }
 
