@@ -697,14 +697,17 @@ void *BindSyncWithPthread(void *arg)
     if (PrepareBindSocket(inst->primarySockName, &identity, &socket) == 0) {
         succ = BindSync(socket, &identity);
     }
-
     if (succ) {
         return NULL;
     }
 
     if (PrepareBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
-        (void)BindSync(socket, &identity);
+        succ = BindSync(socket, &identity);
     }
+    if (succ) {
+        return NULL;
+    }
+    Shutdown(socket);
     return NULL;
 }
 
