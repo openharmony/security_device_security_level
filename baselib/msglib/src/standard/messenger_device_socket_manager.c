@@ -344,7 +344,7 @@ static void ProcessBindDevice(int socket, const DeviceIdentify *devId, bool isSe
 static void ServerOnBind(int32_t socket, PeerSocketInfo info)
 {
     DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
-    if (!MessengerGetDeviceIdentifyByNetworkId(info.deviceId, &identity)) {
+    if (!MessengerGetDeviceIdentifyByNetworkId(info.networkId, &identity)) {
         SECURITY_LOG_ERROR("MessengerGetDeviceIdentifyByNetworkId failed");
         return;
     }
