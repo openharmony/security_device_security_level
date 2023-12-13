@@ -626,6 +626,7 @@ static bool BindSync(int32_t socket, const DeviceIdentify *devId)
         ClientOnBind(socket, devId);
         return true;
     }
+    Shutdown(socket);
     return false;
 }
 
