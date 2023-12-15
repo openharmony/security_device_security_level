@@ -322,21 +322,25 @@ static void ProcessBindDevice(int socket, const DeviceIdentify *devId, bool isSe
 
     LockMutex(&instance->mutex);
     AddListNodeBefore(&socketInfo->link, socketList);
-    ListNode *node = NULL;
-    ListNode *temp = NULL;
-    FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
-        PendingMsgData *msgData = LIST_ENTRY(node, PendingMsgData, link);
-        if (!IsSameDevice(&msgData->destIdentity, devId)) {
-            continue;
-        }
-        RemoveListNode(node);
 
-        int sent = SendBytes(socket, msgData->msgData, msgData->msgLen);
-        if (sent != 0) {
-            SECURITY_LOG_ERROR("SendBytes error code = %{public}d", sent);
+    if (!isServer) {
+        ListNode *node = NULL;
+        ListNode *temp = NULL;
+        FOREACH_LIST_NODE_SAFE (node, &instance->pendingSendList, temp) {
+            PendingMsgData *msgData = LIST_ENTRY(node, PendingMsgData, link);
+            if (!IsSameDevice(&msgData->destIdentity, devId)) {
+                continue;
+            }
+            RemoveListNode(node);
+
+            int sent = SendBytes(socket, msgData->msgData, msgData->msgLen);
+            if (sent != 0) {
+                SECURITY_LOG_ERROR("SendBytes error code = %{public}d", sent);
+            }
+            FREE(msgData);
         }
-        FREE(msgData);
     }
+
     UnlockMutex(&instance->mutex);
     return;
 }
@@ -560,11 +564,6 @@ static bool GetSocketByClientSocketList(const DeviceIdentify *devId, int32_t *so
     return GetSocketBySocketList(devId, false, socket);
 }
 
-static bool GetSocketByServerSocketList(const DeviceIdentify *devId, int32_t *socket)
-{
-    return GetSocketBySocketList(devId, true, socket);
-}
-
 static void PushMsgDataToPendingList(uint32_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
 {
     if (devId == NULL || msg == NULL) {
@@ -744,7 +743,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     }
 
     int32_t socket = 0;
-    bool find = GetSocketByClientSocketList(devId, &socket) || GetSocketByServerSocketList(devId, &socket);
+    bool find = GetSocketByClientSocketList(devId, &socket);
     if (find && socket != 0) {
         int32_t ret = SendBytes(socket, msg, msgLen);
         if (ret != 0) {
