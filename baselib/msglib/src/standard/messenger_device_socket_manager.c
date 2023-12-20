@@ -415,7 +415,8 @@ static int32_t ProcessCreateServer(const char *session, const char *pkg, int32_t
     }
     static QosTV serverQos[] = {
         {.qos = QOS_TYPE_MIN_BW, .value = 20},
-        {.qos = QOS_TYPE_MAX_LATENCY, .value = 2000},
+        {.qos = QOS_TYPE_MAX_LATENCY, .value = 6000},
+        {.qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
         {.qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 30000},
         {.qos = QOS_TYPE_MAX_BUFFER, .value = 10000},
         {.qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 30000},
@@ -610,7 +611,8 @@ static bool BindSync(int32_t socket, const DeviceIdentify *devId)
     }
     static QosTV clientQos[] = {
         {.qos = QOS_TYPE_MIN_BW, .value = 20},
-        {.qos = QOS_TYPE_MAX_LATENCY, .value = 2000},
+        {.qos = QOS_TYPE_MAX_LATENCY, .value = 6000},
+        {.qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
         {.qos = QOS_TYPE_MAX_WAIT_TIMEOUT, .value = 5000},
         {.qos = QOS_TYPE_MAX_BUFFER, .value = 10000},
     };
