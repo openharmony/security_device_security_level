@@ -108,8 +108,6 @@ static DslmRemoteStubListNode *DslmPopRemoteStub(uint32_t owner, uint32_t cookie
 
 static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
 {
-    DeviceSecurityInfoCallback *callback = NULL;
-
     if ((cookie == 0) || (info == NULL)) {
         return;
     }
@@ -121,7 +119,7 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
     }
 
     DeviceSecurityInfo *resultInfo = (DeviceSecurityInfo *)MALLOC(sizeof(DeviceSecurityInfo));
-    if (info == NULL) {
+    if (resultInfo == NULL) {
         SECURITY_LOG_ERROR("no memory");
         return;
     }
