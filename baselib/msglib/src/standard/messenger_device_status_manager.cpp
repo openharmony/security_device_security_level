@@ -79,6 +79,13 @@ public:
         EVENT_NODE_STATE_OFFLINE = 0,
         EVENT_NODE_STATE_ONLINE = 1,
     };
+
+    struct QueueStatusData {
+        DeviceIdentify srcIdentity {0, {0}};
+        uint32_t status {0};
+        uint32_t devType {0};
+    };
+
     DslmDeviceState() = default;
     ~DslmDeviceState() override = default;
 
@@ -126,11 +133,7 @@ public:
             SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, invalid queue");
             return;
         }
-        struct QueueStatusData {
-            DeviceIdentify srcIdentity {0, {0}};
-            uint32_t status {0};
-            uint32_t devType {0};
-        };
+
         QueueStatusData *data = new (std::nothrow) QueueStatusData;
         if (data == nullptr) {
             SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, malloc result null");

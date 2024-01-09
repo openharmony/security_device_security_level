@@ -21,9 +21,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define MAX_MALLOC_SIZE (64 * 1024)
 
 void *UtilsMalloc(size_t size)
 {
+    if (size > MAX_MALLOC_SIZE) {
+        return NULL;
+    }
+
     return malloc(size);
 }
 

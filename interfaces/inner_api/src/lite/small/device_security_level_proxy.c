@@ -34,11 +34,13 @@ static inline Mutex *GetMutex(void)
 
 static int DslmIpcCallback(IOwner owner, int code, IpcIo *reply)
 {
+    uint32_t result = ERR_DEFAULT;
+    uint32_t level = 0;
+
     if (owner == NULL) {
         return ERR_INVALID_PARA;
     }
 
-    uint32_t result, level;
     struct DslmCallbackHolder *holder = (struct DslmCallbackHolder *)owner;
 
     ReadUint32(reply, &result);
