@@ -15,13 +15,19 @@
 
 #include "dslm_fuzzer.h"
 
-#include "securec.h"
 #include "parcel.h"
+#include "securec.h"
 
 #include "device_security_defines.h"
-#include "utils_log.h"
 #include "device_security_level_callback_stub.h"
+#include "dslm_credential.h"
+#include "dslm_device_list.h"
 #include "dslm_service.h"
+#include "dslm_device_list.h"
+
+
+#define CNT 1000
+#define ITEMSTATE 4
 
 extern "C" int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len);
 
@@ -37,13 +43,38 @@ void OnPeerMsgReceivedFuzzer(Parcel &parcel)
 {
     SECURITY_LOG_INFO("begin");
     DeviceIdentify deviceIdentify = {};
-    deviceIdentify.length = parcel.ReadUint32();
+    deviceIdentify.length = DEVICE_ID_MAX_LEN;
     const uint8_t *buffer = parcel.ReadBuffer(DEVICE_ID_MAX_LEN);
     if (buffer != nullptr) {
         (void)memcpy_s(deviceIdentify.identity, DEVICE_ID_MAX_LEN, buffer, DEVICE_ID_MAX_LEN);
     }
-    OnPeerMsgReceived(&deviceIdentify,
-        reinterpret_cast<const uint8_t *>(parcel.GetData() + parcel.GetReadPosition()), parcel.GetReadableBytes());
+
+    static int cnt = 0;
+    cnt++;
+    if (cnt <= CNT) {
+        DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(&deviceIdentify);
+        if (info != nullptr) {
+            info->machine.currState = parcel.ReadUint32() % ITEMSTATE;
+        }
+    }
+
+    uint32_t a = parcel.ReadUint32() % 3;
+    if (a == 0) {
+        uint8_t jsonString[] = R"(
+            {"message":0, "payload":111}
+        )";
+        OnPeerMsgReceived(&deviceIdentify, jsonString, sizeof(jsonString));
+    } else if (a == 1) {
+        uint8_t jsonString[] = R"(
+            {"message":1, "payload":{"challenge":"0102030405060708"}}
+        )";
+        OnPeerMsgReceived(&deviceIdentify, jsonString, sizeof(jsonString));
+    } else {
+        uint8_t jsonString[] = R"(
+            {"message":2, "payload":222}
+        )";
+        OnPeerMsgReceived(&deviceIdentify, jsonString, sizeof(jsonString));
+    }
     SECURITY_LOG_INFO("end");
 }
 
@@ -95,7 +126,7 @@ void DslmFuzzTest(const uint8_t *data, size_t size)
         OnRemoteRequestFuzzer(parcel);
     }
 }
-}
+} // namespace
 } // namespace DeviceSecurityLevel
 } // namespace Security
 } // namespace OHOS
@@ -103,6 +134,18 @@ void DslmFuzzTest(const uint8_t *data, size_t size)
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    static int initCount = 0;
+    if (initCount == 0) {
+        const ProcessDslmCredFunctions func = {
+            .initFunc = InitOhosDslmCred,
+            .requestFunc = RequestOhosDslmCred,
+            .verifyFunc = VerifyOhosDslmCred,
+            .credTypeCnt = 2,
+            .credTypeArray = { CRED_TYPE_STANDARD, CRED_TYPE_SMALL },
+        };
+        InitDslmCredentialFunctions(&func);
+        initCount = 1;
+    }
     OHOS::Security::DeviceSecurityLevel::DslmFuzzTest(data, size);
     return 0;
 }
