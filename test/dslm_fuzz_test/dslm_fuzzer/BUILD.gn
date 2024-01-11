@@ -27,19 +27,32 @@ if (os_level == "standard") {
 
     include_dirs = [
       "../../../baselib/utils/include",
+      "../../../baselib/msglib/include",
+      "../../../baselib/msglib/src/common",
+      "../../../baselib/msglib/src/standard",
       "../../../common/include",
       "../../../interfaces/inner_api/src/standard",
+      "../../../oem_property/include",
+      "../../../oem_property/ohos/common",
+      "../../../oem_property/ohos/standard",
+      "../../../oem_property/ohos/standard/impl",
       "../../../services/sa/common",
       "../../../services/sa/standard",
       "../../../services/include",
       "../../../services/dslm",
+      "../mock",
     ]
 
     sources = [
+      "../../../baselib/msglib/src/common/messenger.c",
+      "../../../baselib/msglib/src/standard/messenger_device_socket_manager.c",
+      "../../../baselib/msglib/src/standard/messenger_device_status_manager.cpp",
+      "../../../baselib/msglib/src/standard/messenger_impl.c",
       "../../../services/sa/common/dslm_rpc_process.c",
       "../../../services/sa/standard/dslm_callback_proxy.cpp",
       "../../../services/sa/standard/dslm_ipc_process.cpp",
       "../../../services/sa/standard/dslm_service.cpp",
+      "../mock/mock.cpp",
       "dslm_fuzzer.cpp",
     ]
 
@@ -54,8 +67,11 @@ if (os_level == "standard") {
 
     external_deps = [
       "c_utils:utils",
+      "device_manager:devicemanagersdk",
       "device_security_level:dslm_sdk",
+      "dsoftbus:softbus_client",
       "hilog:libhilog",
+      "huks:libhukssdk",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
