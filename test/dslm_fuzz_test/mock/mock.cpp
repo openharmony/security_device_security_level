@@ -31,11 +31,6 @@ int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISock
     return 0;
 }
 
-int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
-{
-    return 0;
-}
-
 void Shutdown(int32_t socket)
 {
 }
