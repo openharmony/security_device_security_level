@@ -119,9 +119,16 @@ void OnPeerMsgReceivedTest3(DeviceIdentify *deviceIdentify, Parcel &parcel)
 void ServiceTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
     if (g_init < INIT_MAX) {
+        uint8_t jsonString[] = R"(
+            {"message":0, "payload":111}
+            )";
+        uint64_t transNo = 1;
+        static DeviceIdentify self = {0, {0}};
         uint32_t devType;
         (void)InitService();
         (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
+        (void)MessengerGetSelfDeviceIdentify(&self, &devType);
+        MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
         UnInitService();
         g_init++;
     }
@@ -141,6 +148,7 @@ void VerifyDslmCredentialTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
 
     (void)VerifyDslmCredential(g_cred, &info, &list);
+    FreeAttestationList(&list);
 }
 
 void MessengerSendMsgToTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -197,7 +205,7 @@ void GetPeerDeviceOnlineStatusTest(DeviceIdentify *deviceIdentify, Parcel &parce
 void Base64EncodeAppTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
     uint8_t src[] = {'a', 'b', 'c', 'd', '\0'};
-    uint32_t maxStrLen = MAX_MALLOC_LEN / 4 * 3;
+    uint32_t maxStrLen = 4;
 
     (void)Base64EncodeApp(nullptr, sizeof(src));
     (void)Base64EncodeApp(src, maxStrLen);
@@ -228,14 +236,18 @@ void BufferToHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
     uint8_t buff[8];
     uint32_t len = 8;
+    uint8_t *data;
     memset_s(buff, sizeof(buff), 'c', sizeof(buff));
     TlvCommon *ptr = (TlvCommon *)buff;
     ptr->tag = 0x110;
     ptr->len = PTR_LEN;
     struct HksCertChain chain;
     memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
+    CredType credType = CRED_TYPE_STANDARD;
 
     (void)BufferToHksCertChain(buff, len, &chain);
+    (void)CreateDslmCred(credType, len, buff);
+    (void)HksCertChainToBuffer(&chain, &data, &len);
 }
 
 void DestroyHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -250,11 +262,17 @@ void DestroyHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     DestroyHksCertChain(chain);
 }
 
+void DefaultInitDslmCredTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    DslmCredInfo credInfo;
+    DefaultInitDslmCred(&credInfo);
+}
+
 DslmFuzzerTable g_fuzzerTable[] = {{0, OnPeerMsgReceivedTest1}, {1, OnPeerMsgReceivedTest2},
     {2, OnPeerMsgReceivedTest3}, {3, ServiceTest}, {4, OnSendResultNotifierTest}, {5, VerifyDslmCredentialTest},
     {6, MessengerSendMsgToTest}, {7, OnPeerStatusReceiverTest}, {8, DslmDumperTest}, {9, VerifyOhosDslmCredTest},
     {10, RequestDeviceSecurityInfoTest}, {11, GetPeerDeviceOnlineStatusTest}, {12, Base64EncodeAppTest},
-    {13, SerializeTest}, {14, BufferToHksCertChainTest}, {15, DestroyHksCertChainTest}};
+    {13, SerializeTest}, {14, BufferToHksCertChainTest}, {15, DestroyHksCertChainTest}, {16, DefaultInitDslmCredTest}};
 
 void OnPeerMsgReceivedFuzzer(Parcel &parcel)
 {
@@ -275,7 +293,7 @@ void OnPeerMsgReceivedFuzzer(Parcel &parcel)
         }
     }
 
-    uint32_t a = parcel.ReadUint32() % 16;
+    uint32_t a = parcel.ReadUint32() % 17;
     for (uint32_t i = 0; i < sizeof(g_fuzzerTable) / sizeof(DslmFuzzerTable); ++i) {
         if (g_fuzzerTable[i].code == a) {
             g_fuzzerTable[i].process(&deviceIdentify, parcel);
