@@ -31,7 +31,7 @@
 #define MSG_BUFF_MAX_LENGTH (81920 * 4)
 #define PKG_NAME_LEN 128
 #define SOCKET_NAME_LEN 128
-#define WAITING_TIMEOUT_LEN 20000
+#define WAITING_TIMEOUT_LEN 15000
 
 typedef struct DeviceSocketManager {
     ListHead pendingSendList;
@@ -415,8 +415,8 @@ static int32_t ProcessCreateServer(const char *session, const char *pkg, int32_t
         return ret;
     }
     static QosTV serverQos[] = {
-        {.qos = QOS_TYPE_MIN_BW, .value = 20},
-        {.qos = QOS_TYPE_MAX_LATENCY, .value = 6000},
+        {.qos = QOS_TYPE_MIN_BW, .value = 8 * 1024},
+        {.qos = QOS_TYPE_MAX_LATENCY, .value = 10000},
         {.qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
     };
     static ISocketListener serverListener = {
@@ -608,8 +608,8 @@ static bool BindSync(int32_t socket, const DeviceIdentify *devId)
         return false;
     }
     static QosTV clientQos[] = {
-        {.qos = QOS_TYPE_MIN_BW, .value = 20},
-        {.qos = QOS_TYPE_MAX_LATENCY, .value = 6000},
+        {.qos = QOS_TYPE_MIN_BW, .value = 8 * 1024},
+        {.qos = QOS_TYPE_MAX_LATENCY, .value = 10000},
         {.qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
         {.qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 30000},
     };
