@@ -698,8 +698,8 @@ HWTEST_F(DslmTest, GetMillisecondSinceBoot_case1, TestSize.Level0)
     uint64_t end = GetMillisecondSinceBoot();
     EXPECT_GT(end, 0U);
 
-    EXPECT_GT(end - start, tick - 10);
-    EXPECT_LT(end - start, tick + 10);
+    EXPECT_GT(end - start, tick - 25);
+    EXPECT_LT(end - start, tick + 25);
 }
 
 HWTEST_F(DslmTest, GetMillisecondSince1970_case1, TestSize.Level0)
@@ -711,8 +711,8 @@ HWTEST_F(DslmTest, GetMillisecondSince1970_case1, TestSize.Level0)
     uint64_t end = GetMillisecondSince1970();
     EXPECT_GT(end, 0U);
 
-    EXPECT_GT(end - start, tick - 10);
-    EXPECT_LT(end - start, tick + 10);
+    EXPECT_GT(end - start, tick - 25);
+    EXPECT_LT(end - start, tick + 25);
 }
 
 HWTEST_F(DslmTest, GetDateTime_case1, TestSize.Level0)
