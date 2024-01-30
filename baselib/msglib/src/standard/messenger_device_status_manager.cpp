@@ -220,7 +220,7 @@ static bool MessengerGetDeviceNodeBasicInfo(const DeviceIdentify &devId, DmDevic
 
         if (IsSameDevice(&devId, &curr)) {
             find = true;
-            (void)memcpy_s(&info, sizeof(DmDeviceInfo), &device, sizeof(DmDeviceInfo));
+            info = device;
             break;
         }
     }
