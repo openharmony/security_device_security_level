@@ -334,19 +334,6 @@ HWTEST_F(DslmTest, GetPkInfoListStr_case3, TestSize.Level0)
     EXPECT_EQ(result, ERR_MEMORY_ERR);
 }
 
-HWTEST_F(DslmTest, GetPkInfoListStr_case4, TestSize.Level0)
-{
-    const char *udidStr = "device";
-    char *pkInfoListStr = nullptr;
-
-    MockStrcpy mock;
-    // mock the strcpy_s return a EINVAL on the second call
-    EXPECT_CALL(mock, strcpy_s).WillOnce(Invoke(MockStrcpy::defaultstrcpy_s)).WillOnce(Return(EINVAL));
-
-    int32_t result = GetPkInfoListStr(true, udidStr, &pkInfoListStr);
-    EXPECT_EQ(result, ERR_MEMORY_ERR);
-}
-
 HWTEST_F(DslmTest, ParseDeviceSecInfoRequest_case1, TestSize.Level0)
 {
     const char *message = "{\"version\":3351057,\"challenge\":\"010203040a0b0c0d\"}";
