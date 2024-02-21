@@ -23,6 +23,7 @@ ohos_static_library("messenger_static") {
   include_dirs = [
     "include",
     "src/common",
+    "src/utils",
   ]
 
   sources = [ "src/common/messenger.c" ]
