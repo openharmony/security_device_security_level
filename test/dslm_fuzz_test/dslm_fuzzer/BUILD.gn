@@ -28,7 +28,6 @@ if (os_level == "standard") {
     include_dirs = [
       "../../../baselib/utils/include",
       "../../../baselib/msglib/include",
-      "../../../baselib/msglib/src/utils",
       "../../../baselib/msglib/src/common",
       "../../../baselib/msglib/src/standard",
       "../../../common/include",
