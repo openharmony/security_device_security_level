@@ -129,6 +129,7 @@ if (defined(ohos_lite)) {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
       "ipc:ipc_core",
       "samgr:samgr_proxy",
     ]
