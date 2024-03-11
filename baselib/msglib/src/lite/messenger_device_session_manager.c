@@ -47,12 +47,6 @@ typedef struct DeviceSessionManager {
     Mutex mutex;
 } DeviceSessionManager;
 
-typedef struct QueueMsgData {
-    DeviceIdentify srcIdentity;
-    uint32_t msgLen;
-    uint8_t msgData[1];
-} QueueMsgData;
-
 typedef struct PendingMsgData {
     ListNode link;
     uint32_t transNo;
@@ -121,26 +115,12 @@ static void OnSessionMessageReceived(const DeviceIdentify *devId, const uint8_t 
         SECURITY_LOG_ERROR("messageReceiver is null");
         return;
     }
-    uint32_t queueDataLen = sizeof(QueueMsgData) + msgLen;
-    QueueMsgData *queueData = MALLOC(queueDataLen);
+    uint32_t queueDataLen = 0;
+    QueueMsgData *queueData = CreateQueueMsgData(devId, msg, msgLen, &queueDataLen);
     if (queueData == NULL) {
-        SECURITY_LOG_ERROR("malloc result null");
         return;
     }
-    uint32_t ret = (uint32_t)memcpy_s(&queueData->srcIdentity, sizeof(DeviceIdentify), devId, sizeof(DeviceIdentify));
-    if (ret != EOK) {
-        SECURITY_LOG_ERROR("memcpy failed");
-        FREE(queueData);
-        return;
-    }
-    ret = (uint32_t)memcpy_s(queueData->msgData, msgLen, msg, msgLen);
-    if (ret != EOK) {
-        SECURITY_LOG_ERROR("memcpy failed");
-        FREE(queueData);
-        return;
-    }
-    queueData->msgLen = msgLen;
-    ret = QueueWork(queue, ProcessSessionMessageReceived, (uint8_t *)queueData, queueDataLen);
+    uint32_t ret = QueueWork(queue, ProcessSessionMessageReceived, (uint8_t *)queueData, queueDataLen);
     if (ret != WORK_QUEUE_OK) {
         SECURITY_LOG_ERROR("QueueWork failed, ret is %{public}u", ret);
         FREE(queueData);

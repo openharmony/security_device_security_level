@@ -26,7 +26,10 @@ ohos_static_library("messenger_static") {
     "src/utils",
   ]
 
-  sources = [ "src/common/messenger.c" ]
+  sources = [
+    "src/common/messenger.c",
+    "src/utils/messenger_utils.c",
+  ]
 
   deps = [ "../utils:utils_static" ]
 

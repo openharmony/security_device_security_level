@@ -31,6 +31,12 @@ extern "C" {
 
 #define MAX_TRY_TIMES 512
 
+typedef struct QueueMsgData {
+    DeviceIdentify srcIdentity;
+    uint32_t msgLen;
+    uint8_t msgData[1];
+} QueueMsgData;
+
 static inline uint32_t MaskDeviceIdentity(const char *deviceId, uint32_t length)
 {
 #define MASK_LEN 4U
@@ -74,6 +80,9 @@ static inline bool IsSameDevice(const DeviceIdentify *left, const DeviceIdentify
 
     return true;
 }
+
+QueueMsgData *CreateQueueMsgData(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen,
+    uint32_t *queueDataLen);
 
 #ifdef __cplusplus
 }
