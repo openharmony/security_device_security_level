@@ -129,7 +129,6 @@ void ServiceTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
         (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
         (void)MessengerGetSelfDeviceIdentify(&self, &devType);
         MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
-        UnInitService();
         g_init++;
     }
 }
