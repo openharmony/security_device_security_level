@@ -18,7 +18,6 @@
 
 #include "hilog/log.h"
 
-#ifndef __cplusplus
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
@@ -35,19 +34,4 @@
 #define SECURITY_LOG_ERROR(fmt, ...) HILOG_ERROR(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
 #define SECURITY_LOG_FATAL(fmt, ...) HILOG_FATAL(LOG_CORE, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
 
-#else // __cplusplus
-static constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0xD002F05, "DSLM_SERVICE"};
-
-#define SECURITY_LOG_DEBUG(fmt, ...) \
-    OHOS::HiviewDFX::HiLog::Debug(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
-#define SECURITY_LOG_INFO(fmt, ...) \
-    OHOS::HiviewDFX::HiLog::Info(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
-#define SECURITY_LOG_WARN(fmt, ...) \
-    OHOS::HiviewDFX::HiLog::Warn(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
-#define SECURITY_LOG_ERROR(fmt, ...) \
-    OHOS::HiviewDFX::HiLog::Error(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
-#define SECURITY_LOG_FATAL(fmt, ...) \
-    OHOS::HiviewDFX::HiLog::Fatal(LABEL, "[%{public}s]:" fmt, __func__, ##__VA_ARGS__)
-
-#endif // __cplusplus
 #endif // SEC_UTILS_LOG_H

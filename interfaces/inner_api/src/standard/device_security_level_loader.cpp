@@ -35,7 +35,7 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
 {
     auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (registry == nullptr) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo get registry error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo get registry error.");
         return {};
     }
     auto object = registry->CheckSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID);
@@ -46,7 +46,7 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
     sptr<LoadCallback> callback = new (std::nothrow) LoadCallback();
     int32_t result = registry->LoadSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, callback);
     if (result != ERR_OK) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo LoadSystemAbility error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo LoadSystemAbility error.");
         return {};
     }
     return callback->Promise();
@@ -54,13 +54,13 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
 
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilitySuccess(int32_t sid, const sptr<IRemoteObject> &object)
 {
-    HiLog::Info(LABEL, "OnLoadSystemAbilitySuccess = %{public}d.", sid);
+    HILOG_INFO(LOG_CORE, "OnLoadSystemAbilitySuccess = %{public}d.", sid);
     promise_.set_value(object);
 }
 
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t sid)
 {
-    HiLog::Error(LABEL, "OnLoadSystemAbilityFail = %{public}d.", sid);
+    HILOG_ERROR(LOG_CORE, "OnLoadSystemAbilityFail = %{public}d.", sid);
 }
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
