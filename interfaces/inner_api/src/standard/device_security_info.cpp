@@ -33,7 +33,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
     const ResultCallback &callback)
 {
     if (identify == nullptr || callback == nullptr) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo input error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo input error.");
         return ERR_INVALID_PARA;
     }
 
@@ -44,13 +44,13 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         option = &defaultOption;
     }
     if (option->timeout > MAX_KEEP_LEN) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo input error, timeout too len.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo input error, timeout too len.");
         return ERR_INVALID_PARA;
     }
     auto object = DeviceSecurityLevelLoader::GetInstance().LoadDslmService();
     auto proxy = iface_cast<DeviceSecurityLevelProxy>(object);
     if (proxy == nullptr) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo iface_cast error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo iface_cast error.");
         return ERR_IPC_REMOTE_OBJ_ERR;
     }
     auto &helper = DelayedRefSingleton<DeviceSecurityLevelCallbackHelper>::GetInstance();
@@ -59,13 +59,13 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
 
     auto success = helper.Publish(*identify, callback, option->timeout, stub, cookie);
     if (!success || stub == nullptr || cookie == 0) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo get stub error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo get stub error.");
         return ERR_REG_CALLBACK;
     }
 
     auto result = proxy->RequestDeviceSecurityLevel(*identify, *option, stub->AsObject(), cookie);
     if (result != SUCCESS) {
-        HiLog::Error(LABEL, "GetDeviceSecurityInfo RequestDeviceSecurityLevel error.");
+        HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo RequestDeviceSecurityLevel error.");
         helper.Withdraw(cookie);
         return result;
     }
@@ -84,7 +84,7 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
     };
     auto result = RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
     if (result != SUCCESS) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityInfoImpl RequestDeviceSecurityLevel error.");
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl RequestDeviceSecurityLevel error.");
         return result;
     }
     *info = promise.get_future().get();

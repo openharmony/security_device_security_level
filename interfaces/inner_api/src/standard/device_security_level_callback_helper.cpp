@@ -60,7 +60,7 @@ bool DeviceSecurityLevelCallbackHelper::Publish(const DeviceIdentify &identity, 
 
     auto result = holder_.PushCallback(identity, callback, keep, cookie);
     if (!result) {
-        HiLog::Error(LABEL, "DeviceSecurityLevelCallbackHelper::PushCallback failed");
+        HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelCallbackHelper::PushCallback failed");
         return false;
     }
 
@@ -76,7 +76,7 @@ bool DeviceSecurityLevelCallbackHelper::Withdraw(uint32_t cookie)
 
     auto result = holder_.PopCallback(cookie);
     if (!result) {
-        HiLog::Error(LABEL, "DeviceSecurityLevelCallbackHelper::withdraw failed");
+        HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelCallbackHelper::withdraw failed");
         return false;
     }
     return true;
@@ -89,7 +89,7 @@ int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, Messag
         auto cookie = data.ReadUint32();
         auto result = data.ReadUint32();
         auto level = data.ReadUint32();
-        HiLog::Info(LABEL, "callback cookie %{public}u, result %{public}u, level %{public}u", cookie, result, level);
+        HILOG_INFO(LOG_CORE, "callback cookie %{public}u, result %{public}u, level %{public}u", cookie, result, level);
         holder_.PopCallback(cookie, result, level);
     }
 
@@ -111,7 +111,7 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const D
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (map_.size() > MAX_CALLBACKS_NUM) {
-        HiLog::Error(LABEL, "DeviceSecurityLevelCallbackHelper::PushCallback reached max");
+        HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelCallbackHelper::PushCallback reached max");
         return false;
     }
 
