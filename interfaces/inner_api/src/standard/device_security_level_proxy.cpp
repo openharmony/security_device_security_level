@@ -49,12 +49,12 @@ int32_t DeviceSecurityLevelProxy::RequestDeviceSecurityLevel(const DeviceIdentif
 
     auto length = identify.length;
     if (length == 0 || length > DEVICE_ID_MAX_LEN) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityLevel invalid para len.");
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityLevel invalid para len.");
         return ERR_INVALID_LEN_PARA;
     }
 
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityLevel write descriptor failed");
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityLevel write descriptor failed");
         return ERR_INVALID_PARA;
     }
 
@@ -74,18 +74,18 @@ int32_t DeviceSecurityLevelProxy::RequestDeviceSecurityLevel(const DeviceIdentif
     MessageOption ipcOption = {MessageOption::TF_SYNC};
     auto result = Remote()->SendRequest(CMD_GET_DEVICE_SECURITY_LEVEL, data, reply, ipcOption);
     if (result != ERR_NONE) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityLevelSendRequest send failed, ret is %{public}d", result);
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityLevelSendRequest send failed, ret is %{public}d", result);
         return result;
     }
 
     if (reply.GetReadableBytes() < sizeof(uint32_t)) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityLevelSendRequest result length error");
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityLevelSendRequest result length error");
         return ERR_IPC_RET_PARCEL_ERR;
     }
 
     auto status = reply.ReadUint32();
     if (status != cookie) {
-        HiLog::Error(LABEL, "RequestDeviceSecurityLevelSendRequest result value error, ret is %{public}u", status);
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityLevelSendRequest result value error, ret is %{public}u", status);
         return ERR_IPC_REMOTE_OBJ_ERR;
     }
 
