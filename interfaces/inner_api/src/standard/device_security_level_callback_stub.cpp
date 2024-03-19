@@ -37,7 +37,7 @@ int32_t DeviceSecurityLevelCallbackStub::OnRemoteRequest(uint32_t code, MessageP
     MessageOption &option)
 {
     if (DeviceSecurityLevelCallbackStub::GetDescriptor() != data.ReadInterfaceToken()) {
-        HiLog::Error(LABEL, "descriptor not match");
+        HILOG_ERROR(LOG_CORE, "descriptor not match");
         return SUCCESS;
     }
 
