@@ -26,7 +26,10 @@
 #include "dslm_credential_utils.h"
 #include "dslm_device_list.h"
 #include "dslm_hidumper.h"
+#include "dslm_hievent.h"
 #include "dslm_messenger_wrapper.h"
+#include "dslm_msg_serialize.h"
+#include "dslm_msg_utils.h"
 #include "dslm_rpc_process.h"
 #include "dslm_service.h"
 #include "hks_adapter.h"
@@ -114,6 +117,9 @@ void OnPeerMsgReceivedTest3(DeviceIdentify *deviceIdentify, Parcel &parcel)
             {"message":2, "payload":222}
             )";
     (void)OnPeerMsgReceived(deviceIdentify, jsonString, sizeof(jsonString));
+
+    uint32_t len = 0;
+    (void)OnPeerMsgReceived(deviceIdentify, jsonString, len);
 }
 
 void ServiceTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -127,7 +133,9 @@ void ServiceTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
         uint32_t devType;
         (void)InitService();
         (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
+        (void)MessengerGetDeviceOnlineStatus(nullptr, &devType);
         (void)MessengerGetSelfDeviceIdentify(&self, &devType);
+        (void)MessengerGetSelfDeviceIdentify(nullptr, &devType);
         MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
         g_init++;
     }
@@ -147,6 +155,7 @@ void VerifyDslmCredentialTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     memset_s(&list, sizeof(AttestationList), 0, sizeof(AttestationList));
 
     (void)VerifyDslmCredential(g_cred, &info, &list);
+    (void)VerifyDslmCredential(nullptr, &info, &list);
     FreeAttestationList(&list);
 }
 
@@ -160,6 +169,7 @@ void MessengerSendMsgToTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     uint32_t devType;
     (void)MessengerGetSelfDeviceIdentify(&self, &devType);
     MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
+    MessengerSendMsgTo(transNo, nullptr, jsonString, sizeof(jsonString));
 }
 
 void OnPeerStatusReceiverTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -167,6 +177,7 @@ void OnPeerStatusReceiverTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     uint32_t status = parcel.ReadUint32() % 2;
     uint32_t devType = parcel.ReadUint32() % 2;
     (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
+    (void)MessengerGetDeviceOnlineStatus(nullptr, &devType);
     (void)OnPeerStatusReceiver(deviceIdentify, status, devType);
 }
 
@@ -181,9 +192,13 @@ void VerifyOhosDslmCredTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     uint64_t challenge = 0x1234;
     uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
     DslmCredBuff cred = {CRED_TYPE_STANDARD, 9, info};
-    DslmCredInfo credInfo = {};
-
+    DslmCredInfo credInfo;
+    (void)memset_s(&credInfo, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
     (void)VerifyOhosDslmCred(&device, challenge, &cred, &credInfo);
+
+    cred.type = CRED_TYPE_LARGE;
+    (void)VerifyOhosDslmCred(&device, challenge, &cred, &credInfo);
+    (void)VerifyOhosDslmCred(nullptr, challenge, &cred, &credInfo);
 }
 
 void RequestDeviceSecurityInfoTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -198,6 +213,8 @@ void RequestDeviceSecurityInfoTest(DeviceIdentify *deviceIdentify, Parcel &parce
 
 void GetPeerDeviceOnlineStatusTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
+    uint32_t devType;
+    (void)GetPeerDeviceOnlineStatus(deviceIdentify, &devType);
     (void)GetPeerDeviceOnlineStatus(nullptr, nullptr);
 }
 
@@ -229,6 +246,7 @@ void SerializeTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     }
 
     (void)Serialize(tlvs, MAX_ENTRY, buff, sizeof(buff), &size);
+    (void)Serialize(nullptr, MAX_ENTRY, buff, sizeof(buff), &size);
 }
 
 void BufferToHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -245,8 +263,11 @@ void BufferToHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     CredType credType = CRED_TYPE_STANDARD;
 
     (void)BufferToHksCertChain(buff, len, &chain);
+    (void)BufferToHksCertChain(nullptr, len, &chain);
     (void)CreateDslmCred(credType, len, buff);
+    (void)CreateDslmCred(credType, len, nullptr);
     (void)HksCertChainToBuffer(&chain, &data, &len);
+    (void)HksCertChainToBuffer(nullptr, &data, &len);
 }
 
 void DestroyHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -259,6 +280,7 @@ void DestroyHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     chain->certsCount = 1;
 
     DestroyHksCertChain(chain);
+    DestroyHksCertChain(nullptr);
 }
 
 void DefaultInitDslmCredTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -267,11 +289,37 @@ void DefaultInitDslmCredTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     DefaultInitDslmCred(&credInfo);
 }
 
+void BuildDeviceSecInfoResponseTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    uint64_t challenge = 0x1234;
+    uint8_t info[] = {'a', 'b', 'c', 'd', 1, 3, 5, 7, 9};
+    DslmCredBuff cred = {CRED_TYPE_STANDARD, 9, info};
+    MessageBuff *msg = NULL;
+    (void)BuildDeviceSecInfoResponse(challenge, &cred, &msg);
+    (void)BuildDeviceSecInfoResponse(challenge, nullptr, &msg);
+}
+
+void ReportHiEventTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    uint32_t errorType = ERR_MSG_NOT_INIT;
+    ReportHiEventServiceStartFailed(errorType);
+
+    DslmDeviceInfo *info = (DslmDeviceInfo *)MALLOC(sizeof(DslmDeviceInfo));
+    (void)memset_s(info, sizeof(DslmDeviceInfo), 0, sizeof(DslmDeviceInfo));
+    info->lastRequestTime = 10U;
+    ReportHiEventInfoSync(nullptr);
+    ReportHiEventInfoSync(info);
+    ReportHiEventAppInvoke(nullptr);
+    FREE(info);
+    info = nullptr;
+}
+
 DslmFuzzerTable g_fuzzerTable[] = {{0, OnPeerMsgReceivedTest1}, {1, OnPeerMsgReceivedTest2},
     {2, OnPeerMsgReceivedTest3}, {3, ServiceTest}, {4, OnSendResultNotifierTest}, {5, VerifyDslmCredentialTest},
     {6, MessengerSendMsgToTest}, {7, OnPeerStatusReceiverTest}, {8, DslmDumperTest}, {9, VerifyOhosDslmCredTest},
     {10, RequestDeviceSecurityInfoTest}, {11, GetPeerDeviceOnlineStatusTest}, {12, Base64EncodeAppTest},
-    {13, SerializeTest}, {14, BufferToHksCertChainTest}, {15, DestroyHksCertChainTest}, {16, DefaultInitDslmCredTest}};
+    {13, SerializeTest}, {14, BufferToHksCertChainTest}, {15, DestroyHksCertChainTest}, {16, DefaultInitDslmCredTest},
+    {17, BuildDeviceSecInfoResponseTest}, {18, ReportHiEventTest}};
 
 void OnPeerMsgReceivedFuzzer(Parcel &parcel)
 {
@@ -292,7 +340,7 @@ void OnPeerMsgReceivedFuzzer(Parcel &parcel)
         }
     }
 
-    uint32_t a = parcel.ReadUint32() % 17;
+    uint32_t a = parcel.ReadUint32() % 19;
     for (uint32_t i = 0; i < sizeof(g_fuzzerTable) / sizeof(DslmFuzzerTable); ++i) {
         if (g_fuzzerTable[i].code == a) {
             g_fuzzerTable[i].process(&deviceIdentify, parcel);
