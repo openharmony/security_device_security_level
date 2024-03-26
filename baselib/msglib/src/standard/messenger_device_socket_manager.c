@@ -687,7 +687,7 @@ void *BindSyncWithPthread(void *arg)
     return NULL;
 }
 
-static void BindAsync(const DeviceIdentify *devId)
+static void BindAsyncAction(const DeviceIdentify *devId)
 {
     if (devId == NULL) {
         SECURITY_LOG_ERROR("Bind async invalid params");
@@ -734,5 +734,5 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     }
 
     PushMsgDataToPendingList(transNo, devId, msg, msgLen);
-    BindAsync(devId);
+    BindAsyncAction(devId);
 }
