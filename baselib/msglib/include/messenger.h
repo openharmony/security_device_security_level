@@ -33,11 +33,11 @@ typedef struct DeviceIdentify {
 
 typedef int32_t (*DeviceMessageReceiver)(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen);
 
-typedef int32_t (*DeviceStatusReceiver)(const DeviceIdentify *devId, uint32_t status, uint32_t devType);
+typedef int32_t (*DeviceStatusReceiver)(const DeviceIdentify *devId, uint32_t status, int32_t level);
 
 typedef int32_t (*MessageSendResultNotifier)(const DeviceIdentify *devId, uint64_t transNo, uint32_t result);
 
-typedef int32_t (*DeviceProcessor)(const DeviceIdentify *devId, uint32_t devType, void *para);
+typedef int32_t (*DeviceProcessor)(const DeviceIdentify *devId, int32_t level, void *para);
 
 typedef struct MessengerConfig {
     const char *pkgName;
@@ -86,9 +86,9 @@ bool IsMessengerReady(const Messenger *messenger);
 void SendMsgTo(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
     uint32_t msgLen);
 
-bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType);
+bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level);
 
-bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType);
+bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level);
 
 void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para);
 

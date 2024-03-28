@@ -28,7 +28,7 @@ extern "C" {
 extern Messenger *g_messenger;
 extern int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len);
 extern int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint32_t result);
-extern int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, uint32_t devType);
+extern int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, int32_t level);
 }
 
 namespace OHOS {
@@ -63,7 +63,7 @@ void DslmMsgInterfaceMock::MakeMsgLoopback() const
 
 void DslmMsgInterfaceMock::MakeSelfDeviceId(const DeviceIdentify *self) const
 {
-    auto loopback = [this, self](const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType) {
+    auto loopback = [this, self](const Messenger *messenger, DeviceIdentify *devId, int32_t *level) {
         *devId = *self;
         return true;
     };
@@ -111,14 +111,14 @@ uint64_t SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const Devic
     return GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
 }
 
-bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType)
+bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
 {
-    return GetDslmMsgInterface()->GetDeviceOnlineStatus(messenger, devId, devType);
+    return GetDslmMsgInterface()->GetDeviceOnlineStatus(messenger, devId, level);
 }
 
-bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType)
+bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
 {
-    return GetDslmMsgInterface()->GetSelfDeviceIdentify(messenger, devId, devType);
+    return GetDslmMsgInterface()->GetSelfDeviceIdentify(messenger, devId, level);
 }
 
 void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)

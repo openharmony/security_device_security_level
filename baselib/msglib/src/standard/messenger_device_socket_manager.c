@@ -712,8 +712,8 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     }
 
     static DeviceIdentify self = {0, {0}};
-    uint32_t devType;
-    MessengerGetSelfDeviceIdentify(&self, &devType);
+    int32_t level;
+    MessengerGetSelfDeviceIdentify(&self, &level);
 
     if (IsSameDevice(&self, devId)) {
         SECURITY_LOG_DEBUG("loopback msg");

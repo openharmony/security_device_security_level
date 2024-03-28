@@ -89,34 +89,30 @@ void SendMsgToDevice(uint64_t transNo, const DeviceIdentify *devId, const uint8_
     return;
 }
 
-bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType)
+bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level)
 {
     LockMutex(&g_mutex);
     if (g_messenger == NULL) {
         UnlockMutex(&g_mutex);
         return false;
     }
-    if (devId == NULL || devType == NULL) {
+    if (devId == NULL || level == NULL) {
         UnlockMutex(&g_mutex);
         return false;
     }
-    bool ret = GetDeviceOnlineStatus(g_messenger, devId, devType);
+    bool ret = GetDeviceOnlineStatus(g_messenger, devId, level);
     UnlockMutex(&g_mutex);
     return ret;
 }
 
-const DeviceIdentify *GetSelfDevice(uint32_t *devType)
+const DeviceIdentify *GetSelfDevice(int32_t *level)
 {
     LockMutex(&g_mutex);
-    static uint32_t type = 0;
     static DeviceIdentify deviceId = {0, {0}};
     if (deviceId.length == 0 || deviceId.identity[0] == 0) {
         if (g_messenger != NULL) {
-            GetSelfDeviceIdentify(g_messenger, &deviceId, &type);
+            GetSelfDeviceIdentify(g_messenger, &deviceId, level);
         }
-    }
-    if (devType != NULL) {
-        *devType = type;
     }
     UnlockMutex(&g_mutex);
     return &deviceId;

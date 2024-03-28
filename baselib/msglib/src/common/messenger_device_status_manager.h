@@ -35,9 +35,9 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
 
 bool DeInitDeviceStatusManager(void);
 
-bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
+bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level);
 
-bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType);
+bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level);
 
 void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para);
 

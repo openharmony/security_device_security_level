@@ -173,6 +173,9 @@ static void ProcessSendDeviceInfoCallback(DslmDeviceInfo *info, DslmInfoChecker 
 
 static bool CheckNeedToResend(const DslmDeviceInfo *info)
 {
+    if (info->credInfo.credLevel > 0) {
+        return false;
+    }
     if (info->credInfo.credLevel == 0) {
         return true;
     }
@@ -188,8 +191,9 @@ static bool CheckNeedToResend(const DslmDeviceInfo *info)
 static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *info = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
-    if (para != NULL) {
-        info->deviceType = *(uint32_t *)para;
+    if (para != NULL && *(int32_t *)para > 0) {
+        info->credInfo.credLevel = *(int32_t *)para;
+        info->result = SUCCESS;
     }
     info->onlineStatus = ONLINE_STATUS_ONLINE;
     info->queryTimes = 0;

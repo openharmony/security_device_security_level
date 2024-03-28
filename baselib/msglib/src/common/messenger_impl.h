@@ -31,9 +31,9 @@ void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIde
 
 bool IsMessengerReadyImpl(const Messenger *messenger);
 
-bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType);
+bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level);
 
-bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType);
+bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, int32_t *level);
 
 void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para);
 
