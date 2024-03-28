@@ -36,7 +36,7 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
 
 int32_t OnMsgSendResultNotifier(const DeviceIdentify *deviceId, uint64_t transNo, uint32_t result);
 
-int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, uint32_t devType);
+int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, int32_t level);
 
 bool InitDslmProcess(void);
 

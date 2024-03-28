@@ -49,7 +49,7 @@
 
 extern "C" int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len);
 extern "C" int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint32_t result);
-extern "C" bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
+extern "C" bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level);
 
 namespace OHOS {
 namespace Security {
@@ -130,12 +130,12 @@ void ServiceTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
             )";
         uint64_t transNo = 1;
         static DeviceIdentify self = {0, {0}};
-        uint32_t devType;
+        int32_t level;
         (void)InitService();
-        (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
-        (void)MessengerGetDeviceOnlineStatus(nullptr, &devType);
-        (void)MessengerGetSelfDeviceIdentify(&self, &devType);
-        (void)MessengerGetSelfDeviceIdentify(nullptr, &devType);
+        (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &level);
+        (void)MessengerGetDeviceOnlineStatus(nullptr, &level);
+        (void)MessengerGetSelfDeviceIdentify(&self, &level);
+        (void)MessengerGetSelfDeviceIdentify(nullptr, &level);
         MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
         g_init++;
     }
@@ -166,8 +166,8 @@ void MessengerSendMsgToTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
             )";
     uint64_t transNo = 1;
     static DeviceIdentify self = {0, {0}};
-    uint32_t devType;
-    (void)MessengerGetSelfDeviceIdentify(&self, &devType);
+    int32_t level;
+    (void)MessengerGetSelfDeviceIdentify(&self, &level);
     MessengerSendMsgTo(transNo, deviceIdentify, jsonString, sizeof(jsonString));
     MessengerSendMsgTo(transNo, nullptr, jsonString, sizeof(jsonString));
 }
@@ -175,10 +175,10 @@ void MessengerSendMsgToTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 void OnPeerStatusReceiverTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
     uint32_t status = parcel.ReadUint32() % 2;
-    uint32_t devType = parcel.ReadUint32() % 2;
-    (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &devType);
-    (void)MessengerGetDeviceOnlineStatus(nullptr, &devType);
-    (void)OnPeerStatusReceiver(deviceIdentify, status, devType);
+    int32_t level = -1;
+    (void)MessengerGetDeviceOnlineStatus(deviceIdentify, &level);
+    (void)MessengerGetDeviceOnlineStatus(nullptr, &level);
+    (void)OnPeerStatusReceiver(deviceIdentify, status, level);
 }
 
 void DslmDumperTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
@@ -213,8 +213,8 @@ void RequestDeviceSecurityInfoTest(DeviceIdentify *deviceIdentify, Parcel &parce
 
 void GetPeerDeviceOnlineStatusTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
-    uint32_t devType;
-    (void)GetPeerDeviceOnlineStatus(deviceIdentify, &devType);
+    int32_t level;
+    (void)GetPeerDeviceOnlineStatus(deviceIdentify, &level);
     (void)GetPeerDeviceOnlineStatus(nullptr, nullptr);
 }
 

@@ -37,14 +37,14 @@ void SendMsgTo(const Messenger *messenger, uint64_t transNo, const DeviceIdentif
     SendMsgToImpl(messenger, transNo, devId, msg, msgLen);
 }
 
-bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType)
+bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
 {
-    return GetDeviceOnlineStatusImpl(messenger, devId, devType);
+    return GetDeviceOnlineStatusImpl(messenger, devId, level);
 }
 
-bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType)
+bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
 {
-    return GetSelfDeviceIdentifyImpl(messenger, devId, devType);
+    return GetSelfDeviceIdentifyImpl(messenger, devId, level);
 }
 
 void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para)

@@ -41,7 +41,6 @@ typedef struct DslmDeviceInfo {
     DeviceIdentify identity;
     uint32_t version;
     uint32_t onlineStatus;
-    uint32_t deviceType;
     uint64_t nonce;
     uint64_t nonceTimeStamp;
     uint64_t lastOnlineTime;
