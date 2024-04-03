@@ -103,24 +103,24 @@ void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIde
     MessengerSendMsgTo(transNo, devId, msg, msgLen);
 }
 
-bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType)
+bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
         SECURITY_LOG_ERROR("invalid params");
         return false;
     }
 
-    return MessengerGetDeviceOnlineStatus(devId, devType);
+    return MessengerGetDeviceOnlineStatus(devId, level);
 }
 
-bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType)
+bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
 {
     if (messenger == NULL || messenger->magicHead != MESSENGER_MAGIC_HEAD) {
         SECURITY_LOG_ERROR("invalid params");
         return false;
     }
 
-    return MessengerGetSelfDeviceIdentify(devId, devType);
+    return MessengerGetSelfDeviceIdentify(devId, level);
 }
 
 void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)

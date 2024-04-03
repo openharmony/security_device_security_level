@@ -179,7 +179,7 @@ int32_t OnRequestDeviceSecLevelInfo(const DeviceIdentify *deviceId, const Reques
     return SUCCESS;
 }
 
-int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, uint32_t devType)
+int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, int32_t level)
 {
     DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(deviceId);
     if (info == NULL) {
@@ -192,14 +192,14 @@ int32_t OnPeerStatusReceiver(const DeviceIdentify *deviceId, uint32_t status, ui
 
     uint32_t event = (status == ONLINE_STATUS_ONLINE) ? EVENT_DEVICE_ONLINE : EVENT_DEVICE_OFFLINE;
 
-    ScheduleDslmStateMachine(info, event, &devType);
+    ScheduleDslmStateMachine(info, event, &level);
     return SUCCESS;
 }
 
 bool InitSelfDeviceSecureLevel(void)
 {
-    uint32_t devType = 0;
-    const DeviceIdentify *device = GetSelfDevice(&devType);
+    int32_t level = 0;
+    const DeviceIdentify *device = GetSelfDevice(&level);
     if (device->length == 0) {
         SECURITY_LOG_ERROR("GetSelfDevice failed");
         ReportHiEventInitSelfFailed("GetSelfDevice failed");
@@ -213,12 +213,13 @@ bool InitSelfDeviceSecureLevel(void)
         return false;
     }
 
-    info->deviceType = devType;
     info->onlineStatus = ONLINE_STATUS_ONLINE;
     if (info->lastOnlineTime == 0) {
         info->lastOnlineTime = GetMillisecondSinceBoot();
     }
-
+    if (level > 0) {
+        info->credInfo.credLevel = level;
+    }
     if (info->credInfo.credLevel > 0) {
         info->result = SUCCESS;
         info->machine.currState = STATE_SUCCESS;
@@ -233,7 +234,7 @@ bool InitSelfDeviceSecureLevel(void)
         return true;
     }
 
-    ret = OnPeerStatusReceiver(device, ONLINE_STATUS_ONLINE, devType);
+    ret = OnPeerStatusReceiver(device, ONLINE_STATUS_ONLINE, level);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("make self online failed");
     }
@@ -269,21 +270,21 @@ bool DeinitDslmProcess(void)
 
 static const DeviceIdentify *RefreshDeviceOnlineStatus(const DeviceIdentify *deviceId)
 {
-    uint32_t devType = 0;
+    int32_t level = 0;
     if (deviceId == NULL) {
         return NULL;
     }
 
     if (deviceId->identity[0] == 0) {
         SECURITY_LOG_INFO("RefreshDeviceOnlineStatus to self");
-        return GetSelfDevice(&devType);
+        return GetSelfDevice(&level);
     }
 
-    if (GetPeerDeviceOnlineStatus(deviceId, &devType)) {
-        (void)OnPeerStatusReceiver(deviceId, ONLINE_STATUS_ONLINE, devType);
+    if (GetPeerDeviceOnlineStatus(deviceId, &level)) {
+        (void)OnPeerStatusReceiver(deviceId, ONLINE_STATUS_ONLINE, level);
     }
 
-    if (IsSameDevice(deviceId, GetSelfDevice((&devType)))) {
+    if (IsSameDevice(deviceId, GetSelfDevice(&level))) {
         (void)InitSelfDeviceSecureLevel();
     }
 

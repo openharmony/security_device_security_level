@@ -28,7 +28,7 @@
 static void MessengerOnNodeOnline(NodeBasicInfo *info);
 static void MessengerOnNodeOffline(NodeBasicInfo *info);
 static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo *info);
-static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para);
+static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, int32_t level, void *para);
 
 typedef struct DeviceStatusManager {
     const INodeStateCb nodeStateCb;
@@ -40,7 +40,7 @@ typedef struct DeviceStatusManager {
 typedef struct QueueStatusData {
     DeviceIdentify srcIdentity;
     uint32_t status;
-    uint32_t devType;
+    int32_t level;
 } QueueStatusData;
 
 static DeviceStatusManager *GetDeviceManagerInstance(void)
@@ -76,11 +76,11 @@ static void ProcessDeviceStatusReceived(const uint8_t *data, uint32_t len)
         SECURITY_LOG_ERROR("ProcessSessionMessageReceived, messageReceiver is null");
         return;
     }
-    deviceStatusReceiver(&queueData->srcIdentity, queueData->status, queueData->devType);
+    deviceStatusReceiver(&queueData->srcIdentity, queueData->status, queueData->level);
     FREE(queueData);
 }
 
-static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, uint32_t devType)
+static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, int32_t level)
 {
     DeviceStatusManager *instance = GetDeviceManagerInstance();
 
@@ -108,7 +108,7 @@ static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t st
         FREE(data);
         return;
     }
-    data->devType = devType;
+    data->level = level;
     data->status = status;
 
     ret = QueueWork(queue, ProcessDeviceStatusReceived, (uint8_t *)data, sizeof(QueueStatusData));
@@ -127,6 +127,7 @@ static void MessengerOnNodeStateChange(NodeBasicInfo *info, uint32_t state)
     }
     DeviceStatusManager *instance = GetDeviceManagerInstance();
 
+    int32_t level = 0;
     char udid[UDID_BUF_LEN] = {0};
     if (GetNodeKeyInfo(instance->pkgName, info->networkId, NODE_KEY_UDID, (uint8_t *)udid, UDID_BUF_LEN) != 0) {
         SECURITY_LOG_ERROR("MessengerOnNodeStateChange process get device identity error.");
@@ -139,10 +140,10 @@ static void MessengerOnNodeStateChange(NodeBasicInfo *info, uint32_t state)
         SECURITY_LOG_ERROR("MessengerOnNodeStateChange copy device error");
     }
     uint32_t maskId = MaskDeviceIdentity(udid, UDID_BUF_LEN);
-    SECURITY_LOG_INFO("MessengerOnNodeStateChange device(%{public}x*** change to %{public}s, deviceType is %{public}d)",
-        maskId, (state == EVENT_NODE_STATE_ONLINE) ? "online" : "offline", info->deviceTypeId);
+    SECURITY_LOG_INFO("MessengerOnNodeStateChange device(%{public}x*** change to %{public}s)", maskId,
+        (state == EVENT_NODE_STATE_ONLINE) ? "online" : "offline");
 
-    ProcessDeviceStatusReceiver(&identity, state, info->deviceTypeId);
+    ProcessDeviceStatusReceiver(&identity, state, level);
 }
 
 static void MessengerOnNodeOnline(NodeBasicInfo *info)
@@ -161,10 +162,10 @@ static void MessengerOnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInf
     (void)info;
 }
 
-static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, uint32_t devType, void *para)
+static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, int32_t level, void *para)
 {
     (void)para;
-    ProcessDeviceStatusReceiver(devId, EVENT_NODE_STATE_ONLINE, devType);
+    ProcessDeviceStatusReceiver(devId, EVENT_NODE_STATE_ONLINE, level);
     return 0;
 }
 
@@ -274,15 +275,15 @@ bool MessengerGetDeviceNodeBasicInfo(const DeviceIdentify *devId, NodeBasicInfo 
     return find;
 }
 
-bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType)
+bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level)
 {
     if (devId == NULL) {
         return false;
     }
     NodeBasicInfo info = {{0}, {0}, 0};
     bool result = MessengerGetDeviceNodeBasicInfo(devId, &info);
-    if (result == true && devType != NULL) {
-        *devType = info.deviceTypeId;
+    if (result == true && level != NULL) {
+        *level = -1;
     }
     return result;
 }
@@ -306,9 +307,9 @@ bool MessengerGetNetworkIdByDeviceIdentify(const DeviceIdentify *devId, char *ne
     return true;
 }
 
-bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType)
+bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
 {
-    if (devId == NULL || devType == NULL) {
+    if (devId == NULL || level == NULL) {
         return false;
     }
 
@@ -325,11 +326,10 @@ bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType)
     if (convert == false) {
         return false;
     }
-    *devType = info.deviceTypeId;
+    *level = -1;
 
     uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity[0], UDID_BUF_LEN);
-    SECURITY_LOG_DEBUG("MessengerGetSelfDeviceIdentify device %{public}x***, deviceType is %{public}d", maskId,
-        info.deviceTypeId);
+    SECURITY_LOG_DEBUG("MessengerGetSelfDeviceIdentify device %{public}x***", maskId);
     return true;
 }
 
@@ -343,6 +343,7 @@ void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para)
     NodeBasicInfo *infoList = NULL;
 
     int infoListLen = 0;
+    int32_t level = -1;
     int32_t ret = GetAllNodeDeviceInfo(instance->pkgName, &infoList, &infoListLen);
     if (ret != 0) {
         SECURITY_LOG_ERROR("MessengerForEachDeviceProcess GetAllNodeDeviceInfo failed = %{public}d", ret);
@@ -354,7 +355,7 @@ void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para)
         DeviceIdentify devId = {DEVICE_ID_MAX_LEN, {0}};
         bool convert = MessengerConvertNodeToIdentity(node, &devId);
         if (convert == true) {
-            processor(&devId, node->deviceTypeId, para);
+            processor(&devId, level, para);
         }
     }
 

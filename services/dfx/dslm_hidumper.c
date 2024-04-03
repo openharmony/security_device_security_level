@@ -168,7 +168,6 @@ static void PrintBanner(int fd)
 static void DumpDeviceDetails(const DslmDeviceInfo *info, int32_t fd)
 {
     dprintf(fd, "DEVICE_ID                 : %x" END_LINE, info->machine.machineId);
-    dprintf(fd, "DEVICE_TYPE               : %u" END_LINE, info->deviceType);
     dprintf(fd, END_LINE);
 
     dprintf(fd, "DEVICE_ONLINE_STATUS      : %s" END_LINE, (info->onlineStatus != 0) ? "online" : "offline");

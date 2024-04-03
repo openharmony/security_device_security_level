@@ -36,9 +36,9 @@ public:
     virtual uint64_t SendMsgTo(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId,
         const uint8_t *msg, uint32_t msgLen) = 0;
 
-    virtual bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType) = 0;
+    virtual bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level) = 0;
 
-    virtual bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType) = 0;
+    virtual bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level) = 0;
 
     virtual void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para) = 0;
 };
@@ -51,8 +51,8 @@ public:
     MOCK_METHOD5(SendMsgTo, uint64_t(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId,
                                 const uint8_t *msg, uint32_t msgLen));
     MOCK_METHOD3(GetDeviceOnlineStatus,
-        bool(const Messenger *messenger, const DeviceIdentify *devId, uint32_t *devType));
-    MOCK_METHOD3(GetSelfDeviceIdentify, bool(const Messenger *messenger, DeviceIdentify *devId, uint32_t *devType));
+        bool(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level));
+    MOCK_METHOD3(GetSelfDeviceIdentify, bool(const Messenger *messenger, DeviceIdentify *devId, int32_t *level));
     MOCK_METHOD3(ForEachDeviceProcess, void(const Messenger *messenger, const DeviceProcessor processor, void *para));
     void MakeMsgLoopback() const;
     void MakeSelfDeviceId(const DeviceIdentify *devId) const;
