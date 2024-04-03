@@ -30,11 +30,11 @@ extern "C" {
 
 typedef int32_t (*MessageReceiver)(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len);
 
-typedef int32_t (*StatusReceiver)(const DeviceIdentify *devId, uint32_t status, uint32_t devType);
+typedef int32_t (*StatusReceiver)(const DeviceIdentify *devId, uint32_t status, int32_t level);
 
 typedef int32_t (*SendResultNotifier)(const DeviceIdentify *devId, uint64_t transNo, uint32_t result);
 
-typedef int32_t (*DeviceProcessor)(const DeviceIdentify *devId, uint32_t devType, void *para);
+typedef int32_t (*DeviceProcessor)(const DeviceIdentify *devId, int32_t level, void *para);
 
 void SendMsgToDevice(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen);
 
@@ -45,9 +45,9 @@ uint32_t DeinitMessenger(void);
 
 bool GetMessengerStatus(void);
 
-bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType);
+bool GetPeerDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level);
 
-const DeviceIdentify *GetSelfDevice(uint32_t *devType);
+const DeviceIdentify *GetSelfDevice(int32_t *level);
 
 const char *GetMessengerPackageName(void) __attribute__((weak));
 const char *GetMessengerPrimarySessionName(void) __attribute__((weak));

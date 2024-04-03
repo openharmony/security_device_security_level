@@ -28,6 +28,10 @@
 #include "utils_log.h"
 #include "utils_mem.h"
 
+#define PKG_NAME_LEN 128
+
+static void GetDeviceSecurityLevelByNetworkId(const std::string &networkId, int32_t &level);
+
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
@@ -35,7 +39,7 @@ using namespace OHOS::DistributedHardware;
 
 class DeviceStatusControlBlock final : public Singleton<DeviceStatusControlBlock> {
 public:
-    using StateReceiver = std::function<int32_t(const DeviceIdentify *devId, uint32_t status, uint32_t devType)>;
+    using StateReceiver = std::function<int32_t(const DeviceIdentify *devId, uint32_t status, int32_t level)>;
     void Reset(const std::string &pkgName, WorkQueue *queue, StateReceiver deviceStatusReceiver)
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -83,7 +87,7 @@ public:
     struct QueueStatusData {
         DeviceIdentify srcIdentity {0, {0}};
         uint32_t status {0};
-        uint32_t devType {0};
+        uint32_t level {0};
     };
 
     DslmDeviceState() = default;
@@ -114,14 +118,18 @@ public:
     static void MessengerOnNodeStateChange(const DmDeviceInfo &info, State state)
     {
         DeviceIdentify identity = {DEVICE_ID_MAX_LEN, {0}};
+        int32_t level = 0;
         if (!MessengerGetDeviceIdentifyByNetworkId(info.networkId, &identity)) {
             SECURITY_LOG_ERROR("MessengerOnNodeStateChange copy device error");
             return;
         }
-        ProcessDeviceStatusReceiver(&identity, state, info.deviceTypeId);
+        if (state == EVENT_NODE_STATE_ONLINE) {
+            GetDeviceSecurityLevelByNetworkId(info.networkId, level);
+        }
+        ProcessDeviceStatusReceiver(&identity, state, level);
     }
 
-    static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, uint32_t devType)
+    static void ProcessDeviceStatusReceiver(const DeviceIdentify *devId, uint32_t status, int32_t level)
     {
         if (devId == nullptr || devId->length == 0) {
             SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, invalid input");
@@ -140,12 +148,12 @@ public:
             return;
         }
         data->srcIdentity = *devId;
-        data->devType = devType;
+        data->level = level;
         data->status = status;
 
         uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity[0], DEVICE_ID_MAX_LEN);
-        SECURITY_LOG_INFO("OnlineStateChange device %{public}x*** change to %{public}s, devType is %{public}d", maskId,
-            (status == EVENT_NODE_STATE_ONLINE) ? " online " : " offline ", devType);
+        SECURITY_LOG_INFO("OnlineStateChange device %{public}x*** change to %{public}s, level is %{public}d", maskId,
+            (status == EVENT_NODE_STATE_ONLINE) ? " online " : " offline ", level);
 
         auto process = [](const uint8_t *data, uint32_t len) {
             if (data == nullptr || len == 0) {
@@ -161,7 +169,7 @@ public:
                 SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, invalid queue");
                 return;
             }
-            processor(&queueData->srcIdentity, queueData->status, queueData->devType);
+            processor(&queueData->srcIdentity, queueData->status, queueData->level);
             delete queueData;
         };
         auto input = static_cast<uint8_t *>(static_cast<void *>(data));
@@ -234,6 +242,14 @@ static bool MessengerGetDeviceNodeBasicInfo(const DeviceIdentify &devId, DmDevic
 extern "C" {
 #endif
 using namespace OHOS::Security::DeviceSecurityLevel;
+
+static void GetDeviceSecurityLevelByNetworkId(const std::string &networkId, int32_t &level)
+{
+    const char pkgName[PKG_NAME_LEN + 1] = "ohos.dslm";
+    int32_t ret = DeviceManager::GetInstance().GetDeviceSecurityLevel(pkgName, networkId, level);
+    SECURITY_LOG_INFO("GetDeviceSecurityLevelByNetworkId ret = %{public}d, level = %{public}d", ret, level);
+}
+
 bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatusReceiver deviceStatusReceiver)
 {
     if (queue == nullptr || pkgName == nullptr || deviceStatusReceiver == nullptr) {
@@ -273,9 +289,9 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
         return false;
     }
 
-    auto process = [](const DeviceIdentify *devId, uint32_t devType, void *para) -> int32_t {
+    auto process = [](const DeviceIdentify *devId, int32_t level, void *para) -> int32_t {
         static_cast<void>(para);
-        DslmDeviceState::ProcessDeviceStatusReceiver(devId, DslmDeviceState::State::EVENT_NODE_STATE_ONLINE, devType);
+        DslmDeviceState::ProcessDeviceStatusReceiver(devId, DslmDeviceState::State::EVENT_NODE_STATE_ONLINE, level);
         return 0;
     };
 
@@ -294,7 +310,7 @@ bool DeInitDeviceStatusManager(void)
     return true;
 }
 
-bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devType)
+bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, int32_t *level)
 {
     if (devId == nullptr) {
         return false;
@@ -302,15 +318,15 @@ bool MessengerGetDeviceOnlineStatus(const DeviceIdentify *devId, uint32_t *devTy
 
     DmDeviceInfo info;
     bool result = MessengerGetDeviceNodeBasicInfo(*devId, info);
-    if (result == true && devType != nullptr) {
-        *devType = info.deviceTypeId;
+    if (result == true && level != nullptr) {
+        GetDeviceSecurityLevelByNetworkId(info.networkId, *level);
     }
     return result;
 }
 
-bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType)
+bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
 {
-    if (devId == nullptr || devType == nullptr) {
+    if (devId == nullptr || level == NULL) {
         return false;
     }
 
@@ -327,11 +343,11 @@ bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, uint32_t *devType)
     if (convert == false) {
         return false;
     }
-    *devType = info.deviceTypeId;
+
+    GetDeviceSecurityLevelByNetworkId(info.networkId, *level);
 
     uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity[0], DEVICE_ID_MAX_LEN);
-    SECURITY_LOG_DEBUG("MessengerGetSelfDeviceIdentify device %{public}x***, deviceType is %{public}d", maskId,
-        info.deviceTypeId);
+    SECURITY_LOG_DEBUG("MessengerGetSelfDeviceIdentify device %{public}x***, level is %{public}d", maskId, *level);
     return true;
 }
 
@@ -353,8 +369,11 @@ void MessengerForEachDeviceProcess(const DeviceProcessor processor, void *para)
     for (auto const &device : deviceList) {
         DeviceIdentify curr = {DEVICE_ID_MAX_LEN, {0}};
         bool convert = MessengerConvertNodeToIdentity(device.networkId, curr);
+        int32_t level = 0;
+        GetDeviceSecurityLevelByNetworkId(device.networkId, level);
+
         if (convert == true) {
-            processor(&curr, device.deviceTypeId, para);
+            processor(&curr, level, para);
         }
     }
 }

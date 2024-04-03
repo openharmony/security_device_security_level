@@ -1276,9 +1276,9 @@ HWTEST_F(DslmTest, OnPeerStatusReceiver_case1, TestSize.Level0)
 {
     const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'a', 'b'}};
     uint32_t status = 1234;
-    uint32_t devType = 0;
+    uint32_t level = -1;
 
-    int32_t ret = OnPeerStatusReceiver(&device, status, devType);
+    int32_t ret = OnPeerStatusReceiver(&device, status, level);
     EXPECT_EQ(SUCCESS, ret);
 }
 
@@ -1374,10 +1374,9 @@ HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case2, TestSize.Level0)
  */
 HWTEST_F(DslmTest, GetSelfDevice_case1, TestSize.Level0)
 {
-    uint32_t *type = nullptr;
-    const DeviceIdentify *identify = GetSelfDevice(type);
+    int32_t level = 0;
+    const DeviceIdentify *identify = GetSelfDevice(&level);
     EXPECT_NE(nullptr, identify);
-    EXPECT_EQ(nullptr, type);
 }
 
 /**
