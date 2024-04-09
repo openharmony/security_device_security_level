@@ -148,7 +148,9 @@ public:
             return;
         }
         data->srcIdentity = *devId;
-        data->level = level;
+        if (level > 0) {
+            data->level = (uint32_t)level;
+        }
         data->status = status;
 
         uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity[0], DEVICE_ID_MAX_LEN);
