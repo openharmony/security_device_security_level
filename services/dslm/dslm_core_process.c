@@ -218,7 +218,7 @@ bool InitSelfDeviceSecureLevel(void)
         info->lastOnlineTime = GetMillisecondSinceBoot();
     }
     if (level > 0) {
-        info->credInfo.credLevel = level;
+        info->credInfo.credLevel = (uint32_t)level;
     }
     if (info->credInfo.credLevel > 0) {
         info->result = SUCCESS;
