@@ -149,7 +149,7 @@ public:
         }
         data->srcIdentity = *devId;
         if (level > 0) {
-            data->level = (uint32_t)level;
+            data->level = static_cast<uint32_t>(level);
         }
         data->status = status;
 
