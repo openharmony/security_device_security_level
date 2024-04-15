@@ -32,9 +32,7 @@ struct DeviceSecurityInfo {
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
-static constexpr uint64_t SECURITY_MAGIC = 0xABCD1234;
-
-static constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, 0xD002F05, "DSLM_SDK"};
+constexpr uint64_t SECURITY_MAGIC = 0xABCD1234;
 
 using ResultCallback = std::function<void(const DeviceIdentify *identify, struct DeviceSecurityInfo *info)>;
 } // namespace DeviceSecurityLevel
