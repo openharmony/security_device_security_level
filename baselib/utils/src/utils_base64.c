@@ -92,7 +92,7 @@ static int32_t Base64Encode(const uint8_t *from, uint32_t fromLen, uint8_t *to, 
     if (padding-- > 0 && toLen >= 1) {
         to[toLen - 1] = '='; /* padding the -1 to "=" */
     }
-    if (padding-- > 0 && toLen >= 2) {
+    if (padding-- > 0 && toLen >= 2) { /* toLen need to be larger than 2 */
         to[toLen - 2] = '='; /* padding the -2 to "=" */
     }
 
