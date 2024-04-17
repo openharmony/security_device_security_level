@@ -276,14 +276,6 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
             MessengerSleep(1); // sleep 1 second and try again
             continue;
         }
-
-        ret = DeviceManager::GetInstance().RegisterDevStateCallback(name, "", callback);
-        if (ret != 0) {
-            static_cast<void>(DeviceManager::GetInstance().UnInitDeviceManager(name));
-            MessengerSleep(1); // sleep 1 second and try again
-            SECURITY_LOG_ERROR("RegisterDevStateCallback failed = %{public}d", ret);
-            continue;
-        }
     } while (ret != 0 && tryTimes < MAX_TRY_TIMES);
 
     if (ret != 0) {
@@ -305,7 +297,6 @@ bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatus
 bool DeInitDeviceStatusManager(void)
 {
     const auto &name = DeviceStatusControlBlock::GetInstance().GetPackageName();
-    static_cast<void>(DeviceManager::GetInstance().UnRegisterDevStateCallback(name));
     static_cast<void>(DeviceManager::GetInstance().UnInitDeviceManager(name));
 
     SECURITY_LOG_INFO("DeInitDeviceManager UnregNodeDeviceStateCb success");
