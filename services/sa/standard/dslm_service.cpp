@@ -32,7 +32,7 @@ namespace Security {
 namespace DeviceSecurityLevel {
 REGISTER_SYSTEM_ABILITY_BY_ID(DslmService, DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, true);
 
-DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate)
+DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate), IRemoteStub(true)
 {
     SECURITY_LOG_INFO("object initialization");
 }
