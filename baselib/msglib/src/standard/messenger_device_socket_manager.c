@@ -608,7 +608,31 @@ static bool BindSync(int32_t socket, const DeviceIdentify *devId)
     return false;
 }
 
-static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId)
+static int32_t GetClientName(char *clientName, const char *name, uint32_t maskId, bool isSame)
+{
+    if (clientName == NULL || name == NULL) {
+        SECURITY_LOG_ERROR("invalid params client name");
+        return -1;
+    }
+
+    int32_t ret = memcpy_s(clientName, SOCKET_NAME_LEN, name, SOCKET_NAME_LEN);
+    if (ret != EOK) {
+        SECURITY_LOG_ERROR("memcpy name failed");
+        return ret;
+    }
+    if (isSame) {
+        return 0;
+    }
+
+    ret = snprintf_s(clientName, SOCKET_NAME_LEN, SOCKET_NAME_LEN - 1, "device.security.level.%x", maskId);
+    if (ret < 0) {
+        SECURITY_LOG_ERROR("snprintf failed");
+        return ret;
+    }
+    return 0;
+}
+
+static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, int32_t *socketId, bool isSame)
 {
     if (socketName == NULL || devId == NULL || socketId == NULL) {
         SECURITY_LOG_ERROR("invalid params bind socket");
@@ -629,9 +653,9 @@ static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, 
         return ret;
     }
     char clientName[SOCKET_NAME_LEN + 1] = {0};
-    ret = snprintf_s(clientName, SOCKET_NAME_LEN, SOCKET_NAME_LEN - 1, "device.security.level.%x", maskId);
-    if (ret < 0) {
-        SECURITY_LOG_ERROR("snprintf failed");
+    ret = GetClientName(clientName, name, maskId, isSame);
+    if (ret != 0) {
+        SECURITY_LOG_ERROR("memcpy client name failed");
         return ret;
     }
 
@@ -673,7 +697,7 @@ void *BindSyncWithPthread(void *arg)
 
     int32_t socket = 0;
     bool succ = false;
-    if (PrepareBindSocket(inst->primarySockName, &identity, &socket) == 0) {
+    if (PrepareBindSocket(inst->secondarySockName, &identity, &socket, true) == 0) {
         succ = BindSync(socket, &identity);
     }
 
@@ -681,7 +705,7 @@ void *BindSyncWithPthread(void *arg)
         return NULL;
     }
 
-    if (PrepareBindSocket(inst->secondarySockName, &identity, &socket) == 0) {
+    if (PrepareBindSocket(inst->primarySockName, &identity, &socket, false) == 0) {
         (void)BindSync(socket, &identity);
     }
     return NULL;
