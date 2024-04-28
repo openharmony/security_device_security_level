@@ -48,6 +48,9 @@ if (os_level == "standard") {
 
     sources = [
       "../../oem_property/ohos/standard/dslm_ohos_credential.c",
+      "../../services/dfx/dslm_bigdata.cpp",
+      "../../services/dfx/dslm_hidumper.c",
+      "../../services/dfx/dslm_hitrace.cpp",
       "../../services/sa/common/dslm_rpc_process.c",
       "dslm_baselib_utils_test.cpp",
       "dslm_memory_mock.cpp",
@@ -91,6 +94,8 @@ if (os_level == "standard") {
       "c_utils:utils",
       "device_security_level:dslm_sdk",
       "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
       "huks:libhukssdk",
     ]
   }
