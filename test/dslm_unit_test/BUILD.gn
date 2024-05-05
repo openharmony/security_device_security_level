@@ -47,6 +47,8 @@ if (os_level == "standard") {
     module_out_path = "${part_name}/${target_name}"
 
     sources = [
+      "../../baselib/msglib/src/utils/messenger_utils.c",
+      "../../baselib/utils/src/utils_work_queue.c",
       "../../oem_property/ohos/standard/dslm_ohos_credential.c",
       "../../services/dfx/dslm_bigdata.cpp",
       "../../services/dfx/dslm_hidumper.c",
@@ -63,6 +65,8 @@ if (os_level == "standard") {
 
     include_dirs = [
       "../../baselib/msglib/include",
+      "../../baselib/msglib/src/common",
+      "../../baselib/msglib/src/standard",
       "../../common/include",
       "../../interfaces/inner_api/include",
       "../../interfaces/inner_api/src/standard",
