@@ -226,7 +226,7 @@ int32_t Base64UrlDecodeApp(const uint8_t *src, uint8_t **to)
 
     uint32_t sourceLen = (uint32_t)strlen((char*)src);
     uint32_t alignLen = RESIZE4(sourceLen);
-    uint8_t *base64Str = (uint8_t *)malloc(alignLen + 1);
+    uint8_t *base64Str = (uint8_t *)MALLOC(alignLen + 1);
     if (base64Str == NULL) {
         SECURITY_LOG_DEBUG("Base64UrlDecodeApp malloc failed");
         return 0;
