@@ -75,6 +75,7 @@ int32_t HksGenerateKeyAdapter(const struct HksBlob *keyAlias)
         {.tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS},
         {.tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT},
         {.tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB},
+        {.tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE},
     };
     struct HksParamSet *paramSet = NULL;
     if (FillHksParamSet(&paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) != SUCCESS) {
