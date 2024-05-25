@@ -76,9 +76,8 @@ ohos_static_library("utils_static") {
 
     sources += [ "src/utils_timer.cpp" ]
 
-    deps += [ "//third_party/cJSON:cjson" ]
-
     external_deps = [
+      "cJSON:cjson",
       "c_utils:utils",
       "hilog:libhilog",
     ]
