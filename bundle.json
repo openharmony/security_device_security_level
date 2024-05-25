@@ -17,17 +17,24 @@
         "syscap": [
             "SystemCapability.Security.DeviceSecurityLevel"
         ],
-        "features": [],
+        "features": [
+            "device_security_level_feature_cred_level",
+            "device_security_level_feature_plugin_path",
+            "device_security_level_feature_secondary_session_name"
+        ],
         "hisysevent_config": [
             "//base/security/device_security_level/hisysevent.yaml"
         ],
         "adapted_system_type": [
-            "standard"
+            "standard",
+            "small",
+            "mini"
         ],
         "rom": "200KB",
         "ram": "2500KB",
         "deps": {
             "components": [
+                "cJSON",
                 "c_utils",
                 "device_auth",
                 "device_manager",
@@ -39,12 +46,10 @@
                 "init",
                 "ipc",
                 "safwk",
-                "samgr"
-            ],
-            "third_party": [
-                "cJSON",
+                "samgr",
                 "openssl"
-            ]
+            ],
+            "third_party": [ "openssl" ]
         },
         "build": {
             "group_type": {
