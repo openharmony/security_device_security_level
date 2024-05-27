@@ -61,6 +61,7 @@ void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilitySuccess(int32_t
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t sid)
 {
     HILOG_ERROR(LOG_CORE, "OnLoadSystemAbilityFail = %{public}d.", sid);
+    promise_.set_value(NULL);
 }
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
