@@ -39,6 +39,8 @@
 #include "dslm_notify_node.h"
 
 #define REQUEST_INTERVAL (24 * 60 * 60 * 1000)
+#define DEFAULT_TYPE 10
+#define TYPE_PLACE 8
 
 typedef bool DslmInfoChecker(const DslmDeviceInfo *devInfo, const DslmNotifyListNode *node, DslmCallbackInfo *cbInfo,
     uint32_t *result);
@@ -191,15 +193,25 @@ static bool CheckNeedToResend(const DslmDeviceInfo *info)
 static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *info = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
-    if (para != NULL && *(int32_t *)para > 0) {
-        info->credInfo.credLevel = *(int32_t *)para;
+    int32_t deviceAttributes = 0;
+    if (para != NULL) {
+        deviceAttributes = *(int32_t *)para;
+    }
+    int32_t level = deviceAttributes & 0xFF;
+    int32_t osType = (deviceAttributes & 0xFF00) >> TYPE_PLACE;
+    if (level == 0 && osType == DEFAULT_TYPE) {
+        level = 1;
+        SECURITY_LOG_INFO("level set 1");
+    }
+    if (level > 0) {
+        info->credInfo.credLevel = level;
         info->result = SUCCESS;
     }
     info->onlineStatus = ONLINE_STATUS_ONLINE;
     info->queryTimes = 0;
     info->lastOnlineTime = GetMillisecondSinceBoot();
     if (!CheckNeedToResend(info)) {
-        SECURITY_LOG_DEBUG("last request time is last than 24 hours");
+        SECURITY_LOG_INFO("last request time is last than 24 hours");
         ScheduleDslmStateMachine(info, EVENT_TO_SYNC, NULL);
         return true;
     }
