@@ -258,9 +258,9 @@ static void GetDeviceSecurityLevelByNetworkId(const OHOS::DistributedHardware::D
     if (handle == nullptr) {
         return;
     }
-    const int32_t osType = DslmGetJsonFieldInt(handle, "OS_TYPE");
+    const uint32_t osType = static_cast<uint32_t>(DslmGetJsonFieldInt(handle, "OS_TYPE"));
     SECURITY_LOG_INFO("device type is %{public}d", osType);
-    level |= (osType << TYPE_PLACE);
+    level = static_cast<int32_t>(static_cast<uint32_t>(level) | (osType << TYPE_PLACE));
     DslmDestroyJson(handle);
     return;
 }
@@ -351,7 +351,7 @@ bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
     }
 
     GetDeviceSecurityLevelByNetworkId(info, *level);
-    *level = *level & 0xFF;
+    *level = static_cast<int32_t>(static_cast<uint32_t>(*level) & 0xFF);
 
     uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity[0], DEVICE_ID_MAX_LEN);
     SECURITY_LOG_DEBUG("MessengerGetSelfDeviceIdentify device %{public}x***, level is %{public}d", maskId, *level);

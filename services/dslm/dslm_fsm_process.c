@@ -193,12 +193,12 @@ static bool CheckNeedToResend(const DslmDeviceInfo *info)
 static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, const void *para)
 {
     DslmDeviceInfo *info = STATE_MACHINE_ENTRY(machine, DslmDeviceInfo, machine);
-    int32_t deviceAttributes = 0;
+    uint32_t deviceAttributes = 0;
     if (para != NULL) {
-        deviceAttributes = *(int32_t *)para;
+        deviceAttributes = *(uint32_t *)para;
     }
-    int32_t level = deviceAttributes & 0xFF;
-    int32_t osType = (deviceAttributes & 0xFF00) >> TYPE_PLACE;
+    uint32_t level = deviceAttributes & 0xFF;
+    uint32_t osType = (deviceAttributes & 0xFF00) >> TYPE_PLACE;
     if (level == 0 && osType == DEFAULT_TYPE) {
         level = 1;
         SECURITY_LOG_INFO("level set 1");
