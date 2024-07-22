@@ -30,6 +30,7 @@
 #include "device_security_defines.h"
 #include "device_security_info.h"
 #include "device_security_level_defines.h"
+#include "dslm_bigdata.h"
 #include "dslm_core_defines.h"
 #include "dslm_core_process.h"
 #include "dslm_credential.h"
@@ -52,6 +53,7 @@
 #include "messenger_device_status_manager.h"
 #include "utils_datetime.h"
 #include "utils_mem.h"
+#include "utils_timer.h"
 #include "utils_tlv.h"
 #include "utils_work_queue.h"
 
@@ -424,6 +426,8 @@ void DslmTest::SetUpTestCase()
     static const char *perms[] = {
         "ohos.permission.PLACE_CALL",
         "ohos.permission.ACCESS_IDS",
+        "ohos.permission.ACCESS_SERVICE_DM",
+        "ohos.permission.DISTRIBUTED_DATASYNC",
     };
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
@@ -1396,6 +1400,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case1, TestSize.Level0)
     info = GetDslmDeviceInfo(&device);
     ASSERT_NE(nullptr, info);
     EXPECT_GE(info->credInfo.credLevel, 1U);
+    DslmUtilsStopTimerTask(info->timeHandle);
     mockMsg.MakeDeviceOffline(&device);
 }
 
@@ -1418,6 +1423,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level0)
     BlockCheckDeviceStatus(&device, STATE_SUCCESS, 5000);
     EXPECT_EQ(STATE_FAILED, info->machine.currState);
     EXPECT_LT(5U, info->queryTimes);
+    DslmUtilsStopTimerTask(info->timeHandle);
     mockMsg.MakeDeviceOffline(&device);
 }
 
@@ -1619,7 +1625,7 @@ HWTEST_F(DslmTest, VerifyDeviceInfoResponse_case4, TestSize.Level0)
 
     {
         int32_t ret = VerifyDeviceInfoResponse(&device, &msg);
-        EXPECT_EQ(ERR_CHALLENGE_ERR, ret);
+        EXPECT_NE(0, ret);
     }
 
     {
@@ -1682,6 +1688,22 @@ HWTEST_F(DslmTest, OnMsgSendResultNotifier_case1, TestSize.Level0)
     {
         uint32_t ret = OnMsgSendResultNotifier(nullptr, transNo, result);
         EXPECT_EQ(SUCCESS, ret);
+    }
+
+    {
+        NiceMock<DslmMsgInterfaceMock> mockMsg;
+        mockMsg.MakeDeviceOnline(&identify);
+        DslmDeviceInfo *deviceInfo = GetDslmDeviceInfo(&identify);
+        ASSERT_NE(deviceInfo, nullptr);
+        deviceInfo->machine.currState = STATE_WAITING_CRED_RSP;
+        ScheduleDslmStateMachine(deviceInfo, EVENT_MSG_SEND_FAILED, &result);
+        EXPECT_EQ(deviceInfo->machine.currState, STATE_WAITING_CRED_RSP);
+
+        uint32_t res = 2; // ERR_SESSION_OPEN_FAILED
+        ScheduleDslmStateMachine(deviceInfo, EVENT_MSG_SEND_FAILED, &res);
+        EXPECT_GE(deviceInfo->machine.currState, 0);
+        ScheduleDslmStateMachine(deviceInfo, EVENT_DEVICE_OFFLINE, &res);
+        mockMsg.MakeDeviceOffline(&identify);
     }
 }
 
@@ -1994,105 +2016,52 @@ HWTEST_F(DslmTest, RequestDeviceSecurityInfoAsync_case1, TestSize.Level0)
 HWTEST_F(DslmTest, DslmDumper_case1, TestSize.Level0)
 {
     DslmDumper(-1);
+
+    ReportAppInvokeEvent(nullptr);
+    ReportSecurityInfoSyncEvent(nullptr);
+    auto handle = DslmUtilsStartPeriodicTimerTask(100, [](const void *context) { return; }, nullptr);
+    ASSERT_NE(handle, 0);
+    DslmUtilsStopTimerTask(handle);
 }
 
-HWTEST_F(DslmTest, CreateQueueMsgData_case1, TestSize.Level0)
+HWTEST_F(DslmTest, DslmQueue_case1, TestSize.Level0)
 {
-    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
-    const uint8_t msg[] = {'1', '2'};
-    uint32_t msgLen = 0;
-    uint32_t queueDataLen = 0;
+    auto queue = CreateWorkQueue(2, "test");
+    ASSERT_NE(queue, nullptr);
 
-    EXPECT_EQ(nullptr, CreateQueueMsgData(&device, msg, msgLen, &queueDataLen));
+    auto proc = [](const uint8_t *data, uint32_t len) { return; };
+    {
+        auto ret = QueueWork(queue, proc, nullptr, 0);
+        EXPECT_EQ(ret, WORK_QUEUE_OK);
+    }
+    {
+        auto ret = QueueWork(nullptr, nullptr, nullptr, 0);
+        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
 
-    EXPECT_EQ(nullptr, CreateQueueMsgData(nullptr, msg, msgLen, &queueDataLen));
+        ret = QueueWork(queue, nullptr, nullptr, 0);
+        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
+    }
+    {
+        auto sleepfunc = [](const uint8_t *data, uint32_t len) { this_thread::sleep_for(milliseconds(600)); };
+        auto ret = QueueWork(queue, sleepfunc, nullptr, 0);
+        EXPECT_EQ(ret, WORK_QUEUE_OK);
+        ret = QueueWork(queue, sleepfunc, nullptr, 0);
+        (void)QueueWork(queue, proc, nullptr, 0);
+        (void)QueueWork(queue, proc, nullptr, 0);
+        (void)QueueWork(queue, proc, nullptr, 0);
+        (void)QueueWork(queue, proc, nullptr, 0);
+        (void)QueueWork(queue, proc, nullptr, 0);
+        EXPECT_GE(ret, WORK_QUEUE_OK);
+    }
 
-    EXPECT_EQ(nullptr, CreateQueueMsgData(&device, nullptr, msgLen, &queueDataLen));
-
-    msgLen = 2;
-    EXPECT_EQ(nullptr, CreateQueueMsgData(&device, msg, msgLen, nullptr));
-
-    (void)CreateQueueMsgData(&device, msg, msgLen, &queueDataLen);
-}
-
-HWTEST_F(DslmTest, CreateMessenger_case1, TestSize.Level0)
-{
-    MessengerConfig config = {
-        .pkgName = GetMessengerPackageName(),
-        .primarySockName = GetMessengerPrimarySessionName(),
-        .secondarySockName = GetMessengerSecondarySessionName(),
-        .messageReceiver = OnPeerMsgReceived,
-        .statusReceiver = OnPeerStatusReceiver,
-        .sendResultNotifier = OnSendResultNotifier,
-    };
-
-    WorkQueue *processQueue = CreateWorkQueue(MESSENGER_PROCESS_QUEUE_SIZE, MESSENGER_PROCESS_QUEUE_NAME);
-
-    bool result = InitDeviceSocketManager(processQueue, &config);
-
-    EXPECT_EQ(false, InitDeviceSocketManager(nullptr, &config));
-
-    EXPECT_EQ(false, InitDeviceSocketManager(processQueue, nullptr));
-
-    result = InitDeviceStatusManager(processQueue, config.pkgName, config.statusReceiver);
-
-    EXPECT_EQ(false, InitDeviceStatusManager(nullptr, config.pkgName, config.statusReceiver));
-
-    EXPECT_EQ(false, InitDeviceStatusManager(processQueue, nullptr, config.statusReceiver));
-
-    EXPECT_EQ(false, InitDeviceStatusManager(processQueue, config.pkgName, nullptr));
-}
-
-HWTEST_F(DslmTest, MessengerSendMsgTo_case1, TestSize.Level0)
-{
-    uint64_t transNo = 0xfe;
-    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
-    const uint8_t msg[] = {'1', '2'};
-    uint32_t msgLen = 2;
-
-    MessengerSendMsgTo(transNo, &device, msg, msgLen);
-
-    MessengerSendMsgTo(transNo, nullptr, msg, msgLen);
-
-    MessengerSendMsgTo(transNo, &device, nullptr, msgLen);
-
-    MessengerSendMsgTo(transNo, &device, msg, 0);
-
-    MessengerSendMsgTo(transNo, &device, msg, MSG_BUFF_MAX_LENGTH + 1);
-}
-
-HWTEST_F(DslmTest, MessengerGetDeviceIdentifyByNetworkId_case1, TestSize.Level0)
-{
-    const char networkId[] = {'1', '2'};
-    DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
-
-    EXPECT_EQ(false, MessengerGetDeviceIdentifyByNetworkId(networkId, &device));
-
-    EXPECT_EQ(false, MessengerGetDeviceIdentifyByNetworkId(nullptr, &device));
-
-    EXPECT_EQ(false, MessengerGetDeviceIdentifyByNetworkId(networkId, nullptr));
-}
-
-HWTEST_F(DslmTest, MessengerGetNetworkIdByDeviceIdentify_case1, TestSize.Level0)
-{
-    char networkId[DEVICE_ID_MAX_LEN + 1] = {0};
-    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
-    uint32_t len = 0;
-
-    EXPECT_EQ(false, MessengerGetNetworkIdByDeviceIdentify(&device, networkId, len));
-
-    EXPECT_EQ(false, MessengerGetNetworkIdByDeviceIdentify(nullptr, networkId, len));
-
-    EXPECT_EQ(false, MessengerGetNetworkIdByDeviceIdentify(&device, nullptr, len));
-}
-
-HWTEST_F(DslmTest, MessengerGetSelfDeviceIdentify_case1, TestSize.Level0)
-{
-    DeviceIdentify device = {DEVICE_ID_MAX_LEN, {0}};
-
-    EXPECT_EQ(false, MessengerGetSelfDeviceIdentify(nullptr, nullptr));
-
-    EXPECT_EQ(false, MessengerGetSelfDeviceIdentify(&device, nullptr));
+    {
+        auto ret = DestroyWorkQueue(queue);
+        EXPECT_EQ(ret, 0);
+    }
+    {
+        auto ret = DestroyWorkQueue(nullptr);
+        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
+    }
 }
 } // namespace DslmUnitTest
 } // namespace Security

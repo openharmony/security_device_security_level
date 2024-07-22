@@ -89,44 +89,69 @@ void DslmMsgInterfaceMock::MakeMsgReceivedFrom(const DeviceIdentify *devId, cons
 }
 
 extern "C" {
-Messenger *CreateMessengerImpl(const MessengerConfig *config)
+Messenger *CreateMessenger(const MessengerConfig *config)
 {
     (void)config;
     return g_messenger;
 }
 
-void DestroyMessengerImpl(Messenger *messenger)
+void DestroyMessenger(Messenger *messenger)
 {
     (void)messenger;
 }
 
-bool IsMessengerReadyImpl(const Messenger *messenger)
+bool IsMessengerReady(const Messenger *messenger)
 {
     return GetDslmMsgInterface()->IsMessengerReady(messenger);
 }
 
-uint64_t SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
+void SendMsgTo(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
     uint32_t msgLen)
 {
-    return GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
+    (void)GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
 }
 
-bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
+bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
 {
     return GetDslmMsgInterface()->GetDeviceOnlineStatus(messenger, devId, level);
 }
 
-bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
+bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
 {
     return GetDslmMsgInterface()->GetSelfDeviceIdentify(messenger, devId, level);
 }
 
-void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)
+void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para)
 {
-    return;
+    static_cast<void>(messenger);
+    DeviceIdentify ident = {
+        .length = 64,
+        .identity = {0x0a, 0x0a, 0x0a, 0x0a},
+    };
+    processor(&ident, 1, nullptr);
 }
 
-bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
+bool GetDeviceStatisticInfo(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
+{
+    static_cast<void>(messenger);
+    static_cast<void>(devId);
+    static_cast<void>(info);
+    return true;
+}
+
+bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
+{
+    static_cast<void>(devId);
+    *level = 1;
+    return true;
+}
+
+bool MessengerGetNetworkIdByDeviceIdentify(const DeviceIdentify *devId, char *networkId, uint32_t len)
+{
+    return true;
+}
+
+bool MessengerGetDeviceIdentifyByNetworkId(const char *networkId, DeviceIdentify *devId)
 {
     return true;
 }
