@@ -253,6 +253,10 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
 {
     uint8_t src[] = {'a', '-', '_', 'd', '\0'};
     uint8_t *to = nullptr;
+    {
+        int32_t ret = Base64UrlDecodeApp(nullptr, nullptr);
+        EXPECT_EQ(0, ret);
+    }
 
     {
         int32_t ret = Base64UrlDecodeApp(nullptr, &to);
@@ -279,6 +283,11 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
 HWTEST_F(DslmBaselibUtilsTest, Base64DecodeApp_case1, TestSize.Level0)
 {
     uint8_t *to = nullptr;
+
+    {
+        int32_t ret = Base64DecodeApp(nullptr, nullptr);
+        EXPECT_EQ(0, ret);
+    }
 
     {
         int32_t ret = Base64DecodeApp(nullptr, &to);
@@ -361,6 +370,7 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
     DslmJsonHandle handle = DslmCreateJson(str);
 
     DslmDestroyJson(nullptr);
+    DslmAddFieldBoolToJson(nullptr, nullptr, true);
     DslmAddFieldBoolToJson(nullptr, field, true);
     DslmAddFieldIntToJson(nullptr, field, 0);
     DslmAddFieldIntArrayToJson(nullptr, field, arr, sizeof(arr));
@@ -373,6 +383,21 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
 
         ret = DslmGetJsonFieldInt(handle, nullptr);
         EXPECT_EQ(0, ret);
+    }
+
+    {
+        uint32_t ret = DslmGetJsonFieldIntArray(nullptr, nullptr, nullptr, 0);
+        EXPECT_EQ(0U, ret);
+    }
+
+    {
+        uint32_t ret = DslmGetJsonFieldIntArray(handle, nullptr, nullptr, 0);
+        EXPECT_EQ(0U, ret);
+    }
+
+    {
+        uint32_t ret = DslmGetJsonFieldIntArray(handle, str, nullptr, 0);
+        EXPECT_EQ(0U, ret);
     }
 
     {
