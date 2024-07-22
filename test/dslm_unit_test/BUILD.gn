@@ -47,12 +47,12 @@ if (os_level == "standard") {
     module_out_path = "${part_name}/${target_name}"
 
     sources = [
-      "../../baselib/msglib/src/utils/messenger_utils.c",
       "../../baselib/utils/src/utils_work_queue.c",
       "../../oem_property/ohos/standard/dslm_ohos_credential.c",
       "../../services/dfx/dslm_bigdata.cpp",
       "../../services/dfx/dslm_hidumper.c",
       "../../services/dfx/dslm_hitrace.cpp",
+      "../../services/msg/dslm_messenger_wrapper.c",
       "../../services/sa/common/dslm_rpc_process.c",
       "dslm_baselib_utils_test.cpp",
       "dslm_memory_mock.cpp",
@@ -88,7 +88,6 @@ if (os_level == "standard") {
       "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
       "../../services/common:service_common_obj",
       "../../services/dslm:service_dslm_test_obj",
-      "../../services/msg:service_msg_obj",
       "//third_party/googletest:gmock",
     ]
 
