@@ -112,23 +112,6 @@ static int32_t GetDeviceSecurityLevelValueImpl(const DeviceSecurityInfo *info, i
     return static_cast<int32_t>(info->result);
 }
 
-int32_t GetSelfDeviceSecurityLevelValueImpl(int32_t *level)
-{
-    const char key[128] = "const.security.device_security_level";
-    int32_t def = 0;
-    int32_t levelGet = GetIntParameter(key, def);
-    *level = levelGet;
-    if (levelGet == -1) {
-        return -1;
-    }
-    return 0;
-}
-
-int32_t IsDeviceSecurityLevelChangeableImpl(const char *udid, int32_t level)
-{
-    return 0;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -153,16 +136,6 @@ void FreeDeviceSecurityInfo(DeviceSecurityInfo *info)
 int32_t GetDeviceSecurityLevelValue(const DeviceSecurityInfo *info, int32_t *level)
 {
     return GetDeviceSecurityLevelValueImpl(info, level);
-}
-
-int32_t GetSelfDeviceSecurityLevelValue(int32_t *level)
-{
-    return GetSelfDeviceSecurityLevelValueImpl(level);
-}
-
-int32_t IsDeviceSecurityLevelChangeable(const char *udid, int32_t level)
-{
-    return IsDeviceSecurityLevelChangeableImpl(udid, level);
 }
 
 #ifdef __cplusplus

@@ -89,71 +89,90 @@ void DslmMsgInterfaceMock::MakeMsgReceivedFrom(const DeviceIdentify *devId, cons
 }
 
 extern "C" {
-Messenger *CreateMessenger(const MessengerConfig *config)
+Messenger *CreateMessengerImpl(const MessengerConfig *config)
 {
     (void)config;
     return g_messenger;
 }
 
-void DestroyMessenger(Messenger *messenger)
+void DestroyMessengerImpl(Messenger *messenger)
 {
     (void)messenger;
 }
 
-bool IsMessengerReady(const Messenger *messenger)
+bool IsMessengerReadyImpl(const Messenger *messenger)
 {
     return GetDslmMsgInterface()->IsMessengerReady(messenger);
 }
 
-void SendMsgTo(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
+void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
     uint32_t msgLen)
 {
     (void)GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
 }
 
-bool GetDeviceOnlineStatus(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
+bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
 {
     return GetDslmMsgInterface()->GetDeviceOnlineStatus(messenger, devId, level);
 }
 
-bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
+bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId, int32_t *level)
 {
     return GetDslmMsgInterface()->GetSelfDeviceIdentify(messenger, devId, level);
 }
 
-void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para)
+void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)
 {
     static_cast<void>(messenger);
-    DeviceIdentify ident = {
-        .length = 64,
-        .identity = {0x0a, 0x0a, 0x0a, 0x0a},
-    };
-    processor(&ident, 1, nullptr);
+    static_cast<void>(processor);
+    static_cast<void>(para);
 }
 
-bool GetDeviceStatisticInfo(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
+bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
 {
     static_cast<void>(messenger);
     static_cast<void>(devId);
     static_cast<void>(info);
-    return true;
+    return false;
 }
 
-bool MessengerGetSelfDeviceIdentify(DeviceIdentify *devId, int32_t *level)
+int32_t Socket(SocketInfo info)
 {
-    static_cast<void>(devId);
-    *level = 1;
-    return true;
+    if (info.name == nullptr) {
+        return 0;
+    }
+    return info.name[0];
 }
 
-bool MessengerGetNetworkIdByDeviceIdentify(const DeviceIdentify *devId, char *networkId, uint32_t len)
+int32_t SendBytes(int32_t socket, const void *data, uint32_t len)
 {
-    return true;
+    static_cast<void>(socket);
+    static_cast<void>(data);
+    static_cast<void>(len);
+    return 0;
 }
 
-bool MessengerGetDeviceIdentifyByNetworkId(const char *networkId, DeviceIdentify *devId)
+int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
 {
-    return true;
+    if (auto interface = GetDslmMsgInterface(); interface) {
+        return interface->Bind(socket, qos, qosCount, listener);
+    }
+    return 0;
+}
+
+void Shutdown(int32_t socket)
+{
+    if (auto interface = GetDslmMsgInterface(); interface) {
+        interface->Shutdown(socket);
+    }
+}
+
+int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
+{
+    if (auto interface = GetDslmMsgInterface(); interface) {
+        return interface->Listen(socket, qos, qosCount, listener);
+    }
+    return 0;
 }
 }
 } // namespace DslmUnitTest

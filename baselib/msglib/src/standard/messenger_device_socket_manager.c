@@ -760,3 +760,7 @@ void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uin
     PushMsgDataToPendingList(transNo, devId, msg, msgLen);
     BindAsyncAction(devId);
 }
+
+#ifdef UT_ENABLE
+#include "dslm_test_link.c"
+#endif
