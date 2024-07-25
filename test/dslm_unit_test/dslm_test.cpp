@@ -1271,7 +1271,7 @@ HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case3, TestSize.Level0)
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case4, TestSize.Level0)
 {
-    DslmMsgInterfaceMock mockMsg;
+    NiceMock<DslmMsgInterfaceMock> mockMsg;
     DslmRequestCallbackMock mockCallback;
 
     EXPECT_CALL(mockMsg, IsMessengerReady(_)).Times(AtLeast(1));
@@ -1411,7 +1411,7 @@ HWTEST_F(DslmTest, InitSelfDeviceSecureLevel_case2, TestSize.Level0)
     DslmDeviceInfo *info = GetDslmDeviceInfo(&device);
     EXPECT_EQ(nullptr, info);
 
-    DslmMsgInterfaceMock mockMsg;
+    NiceMock<DslmMsgInterfaceMock> mockMsg;
     EXPECT_CALL(mockMsg, SendMsgTo(_, _, _, _, _)).Times(Exactly(6));
     mockMsg.MakeDeviceOnline(&device);
 
@@ -1987,6 +1987,12 @@ HWTEST_F(DslmTest, GetDeviceSecurityLevelValue_case1, TestSize.Level0)
 
     ret = GetDeviceSecurityLevelValue(&info, nullptr);
     EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = GetDeviceSecurityLevelValue(&info, &level);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    //  will not crash
+    FreeDeviceSecurityInfo(&info);
 }
 
 /**
