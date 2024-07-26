@@ -67,19 +67,6 @@ void FreeDeviceSecurityInfo(DeviceSecurityInfo *info);
  */
 int32_t GetDeviceSecurityLevelValue(const DeviceSecurityInfo *info, int32_t *level);
 
-/**
- * Gets the device security level from param.
- * @param [out] level Device security level.
- * @return
- */
-int32_t GetSelfDeviceSecurityLevelValue(int32_t *level);
-
-/**
- * Judge the device security level changeable.
- * @return
- */
-int32_t IsDeviceSecurityLevelChangeable(const char *udid, int32_t level);
-
 #ifdef __cplusplus
 }
 #endif

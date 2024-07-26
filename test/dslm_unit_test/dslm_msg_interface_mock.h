@@ -19,9 +19,10 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "messenger.h"
+#include "socket.h"
 
 #include "dslm_callback_info.h"
+#include "messenger.h"
 
 namespace OHOS {
 namespace Security {
@@ -41,6 +42,16 @@ public:
     virtual bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level) = 0;
 
     virtual void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para) = 0;
+
+    virtual int32_t Socket(SocketInfo info) = 0;
+
+    virtual int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener) = 0;
+
+    virtual int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener) = 0;
+
+    virtual int32_t SendBytes(int32_t socket, const void *data, uint32_t len) = 0;
+
+    virtual void Shutdown(int32_t socket) = 0;
 };
 
 class DslmMsgInterfaceMock : public DslmMsgInterface {
@@ -54,6 +65,12 @@ public:
         bool(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level));
     MOCK_METHOD3(GetSelfDeviceIdentify, bool(const Messenger *messenger, DeviceIdentify *devId, int32_t *level));
     MOCK_METHOD3(ForEachDeviceProcess, void(const Messenger *messenger, const DeviceProcessor processor, void *para));
+    MOCK_METHOD1(Socket, int32_t(SocketInfo info));
+    MOCK_METHOD4(Listen,
+        int32_t(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener));
+    MOCK_METHOD4(Bind, int32_t(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener));
+    MOCK_METHOD3(SendBytes, int32_t(int32_t socket, const void *data, uint32_t len));
+    MOCK_METHOD1(Shutdown, void(int32_t socket));
     void MakeMsgLoopback() const;
     void MakeSelfDeviceId(const DeviceIdentify *devId) const;
     void MakeDeviceOnline(const DeviceIdentify *devId) const;
