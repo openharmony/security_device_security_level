@@ -1808,6 +1808,9 @@ HWTEST_F(DslmTest, GetPeerDeviceOnlineStatus_case2, TestSize.Level0)
 {
     DslmMsgInterfaceMock mockMsg;
     EXPECT_EQ(false, GetPeerDeviceOnlineStatus(nullptr, nullptr));
+
+    const DeviceIdentify devId = {DEVICE_ID_MAX_LEN, {0}};
+    EXPECT_EQ(false, GetPeerDeviceOnlineStatus(&devId, nullptr));
 }
 
 /**
@@ -1878,10 +1881,26 @@ HWTEST_F(DslmTest, SendMsgToDevice_case1, TestSize.Level0)
  */
 HWTEST_F(DslmTest, CheckMessage_case1, TestSize.Level0)
 {
-    const uint8_t msg[] = {'1', 0x8f, '\0'};
-    uint32_t msgLen = 3;
+    {
+        const uint8_t msg[] = {'1', 0x8f, '\0'};
+        uint32_t msgLen = 3;
 
-    EXPECT_EQ(false, CheckMessage(msg, msgLen));
+        EXPECT_EQ(false, CheckMessage(msg, msgLen));
+    }
+
+    {
+        const uint8_t msg[] = {'1', 0x8f, '\0'};
+        uint32_t msgLen = 0;
+
+        EXPECT_EQ(false, CheckMessage(msg, msgLen));
+    }
+
+    {
+        const uint8_t msg[] = {'1', 0x8f, '\0'};
+        uint32_t msgLen = (81920 * 4) + 1;
+
+        EXPECT_EQ(false, CheckMessage(msg, msgLen));
+    }
 }
 
 // just for coverage

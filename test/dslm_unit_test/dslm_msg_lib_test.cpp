@@ -275,6 +275,11 @@ HWTEST_F(DslmMsgLibTest, MessengerSendMsgToTest, TestSize.Level0)
     }
     {
         DeviceIdentify idt {};
+        uint8_t data[UINT16_MAX] = {};
+        MessengerSendMsgTo(0, &idt, data, (81920 * 4) + 1);
+    }
+    {
+        DeviceIdentify idt {};
         uint8_t data[UINT16_MAX] = {0};
         MessengerSendMsgTo(0, &idt, data, UINT16_MAX);
     }
@@ -542,6 +547,11 @@ HWTEST_F(DslmMsgLibTest, InitDeviceStatusManager, TestSize.Level0)
     {
         EXPECT_FALSE(InitDeviceStatusManager(nullptr, nullptr, nullptr));
     }
+
+    {
+        EXPECT_FALSE(InitDeviceStatusManager(queue, nullptr, nullptr));
+    }
+
     {
         EXPECT_FALSE(InitDeviceStatusManager(queue, "??", nullptr));
     }
