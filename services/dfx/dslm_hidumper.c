@@ -27,6 +27,7 @@
 #include "dslm_credential.h"
 #include "dslm_device_list.h"
 #include "dslm_fsm_process.h"
+#include "dslm_messenger_wrapper.h"
 #include "dslm_notify_node.h"
 
 #define SPLIT_LINE "------------------------------------------------------"
@@ -138,21 +139,22 @@ static void GetDefaultStatus(int32_t *requestResult, int32_t *verifyResult, uint
     if (requestResult == NULL || verifyResult == NULL || credLevel == NULL) {
         return;
     }
-    const DeviceIdentify identify = {DEVICE_ID_MAX_LEN, {0}};
+
+    int32_t level = 0;
+    const DeviceIdentify *device = GetSelfDevice(&level);
     RequestObject object;
 
-    object.arraySize = 1;
-    object.credArray[0] = CRED_TYPE_STANDARD;
+    object.arraySize = GetSupportedCredTypes(object.credArray, MAX_CRED_ARRAY_SIZE);
     object.challenge = 0x0;
     object.version = GetCurrentVersion();
 
     DslmCredBuff *cred = NULL;
-    *requestResult = DefaultRequestDslmCred(&identify, &object, &cred);
+    *requestResult = DefaultRequestDslmCred(device, &object, &cred);
 
     DslmCredInfo info;
     (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
-    *verifyResult = DefaultVerifyDslmCred(&identify, object.challenge, cred, &info);
+    *verifyResult = DefaultVerifyDslmCred(device, object.challenge, cred, &info);
     *credLevel = info.credLevel;
     DestroyDslmCred(cred);
 }

@@ -14,9 +14,6 @@
 1.0 {
   global:
     InitDslmCredentialFunctions;
-    InitOhosDslmCred;
-    RequestOhosDslmCred;
-    VerifyOhosDslmCred;
   local:
     *;
 };
