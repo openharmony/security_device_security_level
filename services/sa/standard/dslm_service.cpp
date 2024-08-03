@@ -35,12 +35,12 @@ REGISTER_SYSTEM_ABILITY_BY_ID(DslmService, DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, 
 DslmService::DslmService(int32_t saId, bool runOnCreate) : SystemAbility(saId, runOnCreate), IRemoteStub(true)
 {
     SECURITY_LOG_INFO("object initialization");
+    ProcessLoadPlugin();
 }
 
 void DslmService::OnStart()
 {
     SECURITY_LOG_INFO("start");
-    ProcessLoadPlugin();
     std::thread thread([this]() {
         if (InitService() == SUCCESS) {
             SECURITY_LOG_INFO("init service success");
