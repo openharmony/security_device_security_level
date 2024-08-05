@@ -174,11 +174,6 @@ if (defined(ohos_lite)) {
       "../../interfaces/inner_api/include",
     ]
 
-    if (device_security_level_feature_plugin_path != "") {
-      defines =
-          [ "PLUGIN_SO_PATH=\"${device_security_level_feature_plugin_path}\"" ]
-    }
-
     deps = [
       "../../baselib/utils:utils_static",
       "../../oem_property:dslm_oem_ext",
@@ -187,6 +182,17 @@ if (defined(ohos_lite)) {
       "../dslm:service_dslm_obj",
       "../msg:service_msg_obj",
     ]
+
+    if (device_security_level_feature_plugin_path != "") {
+      defines =
+          [ "PLUGIN_SO_PATH=\"${device_security_level_feature_plugin_path}\"" ]
+
+      deps -= [ "../../oem_property:dslm_oem_ext" ]
+
+      sources += [ "../../oem_property/common/dslm_credential.c" ]
+
+      include_dirs += [ "../../oem_property/include" ]
+    }
 
     external_deps = [
       "c_utils:utils",
