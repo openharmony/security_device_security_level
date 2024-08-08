@@ -144,7 +144,7 @@ static void GetDefaultStatus(int32_t *requestResult, int32_t *verifyResult, uint
     const DeviceIdentify *device = GetSelfDevice(&level);
     RequestObject object;
 
-    object.arraySize = GetSupportedCredTypes(object.credArray, MAX_CRED_ARRAY_SIZE);
+    object.arraySize = (uint32_t)GetSupportedCredTypes(object.credArray, MAX_CRED_ARRAY_SIZE);
     object.challenge = 0x0;
     object.version = GetCurrentVersion();
 
