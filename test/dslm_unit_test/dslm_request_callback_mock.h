@@ -30,14 +30,14 @@ class DslmRequestCallback {
 public:
     DslmRequestCallback() = default;
     virtual ~DslmRequestCallback() = default;
-    virtual void RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info) = 0;
+    virtual void  RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info) = 0;
 };
 
 class DslmRequestCallbackMock : public DslmRequestCallback {
 public:
     DslmRequestCallbackMock();
     ~DslmRequestCallbackMock() override;
-    MOCK_METHOD3(RequestCallback, void(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info));
+    MOCK_METHOD(void, RequestCallback, (uint32_t cookie, uint32_t result, const DslmCallbackInfo *info), (override));
 
     static void MockedCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info);
 

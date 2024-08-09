@@ -1701,7 +1701,7 @@ HWTEST_F(DslmTest, OnMsgSendResultNotifier_case1, TestSize.Level0)
 
         uint32_t res = 2; // ERR_SESSION_OPEN_FAILED
         ScheduleDslmStateMachine(deviceInfo, EVENT_MSG_SEND_FAILED, &res);
-        EXPECT_GE(deviceInfo->machine.currState, 0);
+        EXPECT_GE(deviceInfo->machine.currState, static_cast<uint32_t>(0));
         ScheduleDslmStateMachine(deviceInfo, EVENT_DEVICE_OFFLINE, &res);
         mockMsg.MakeDeviceOffline(&identify);
     }
@@ -2045,7 +2045,7 @@ HWTEST_F(DslmTest, DslmDumper_case1, TestSize.Level0)
     ReportAppInvokeEvent(nullptr);
     ReportSecurityInfoSyncEvent(nullptr);
     auto handle = DslmUtilsStartPeriodicTimerTask(100, [](const void *context) { return; }, nullptr);
-    ASSERT_NE(handle, 0);
+    ASSERT_NE(handle, static_cast<uint32_t>(0));
     DslmUtilsStopTimerTask(handle);
 }
 
@@ -2057,35 +2057,35 @@ HWTEST_F(DslmTest, DslmQueue_case1, TestSize.Level0)
     auto proc = [](const uint8_t *data, uint32_t len) { return; };
     {
         auto ret = QueueWork(queue, proc, nullptr, 0);
-        EXPECT_EQ(ret, WORK_QUEUE_OK);
+        EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_OK));
     }
     {
         auto ret = QueueWork(nullptr, nullptr, nullptr, 0);
-        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
+        EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_NULL_PTR));
 
         ret = QueueWork(queue, nullptr, nullptr, 0);
-        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
+        EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_NULL_PTR));
     }
     {
         auto sleepfunc = [](const uint8_t *data, uint32_t len) { this_thread::sleep_for(milliseconds(600)); };
         auto ret = QueueWork(queue, sleepfunc, nullptr, 0);
-        EXPECT_EQ(ret, WORK_QUEUE_OK);
+        EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_OK));
         ret = QueueWork(queue, sleepfunc, nullptr, 0);
         (void)QueueWork(queue, proc, nullptr, 0);
         (void)QueueWork(queue, proc, nullptr, 0);
         (void)QueueWork(queue, proc, nullptr, 0);
         (void)QueueWork(queue, proc, nullptr, 0);
         (void)QueueWork(queue, proc, nullptr, 0);
-        EXPECT_GE(ret, WORK_QUEUE_OK);
+        EXPECT_GE(ret, static_cast<uint32_t>(WORK_QUEUE_OK));
     }
 
     {
         auto ret = DestroyWorkQueue(queue);
-        EXPECT_EQ(ret, 0);
+        EXPECT_EQ(ret, static_cast<uint32_t>(0));
     }
     {
         auto ret = DestroyWorkQueue(nullptr);
-        EXPECT_EQ(ret, WORK_QUEUE_NULL_PTR);
+        EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_NULL_PTR));
     }
 }
 } // namespace DslmUnitTest
