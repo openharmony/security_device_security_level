@@ -47,7 +47,8 @@
                 "ipc",
                 "safwk",
                 "samgr",
-                "openssl"
+                "openssl",
+                "access_token"
             ],
             "third_party": [ "openssl" ]
         },
