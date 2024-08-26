@@ -152,7 +152,7 @@ void ForEachDeviceDump(const ProcessDumpFunction dumper, int32_t dumpHandle)
     UnlockMutex(GetDeviceListMutex());
 }
 
-bool JudgeListDeviceType()
+bool JudgeListDeviceType(void)
 {
     bool result = true;
     ListNode *node = NULL;
