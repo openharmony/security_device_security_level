@@ -66,7 +66,9 @@ void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t si
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
 {
-    return promise_.get_future().get();
+    auto obj = promise_.get_future().get();
+    promise_ = {};
+    return obj;
 }
 } // namespace DeviceSecurityLevel
 } // namespace Security
