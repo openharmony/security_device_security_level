@@ -55,7 +55,11 @@ static void *WorkQueueThread(void *data)
     prctl(PR_SET_NAME, queue->name, 0, 0, 0);
 #endif
 
-    (void)pthread_mutex_lock(&queue->mutex);
+    int ret = pthread_mutex_lock(&queue->mutex);
+    if (ret != 0) {
+        SECURITY_LOG_ERROR("pthread_mutex_lock error");
+        return NULL;
+    }
     while (queue->state == RUN) {
         while ((IsEmptyList(&queue->head)) && (queue->state == RUN)) {
             pthread_cond_wait(&queue->cond, &queue->mutex);
@@ -69,10 +73,17 @@ static void *WorkQueueThread(void *data)
         RemoveListNode(&worker->linkNode);
         queue->size--;
 
-        pthread_mutex_unlock(&queue->mutex);
+        ret = pthread_mutex_unlock(&queue->mutex);
+        if (ret != 0) {
+            SECURITY_LOG_ERROR("pthread_mutex_unlock error");
+        }
         worker->process(worker->dataBuff, worker->dataLen);
         FREE(worker);
-        (void)pthread_mutex_lock(&queue->mutex);
+        ret = pthread_mutex_lock(&queue->mutex);
+        if (ret != 0) {
+            SECURITY_LOG_ERROR("pthread_mutex_lock error");
+            return NULL;
+        }
     }
 
     // now the queue is stopped, just remove the nodes.
@@ -83,7 +94,10 @@ static void *WorkQueueThread(void *data)
         FREE(worker);
     }
 
-    pthread_mutex_unlock(&queue->mutex);
+    ret = pthread_mutex_unlock(&queue->mutex);
+    if (ret != 0) {
+        SECURITY_LOG_ERROR("pthread_mutex_unlock error");
+    }
     return NULL;
 }
 
