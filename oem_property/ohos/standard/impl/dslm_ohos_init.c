@@ -27,7 +27,7 @@
 int32_t InitOhosDslmCred(DslmCredInfo *credInfo)
 {
     SECURITY_LOG_INFO("start");
-    char credStr[DSLM_CRED_STR_LEN_MAX] = {0};
+    char credStr[DSLM_CRED_STR_LEN_MAX + 1] = {0};
     int32_t ret = GetCredFromCurrentDevice(credStr, DSLM_CRED_STR_LEN_MAX);
     if (ret != SUCCESS) {
         SECURITY_LOG_ERROR("read cred data from file failed");
