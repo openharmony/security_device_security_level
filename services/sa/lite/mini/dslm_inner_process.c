@@ -86,6 +86,7 @@ static DslmRemoteStubListNode *DslmPopRemoteStub(uint32_t owner, uint32_t cookie
     ListNode *node = NULL;
     ListNode *temp = NULL;
     DslmRemoteStubListNode *item = NULL;
+    DslmRemoteStubListNode *find = NULL;
 
     LockMutex(GetRemoteStubList()->mutex);
     uint64_t key = ((uint64_t)owner << COOKIE_SHIFT) | cookie;
@@ -93,6 +94,7 @@ static DslmRemoteStubListNode *DslmPopRemoteStub(uint32_t owner, uint32_t cookie
         item = LIST_ENTRY(node, DslmRemoteStubListNode, node);
         if (item->key == key) {
             SECURITY_LOG_INFO("pop remote stub");
+            find = item;
             RemoveListNode(node);
             if (GetRemoteStubList()->size > 0) {
                 GetRemoteStubList()->size--;
@@ -103,7 +105,7 @@ static DslmRemoteStubListNode *DslmPopRemoteStub(uint32_t owner, uint32_t cookie
         }
     }
     UnlockMutex(GetRemoteStubList()->mutex);
-    return item;
+    return find;
 }
 
 static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
