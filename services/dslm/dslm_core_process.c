@@ -45,6 +45,7 @@ extern "C" {
 #endif
 
 #define MAX_NOTIFY_SIZE 64
+#define DEFAULT_TYPE 10
 
 static const DeviceIdentify *RefreshDeviceOnlineStatus(const DeviceIdentify *deviceId);
 
@@ -214,6 +215,7 @@ bool InitSelfDeviceSecureLevel(void)
     }
 
     info->onlineStatus = ONLINE_STATUS_ONLINE;
+    info->osType = DEFAULT_TYPE;
     if (info->lastOnlineTime == 0) {
         info->lastOnlineTime = GetMillisecondSinceBoot();
     }

@@ -20,6 +20,7 @@
 #include "message_parcel.h"
 
 #include "device_security_defines.h"
+#include "utils_log.h"
 
 namespace OHOS {
 namespace Security {
@@ -34,6 +35,11 @@ int32_t DslmCallbackProxy::ResponseDeviceSecurityLevel(uint32_t cookie, const Re
     MessageParcel data;
     MessageParcel reply;
 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        SECURITY_LOG_ERROR("Remote is nullptr");
+        return ERR_INVALID_PARA;
+    }
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         return ERR_INVALID_PARA;
     }
@@ -48,7 +54,7 @@ int32_t DslmCallbackProxy::ResponseDeviceSecurityLevel(uint32_t cookie, const Re
     }
 
     MessageOption ipcOption = {MessageOption::TF_ASYNC};
-    return Remote()->SendRequest(CMD_SET_DEVICE_SECURITY_LEVEL, data, reply, ipcOption);
+    return remote->SendRequest(CMD_SET_DEVICE_SECURITY_LEVEL, data, reply, ipcOption);
 }
 } // namespace DeviceSecurityLevel
 } // namespace Security
