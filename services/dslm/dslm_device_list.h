@@ -41,6 +41,8 @@ bool IsSameDevice(const DeviceIdentify *first, const DeviceIdentify *second);
 
 void ForEachDeviceDump(const ProcessDumpFunction dumper, int32_t dumpHandle);
 
+bool JudgeListDeviceType(void);
+
 #ifdef __cplusplus
 }
 #endif

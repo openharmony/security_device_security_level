@@ -113,7 +113,7 @@ HWTEST_F(DslmMsgLibTest, DeviceSocketTestCase2, TestSize.Level0)
     char dummy[] = {'a', 0};
     PeerSocketInfo peer = {.name = dummy, .networkId = dummy};
     {
-        DeviceIdentify id {.identity = {'a'}, .length = 1};
+        DeviceIdentify id {.length = 1, .identity = {'a'}};
         uint8_t msg[UINT8_MAX] = {0};
         UtPushMsgDataToPendingList(0, &id, msg, 1);
     }
@@ -186,8 +186,8 @@ HWTEST_F(DslmMsgLibTest, ProcessSocketMessageReceivedTest, TestSize.Level0)
             .pkgName = "pkg",
             .primarySockName = "pr",
             .secondarySockName = "",
-            .threadCnt = 1,
             .messageReceiver = [](const DeviceIdentify *, const uint8_t *, uint32_t) { return 0; },
+            .threadCnt = 1,
         };
         auto ret = InitDeviceSocketManager(queue, &config);
         EXPECT_TRUE(ret);
@@ -287,18 +287,19 @@ HWTEST_F(DslmMsgLibTest, MessengerSendMsgToTest, TestSize.Level0)
         MessengerConfig config = {.pkgName = "pkg",
             .primarySockName = "pr",
             .secondarySockName = "se",
+            .messageReceiver = [](const DeviceIdentify *, const uint8_t *, uint32_t) { return 0; },
             .threadCnt = 1,
-            .messageReceiver = [](const DeviceIdentify *, const uint8_t *, uint32_t) { return 0; }};
+            };
         auto ret = InitDeviceSocketManager(queue, &config);
         EXPECT_TRUE(ret);
 
         uint8_t msg[UINT8_MAX] = {0};
         {
-            DeviceIdentify idt {.identity = {'a'}, .length = 1};
+            DeviceIdentify idt {.length = 1, .identity = {'a'}};
             MessengerSendMsgTo(0, &idt, msg, UINT8_MAX);
         }
         {
-            DeviceIdentify idt {.identity = {'x'}, .length = 1};
+            DeviceIdentify idt {.length = 1, .identity = {'x'}};
             MessengerSendMsgTo(0, &idt, msg, UINT8_MAX);
         }
         EXPECT_TRUE(DeInitDeviceSocketManager());
@@ -334,7 +335,7 @@ HWTEST_F(DslmMsgLibTest, CreateQueueMsgDataTest, TestSize.Level0)
         uint32_t queueDataLen = 0;
         auto *data = CreateQueueMsgData(&idt, msg, UINT8_MAX, &queueDataLen);
         ASSERT_NE(data, nullptr);
-        EXPECT_EQ(data->msgLen, UINT8_MAX);
+        EXPECT_EQ(data->msgLen, static_cast<uint32_t>(UINT8_MAX));
         EXPECT_EQ(queueDataLen, UINT8_MAX + sizeof(QueueMsgData));
     }
 }
@@ -532,11 +533,11 @@ HWTEST_F(DslmMsgLibTest, MessengerGetDeviceOnlineStatus, TestSize.Level0)
         EXPECT_FALSE(MessengerGetDeviceOnlineStatus(nullptr, nullptr));
     }
     {
-        DeviceIdentify idt {.identity = {'a'}, .length = 1};
+        DeviceIdentify idt {.length = 1, .identity = {'a'}};
         EXPECT_FALSE(MessengerGetDeviceOnlineStatus(&idt, nullptr));
     }
     {
-        DeviceIdentify idt {.identity = {'a'}, .length = 1};
+        DeviceIdentify idt {.length = 1, .identity = {'a'}};
         int32_t level = 0;
         EXPECT_FALSE(MessengerGetDeviceOnlineStatus(&idt, &level));
     }

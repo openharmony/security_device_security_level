@@ -495,6 +495,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
 
     DslmJsonHandle json = DslmCreateJson((char *)buffer);
     if (json == NULL) {
+        FREE(buffer);
         return;
     }
 
