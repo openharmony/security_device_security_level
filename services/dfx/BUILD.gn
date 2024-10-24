@@ -40,7 +40,10 @@ ohos_source_set("dslm_extension_dfx") {
     "../../oem_property/include/",
   ]
 
-  deps = [ "../../baselib/utils:utils_static" ]
+  deps = [
+    "../../baselib/utils:utils_static",
+    "../msg:service_msg_obj",
+  ]
 
   external_deps = [
     "c_utils:utils",

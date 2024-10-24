@@ -31,6 +31,7 @@
 #include "utils_state_machine.h"
 
 #define MAX_DEVICE_CNT 128
+#define DEFAULT_TYPE 10
 
 static inline Mutex *GetDeviceListMutex(void)
 {
@@ -149,4 +150,22 @@ void ForEachDeviceDump(const ProcessDumpFunction dumper, int32_t dumpHandle)
         dumper(info, dumpHandle);
     }
     UnlockMutex(GetDeviceListMutex());
+}
+
+bool JudgeListDeviceType(void)
+{
+    bool result = true;
+    ListNode *node = NULL;
+
+    LockMutex(GetDeviceListMutex());
+    FOREACH_LIST_NODE (node, GetDeviceList()) {
+        DslmDeviceInfo *info = LIST_ENTRY(node, DslmDeviceInfo, linkNode);
+        if (info->osType != DEFAULT_TYPE) {
+            result = false;
+            break;
+        }
+    }
+    UnlockMutex(GetDeviceListMutex());
+
+    return result;
 }

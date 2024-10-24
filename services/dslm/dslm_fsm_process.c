@@ -199,6 +199,7 @@ static bool ProcessDeviceOnline(const StateMachine *machine, uint32_t event, con
     }
     uint32_t level = deviceAttributes & 0xFF;
     uint32_t osType = (deviceAttributes & 0xFF00) >> TYPE_PLACE;
+    info->osType = osType;
     if (level == 0 && osType == DEFAULT_TYPE) {
         level = 1;
         SECURITY_LOG_INFO("level set 1");

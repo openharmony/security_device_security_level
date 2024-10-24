@@ -31,6 +31,9 @@
 
 #define PKG_NAME_LEN 128
 #define TYPE_PLACE 8
+#define DEFAULT_TYPE 10
+#define LAPTOP_TYPE 12
+#define SMART_DISPLAY_TYPE 2562
 
 static void GetDeviceSecurityLevelByNetworkId(const OHOS::DistributedHardware::DmDeviceInfo &info, int32_t &level);
 
@@ -258,8 +261,12 @@ static void GetDeviceSecurityLevelByNetworkId(const OHOS::DistributedHardware::D
     if (handle == nullptr) {
         return;
     }
-    const uint32_t osType = static_cast<uint32_t>(DslmGetJsonFieldInt(handle, "OS_TYPE"));
+    uint32_t osType = static_cast<uint32_t>(DslmGetJsonFieldInt(handle, "OS_TYPE"));
     SECURITY_LOG_INFO("device type is %{public}d", osType);
+    if (info.deviceTypeId == LAPTOP_TYPE || info.deviceTypeId == SMART_DISPLAY_TYPE) {
+        osType = DEFAULT_TYPE;
+        SECURITY_LOG_INFO("deviceTypeId is %{public}d", info.deviceTypeId);
+    }
     level = static_cast<int32_t>(static_cast<uint32_t>(level) | (osType << TYPE_PLACE));
     DslmDestroyJson(handle);
     return;

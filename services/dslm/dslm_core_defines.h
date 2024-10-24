@@ -57,6 +57,7 @@ typedef struct DslmDeviceInfo {
     ListHead notifyList;
     uint32_t historyListSize;
     ListHead historyList;
+    uint32_t osType;
 } DslmDeviceInfo;
 
 static inline uint32_t GetCurrentVersion(void)
