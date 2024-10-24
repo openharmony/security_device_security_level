@@ -117,7 +117,7 @@ static void TimerProcessUnloadSystemAbility(const void *context)
 {
     (void)context;
 
-    if (GetDeviceListSize() > 1) {
+    if (!JudgeListDeviceType()) {
         return;
     }
 
@@ -137,7 +137,7 @@ static void TimerProcessUnloadSystemAbility(const void *context)
 
 static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
 {
-    if (GetDeviceListSize() > 1) {
+    if (!JudgeListDeviceType()) {
         return;
     }
 
