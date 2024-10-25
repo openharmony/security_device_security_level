@@ -18,7 +18,6 @@
 #include <future>
 
 #include "hilog/log.h"
-#include "parameter.h"
 
 #include "device_security_level_callback_helper.h"
 #include "device_security_level_callback_stub.h"

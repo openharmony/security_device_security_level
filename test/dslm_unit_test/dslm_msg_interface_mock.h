@@ -19,10 +19,9 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "socket.h"
+#include "messenger.h"
 
 #include "dslm_callback_info.h"
-#include "messenger.h"
 
 namespace OHOS {
 namespace Security {
@@ -42,38 +41,19 @@ public:
     virtual bool GetSelfDeviceIdentify(const Messenger *messenger, DeviceIdentify *devId, int32_t *level) = 0;
 
     virtual void ForEachDeviceProcess(const Messenger *messenger, const DeviceProcessor processor, void *para) = 0;
-
-    virtual int32_t Socket(SocketInfo info) = 0;
-
-    virtual int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener) = 0;
-
-    virtual int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener) = 0;
-
-    virtual int32_t SendBytes(int32_t socket, const void *data, uint32_t len) = 0;
-
-    virtual void Shutdown(int32_t socket) = 0;
 };
 
 class DslmMsgInterfaceMock : public DslmMsgInterface {
 public:
     DslmMsgInterfaceMock();
     ~DslmMsgInterfaceMock() override;
-    MOCK_METHOD(bool, IsMessengerReady, (const Messenger *messenger), (override));
-    MOCK_METHOD(uint64_t, SendMsgTo, (const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId,
-                                const uint8_t *msg, uint32_t msgLen), (override));
-    MOCK_METHOD(bool, GetDeviceOnlineStatus,
-        (const Messenger *messenger, const DeviceIdentify *devId, int32_t *level), (override));
-    MOCK_METHOD(bool, GetSelfDeviceIdentify, (const Messenger *messenger, DeviceIdentify *devId, int32_t *level),
-        (override));
-    MOCK_METHOD(void, ForEachDeviceProcess, (const Messenger *messenger, const DeviceProcessor processor, void *para),
-        (override));
-    MOCK_METHOD(int32_t, Socket, (SocketInfo info), (override));
-    MOCK_METHOD(int32_t, Listen,
-        (int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener), (override));
-    MOCK_METHOD(int32_t, Bind, (int32_t socket, const QosTV qos[], uint32_t qosCount,
-        const ISocketListener *listener), (override));
-    MOCK_METHOD(int32_t, SendBytes, (int32_t socket, const void *data, uint32_t len), (override));
-    MOCK_METHOD(void, Shutdown, (int32_t socket), (override));
+    MOCK_METHOD1(IsMessengerReady, bool(const Messenger *messenger));
+    MOCK_METHOD5(SendMsgTo, uint64_t(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId,
+                                const uint8_t *msg, uint32_t msgLen));
+    MOCK_METHOD3(GetDeviceOnlineStatus,
+        bool(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level));
+    MOCK_METHOD3(GetSelfDeviceIdentify, bool(const Messenger *messenger, DeviceIdentify *devId, int32_t *level));
+    MOCK_METHOD3(ForEachDeviceProcess, void(const Messenger *messenger, const DeviceProcessor processor, void *para));
     void MakeMsgLoopback() const;
     void MakeSelfDeviceId(const DeviceIdentify *devId) const;
     void MakeDeviceOnline(const DeviceIdentify *devId) const;

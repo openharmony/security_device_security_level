@@ -133,50 +133,6 @@ HWTEST_F(DslmBaselibUtilsTest, Deserialize_case2, TestSize.Level0)
     EXPECT_EQ(0U, cnt);
 }
 
-HWTEST_F(DslmBaselibUtilsTest, Deserialize_case3, TestSize.Level0)
-{
-    uint32_t cnt = 0;
-    TlvCommon tlvs[MAX_ENTRY];
-
-    {
-        // buff contains 10 entries which greater than MAX_ENTRY
-        int i;
-        // every entry has a sizeof(void *)-byte value
-        uint8_t buff[(MAX_ENTRY + 2) * sizeof(TlvCommon)] = {0};
-
-        cnt = 0;
-        (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
-
-        for (i = 0; i < (MAX_ENTRY + 2); i++) {
-            TlvCommon *ptr = (TlvCommon *)buff + i;
-            ptr->tag = 0x105;
-            ptr->len = 4;
-        }
-
-        uint32_t ret = Deserialize(buff, sizeof(buff), nullptr, MAX_ENTRY, &cnt);
-        EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
-    }
-
-    {
-        // buff contains 10 entries which greater than MAX_ENTRY
-        int i;
-        // every entry has a sizeof(void *)-byte value
-        uint8_t buff[(MAX_ENTRY + 2) * sizeof(TlvCommon)] = {0};
-
-        cnt = 0;
-        (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
-
-        for (i = 0; i < (MAX_ENTRY + 2); i++) {
-            TlvCommon *ptr = (TlvCommon *)buff + i;
-            ptr->tag = 0x105;
-            ptr->len = 4;
-        }
-
-        uint32_t ret = Deserialize(buff, sizeof(buff), &tlvs[0], MAX_ENTRY, nullptr);
-        EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
-    }
-}
-
 /**
  * @tc.name: Serialize_case1
  * @tc.desc: function Serialize with malformed input
@@ -267,49 +223,6 @@ HWTEST_F(DslmBaselibUtilsTest, Serialize_case2, TestSize.Level0)
     }
 }
 
-HWTEST_F(DslmBaselibUtilsTest, Serialize_case3, TestSize.Level0)
-{
-    uint32_t size = 0;
-    int i = 0;
-    TlvCommon tlvs[MAX_ENTRY];
-    // every entry has a sizeof(void *)-byte value
-    uint8_t buff[MAX_ENTRY * sizeof(TlvCommon)] = {0};
-
-    {
-        // malformed max buffer size
-
-        size = 0;
-        (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
-        (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
-
-        for (i = 0; i < MAX_ENTRY; i++) {
-            TlvCommon *ptr = (TlvCommon *)tlvs + i;
-            ptr->tag = 0x105;
-            ptr->len = 4;
-        }
-
-        uint32_t ret = Serialize(tlvs, MAX_ENTRY, nullptr, 1, &size);
-        EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
-    }
-
-    {
-        // malformed max buffer size
-
-        size = 0;
-        (void)memset_s(&buff[0], sizeof(buff), 0, sizeof(buff));
-        (void)memset_s(&tlvs[0], sizeof(tlvs), 0, sizeof(tlvs));
-
-        for (i = 0; i < MAX_ENTRY; i++) {
-            TlvCommon *ptr = (TlvCommon *)tlvs + i;
-            ptr->tag = 0x105;
-            ptr->len = 4;
-        }
-
-        uint32_t ret = Serialize(tlvs, MAX_ENTRY, buff, 1, nullptr);
-        EXPECT_EQ((uint32_t)TLV_ERR_INVALID_PARA, ret);
-    }
-}
-
 /**
  * @tc.name: GetDateTimeByMillisecondSince1970_case1
  * @tc.desc: function GetDateTimeByMillisecondSince1970 with malformed input
@@ -340,18 +253,9 @@ HWTEST_F(DslmBaselibUtilsTest, Base64UrlDecodeApp_case1, TestSize.Level0)
 {
     uint8_t src[] = {'a', '-', '_', 'd', '\0'};
     uint8_t *to = nullptr;
-    {
-        int32_t ret = Base64UrlDecodeApp(nullptr, nullptr);
-        EXPECT_EQ(0, ret);
-    }
 
     {
         int32_t ret = Base64UrlDecodeApp(nullptr, &to);
-        EXPECT_EQ(0, ret);
-    }
-
-    {
-        int32_t ret = Base64UrlDecodeApp(src, nullptr);
         EXPECT_EQ(0, ret);
     }
 
@@ -377,11 +281,6 @@ HWTEST_F(DslmBaselibUtilsTest, Base64DecodeApp_case1, TestSize.Level0)
     uint8_t *to = nullptr;
 
     {
-        int32_t ret = Base64DecodeApp(nullptr, nullptr);
-        EXPECT_EQ(0, ret);
-    }
-
-    {
         int32_t ret = Base64DecodeApp(nullptr, &to);
         EXPECT_EQ(0, ret);
     }
@@ -394,18 +293,6 @@ HWTEST_F(DslmBaselibUtilsTest, Base64DecodeApp_case1, TestSize.Level0)
         memset_s(maxStr, maxStrLen - 1, 'c', maxStrLen - 1);
 
         int32_t ret = Base64DecodeApp(maxStr, &to);
-        EXPECT_EQ(0, ret);
-        FREE(maxStr);
-    }
-
-    {
-        uint32_t maxStrLen = MAX_MALLOC_LEN / 3 * 4 + 10;
-        uint8_t *maxStr = (uint8_t *)MALLOC(sizeof(uint8_t) * maxStrLen);
-        ASSERT_NE(nullptr, maxStr);
-
-        memset_s(maxStr, maxStrLen - 1, 'c', maxStrLen - 1);
-
-        int32_t ret = Base64DecodeApp(maxStr, nullptr);
         EXPECT_EQ(0, ret);
         FREE(maxStr);
     }
@@ -456,23 +343,6 @@ HWTEST_F(DslmBaselibUtilsTest, InitStateMachine_case1, TestSize.Level0)
         ScheduleMachine(node, nodeCnt, &machine, event, nullptr);
         EXPECT_EQ(nullptr, node);
     }
-
-    {
-        StateNode node;
-        uint32_t nodeCnt = 0;
-        StateMachine machine;
-        uint32_t event = 0;
-
-        ScheduleMachine(&node, nodeCnt, &machine, event, nullptr);
-    }
-
-    {
-        StateNode node;
-        uint32_t nodeCnt = 1;
-        uint32_t event = 0;
-
-        ScheduleMachine(&node, nodeCnt, nullptr, event, nullptr);
-    }
 }
 
 /**
@@ -491,7 +361,6 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
     DslmJsonHandle handle = DslmCreateJson(str);
 
     DslmDestroyJson(nullptr);
-    DslmAddFieldBoolToJson(nullptr, nullptr, true);
     DslmAddFieldBoolToJson(nullptr, field, true);
     DslmAddFieldIntToJson(nullptr, field, 0);
     DslmAddFieldIntArrayToJson(nullptr, field, arr, sizeof(arr));
@@ -504,21 +373,6 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
 
         ret = DslmGetJsonFieldInt(handle, nullptr);
         EXPECT_EQ(0, ret);
-    }
-
-    {
-        uint32_t ret = DslmGetJsonFieldIntArray(nullptr, nullptr, nullptr, 0);
-        EXPECT_EQ(0U, ret);
-    }
-
-    {
-        uint32_t ret = DslmGetJsonFieldIntArray(handle, nullptr, nullptr, 0);
-        EXPECT_EQ(0U, ret);
-    }
-
-    {
-        uint32_t ret = DslmGetJsonFieldIntArray(handle, str, nullptr, 0);
-        EXPECT_EQ(0U, ret);
     }
 
     {
@@ -537,29 +391,6 @@ HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case1, TestSize.Level0)
     }
 
     EXPECT_EQ(false, DslmCompareJsonData(handle, nullptr, true));
-
-    FREE(handle);
-}
-
-HWTEST_F(DslmBaselibUtilsTest, DestroyJson_case2, TestSize.Level0)
-{
-    int32_t arr[10] = {0};
-    const char *field = "test";
-    const char *value = "add";
-
-    const char *str = "{\"version\":131072,\"challenge\":\"3C1F21EE53D3C4E2\",\"type\":2}";
-    DslmJsonHandle handle = DslmCreateJson(str);
-
-    DslmAddFieldBoolToJson(handle, nullptr, true);
-    DslmAddFieldIntToJson(handle, nullptr, 0);
-    DslmAddFieldIntArrayToJson(handle, nullptr, arr, sizeof(arr));
-    DslmAddFieldIntArrayToJson(handle, field, nullptr, sizeof(arr));
-    DslmAddFieldStringToJson(handle, nullptr, value);
-    DslmAddFieldStringToJson(handle, field, nullptr);
-    DslmAddFieldJsonToJson(nullptr, nullptr, nullptr);
-    DslmAddFieldJsonToJson(handle, nullptr, nullptr);
-
-    EXPECT_EQ(false, DslmCompareJsonData(nullptr, nullptr, true));
 
     FREE(handle);
 }

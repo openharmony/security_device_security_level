@@ -41,10 +41,6 @@ static const char *GetName(Service *service)
 
 static BOOL Initialize(Service *service, Identity identity)
 {
-    if (service == NULL) {
-        return FALSE;
-    }
-    
     DslmService *dslmService = (DslmService *)service;
     dslmService->identity = identity;
     if (InitService() != SUCCESS) {

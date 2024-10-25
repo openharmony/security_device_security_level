@@ -105,10 +105,10 @@ bool IsMessengerReadyImpl(const Messenger *messenger)
     return GetDslmMsgInterface()->IsMessengerReady(messenger);
 }
 
-void SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
+uint64_t SendMsgToImpl(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg,
     uint32_t msgLen)
 {
-    (void)GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
+    return GetDslmMsgInterface()->SendMsgTo(messenger, transNo, devId, msg, msgLen);
 }
 
 bool GetDeviceOnlineStatusImpl(const Messenger *messenger, const DeviceIdentify *devId, int32_t *level)
@@ -123,56 +123,12 @@ bool GetSelfDeviceIdentifyImpl(const Messenger *messenger, DeviceIdentify *devId
 
 void ForEachDeviceProcessImpl(const Messenger *messenger, const DeviceProcessor processor, void *para)
 {
-    static_cast<void>(messenger);
-    static_cast<void>(processor);
-    static_cast<void>(para);
+    return;
 }
 
 bool GetDeviceStatisticInfoImpl(const Messenger *messenger, const DeviceIdentify *devId, StatisticInformation *info)
 {
-    static_cast<void>(messenger);
-    static_cast<void>(devId);
-    static_cast<void>(info);
-    return false;
-}
-
-int32_t Socket(SocketInfo info)
-{
-    if (info.name == nullptr) {
-        return 0;
-    }
-    return info.name[0];
-}
-
-int32_t SendBytes(int32_t socket, const void *data, uint32_t len)
-{
-    static_cast<void>(socket);
-    static_cast<void>(data);
-    static_cast<void>(len);
-    return 0;
-}
-
-int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
-{
-    if (auto interface = GetDslmMsgInterface(); interface) {
-        return interface->Bind(socket, qos, qosCount, listener);
-    }
-    return 0;
-}
-
-void Shutdown(int32_t socket)
-{
-    if (auto interface = GetDslmMsgInterface(); interface) {
-        interface->Shutdown(socket);
-    }
-}
-
-int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener)
-{
-    if (auto interface = GetDslmMsgInterface(); interface) {
-        return interface->Listen(socket, qos, qosCount, listener);
-    }
-    return 0;
+    return true;
 }
 }
 } // namespace DslmUnitTest
