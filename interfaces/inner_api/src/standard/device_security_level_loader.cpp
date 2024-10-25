@@ -44,10 +44,6 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
     }
 
     sptr<LoadCallback> callback = new (std::nothrow) LoadCallback();
-    if (callback == nullptr) {
-        HILOG_ERROR(LOG_CORE, "LoadCallback new fail.");
-        return {};
-    }
     int32_t result = registry->LoadSystemAbility(DEVICE_SECURITY_LEVEL_MANAGER_SA_ID, callback);
     if (result != ERR_OK) {
         HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo LoadSystemAbility error.");
@@ -70,9 +66,7 @@ void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t si
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
 {
-    auto obj = promise_.get_future().get();
-    promise_ = {};
-    return obj;
+    return promise_.get_future().get();
 }
 } // namespace DeviceSecurityLevel
 } // namespace Security
