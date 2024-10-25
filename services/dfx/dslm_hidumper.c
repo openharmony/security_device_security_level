@@ -37,18 +37,11 @@
 #define COST_STRING_LEN 64
 #define NOTIFY_NODE_MAX_CNT 1024
 
-static pthread_mutex_t g_buffMutex = PTHREAD_MUTEX_INITIALIZER;
-
 static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
 {
     static char timeBuff[TIME_STRING_LEN] = {0};
     DateTime dateTime = {0};
     bool success = false;
-    int lockRet = pthread_mutex_lock(&g_buffMutex);
-    if (lockRet != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_lock error");
-        return "";
-    }
     do {
         (void)memset_s(timeBuff, TIME_STRING_LEN, 0, TIME_STRING_LEN);
         if (timeStamp == 0) {
@@ -72,11 +65,6 @@ static const char *GetTimeStringFromTimeStamp(uint64_t timeStamp)
             SECURITY_LOG_ERROR("GetTimeStringFromTimeStamp snprintf_s error");
         }
     }
-
-    lockRet = pthread_mutex_unlock(&g_buffMutex);
-    if (lockRet != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_unlock error");
-    }
     return timeBuff;
 }
 
@@ -92,25 +80,9 @@ static const char *GetCostTime(const uint64_t beginTime, const uint64_t endTime)
         return "";
     }
     uint32_t cost = (uint32_t)(endTime - beginTime);
-
-    int ret = pthread_mutex_lock(&g_buffMutex);
-    if (ret != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_lock error");
-        return "";
-    }
-
     if (snprintf_s(costBuff, COST_STRING_LEN, COST_STRING_LEN - 1, "(cost %ums)", cost) < 0) {
-        ret = pthread_mutex_unlock(&g_buffMutex);
-        if (ret != 0) {
-            SECURITY_LOG_ERROR("pthread_mutex_unlock error");
-        }
         return "";
     };
-
-    ret = pthread_mutex_unlock(&g_buffMutex);
-    if (ret != 0) {
-        SECURITY_LOG_ERROR("pthread_mutex_unlock error");
-    }
     return costBuff;
 }
 

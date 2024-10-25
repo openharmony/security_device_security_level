@@ -43,12 +43,10 @@
                 "hisysevent",
                 "hitrace",
                 "huks",
-                "init",
                 "ipc",
                 "safwk",
                 "samgr",
-                "openssl",
-                "access_token"
+                "openssl"
             ],
             "third_party": [ "openssl" ]
         },
@@ -61,7 +59,6 @@
                 "service_group": [
                     "//base/security/device_security_level/oem_property/ohos:dslm_service",
                     "//base/security/device_security_level/oem_property/ohos:dslm_ohos_cred_file",
-                    "//base/security/device_security_level/param:param_files",
                     "//base/security/device_security_level/profile:dslm_service.rc"
                 ]
             },

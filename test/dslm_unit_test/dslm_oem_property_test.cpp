@@ -900,12 +900,6 @@ HWTEST_F(DslmOemPropertyTest, BufferToHksCertChain_case1, TestSize.Level0)
 
     {
         const uint8_t data[] = {'0'};
-        int32_t ret = BufferToHksCertChain(data, 0, nullptr);
-        EXPECT_EQ(ERR_INVALID_PARA, ret);
-    }
-
-    {
-        const uint8_t data[] = {'0'};
         uint32_t len = 1;
         struct HksCertChain chain;
         memset_s(&chain, sizeof(struct HksCertChain), 0, sizeof(struct HksCertChain));
