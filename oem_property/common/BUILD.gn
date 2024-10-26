@@ -47,10 +47,11 @@ ohos_source_set("oem_common_obj") {
     }
     branch_protector_ret = "pac_ret"
 
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
+
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
-      "openssl:libcrypto_shared",
     ]
   }
   configs = [
