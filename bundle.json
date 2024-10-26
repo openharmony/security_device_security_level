@@ -34,7 +34,6 @@
         "ram": "2500KB",
         "deps": {
             "components": [
-                "cJSON",
                 "c_utils",
                 "device_auth",
                 "device_manager",
@@ -45,10 +44,12 @@
                 "huks",
                 "ipc",
                 "safwk",
-                "samgr",
-                "openssl"
+                "samgr"
             ],
-            "third_party": [ "openssl" ]
+            "third_party": [
+                "cJSON",
+                "openssl"
+            ]
         },
         "build": {
             "group_type": {
