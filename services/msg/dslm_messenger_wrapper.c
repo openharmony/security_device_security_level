@@ -61,6 +61,7 @@ uint32_t DeinitMessenger(void)
         return SUCCESS;
     }
     DestroyMessenger(g_messenger);
+    g_messenger = NULL;
     UnlockMutex(&g_mutex);
     return SUCCESS;
 }
