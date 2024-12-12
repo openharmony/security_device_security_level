@@ -725,7 +725,10 @@ static void BindAsyncAction(const DeviceIdentify *devId)
     *identity = *devId;
 
     pthread_t id;
-    pthread_create(&id, NULL, BindSyncWithPthread, identity);
+    int ret = pthread_create(&id, NULL, BindSyncWithPthread, identity);
+    if (ret != 0) {
+        FREE(identity);
+    }
 }
 
 void MessengerSendMsgTo(uint64_t transNo, const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen)
