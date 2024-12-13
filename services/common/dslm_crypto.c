@@ -18,7 +18,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef L2_STANDARD
 #include "openssl/rand.h"
+#endif
 
 void GenerateRandom(RandomValue *rand, uint32_t length)
 {
