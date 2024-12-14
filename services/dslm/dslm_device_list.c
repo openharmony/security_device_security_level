@@ -24,6 +24,7 @@
 #include "device_security_defines.h"
 #include "dslm_core_defines.h"
 #include "dslm_fsm_process.h"
+#include "dslm_notify_node.h"
 #include "utils_dslm_list.h"
 #include "utils_log.h"
 #include "utils_mem.h"
@@ -168,4 +169,37 @@ bool JudgeListDeviceType(void)
     UnlockMutex(GetDeviceListMutex());
 
     return result;
+}
+
+static void DestroyNotifyAndHistoryInfo(DslmDeviceInfo *info)
+{
+    ListNode *node = NULL;
+    ListNode *temp = NULL;
+
+    FOREACH_LIST_NODE_SAFE (node, &info->notifyList, temp) {
+        DslmNotifyListNode *notifyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
+        RemoveListNode(node);
+        FREE(notifyNode);
+    }
+
+    FOREACH_LIST_NODE_SAFE (node, &info->historyList, temp) {
+        DslmNotifyListNode *historyNode = LIST_ENTRY(node, DslmNotifyListNode, linkNode);
+        RemoveListNode(node);
+        FREE(historyNode);
+    }
+}
+
+void DestroyAllDslmDeviceInfo(void)
+{
+    ListNode *node = NULL;
+    ListNode *temp = NULL;
+
+    LockMutex(GetDeviceListMutex());
+    FOREACH_LIST_NODE_SAFE (node, GetDeviceList(), temp) {
+        DslmDeviceInfo *info = LIST_ENTRY(node, DslmDeviceInfo, linkNode);
+        DestroyNotifyAndHistoryInfo(info);
+        RemoveListNode(node);
+        FREE(info);
+    }
+    UnlockMutex(GetDeviceListMutex());
 }

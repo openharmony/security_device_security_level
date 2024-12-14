@@ -43,6 +43,8 @@ void ForEachDeviceDump(const ProcessDumpFunction dumper, int32_t dumpHandle);
 
 bool JudgeListDeviceType(void);
 
+void DestroyAllDslmDeviceInfo(void);
+
 #ifdef __cplusplus
 }
 #endif
