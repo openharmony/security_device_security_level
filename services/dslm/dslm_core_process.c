@@ -267,6 +267,7 @@ bool InitDslmProcess(void)
 
 bool DeinitDslmProcess(void)
 {
+    DestroyAllDslmDeviceInfo();
     return true;
 }
 
