@@ -2088,6 +2088,17 @@ HWTEST_F(DslmTest, DslmQueue_case1, TestSize.Level0)
         EXPECT_EQ(ret, static_cast<uint32_t>(WORK_QUEUE_NULL_PTR));
     }
 }
+
+HWTEST_F(DslmTest, DestroyAllDslmDeviceInfo_case1, TestSize.Level0)
+{
+    const DeviceIdentify device = {DEVICE_ID_MAX_LEN, {'a'}};
+    DslmDeviceInfo *info = CreatOrGetDslmDeviceInfo(&device);
+    ASSERT_NE(info, nullptr);
+    ASSERT_NE(GetDeviceListSize(), 0U);
+
+    DestroyAllDslmDeviceInfo();
+    EXPECT_EQ(GetDeviceListSize(), 0U);
+}
 } // namespace DslmUnitTest
 } // namespace Security
 } // namespace OHOS
