@@ -36,13 +36,13 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         return ERR_INVALID_PARA;
     }
 
-    constexpr uint32_t DEFAULT_KEEP_LEN = 45;
-    constexpr uint32_t MAX_KEEP_LEN = 300;
-    static RequestOption defaultOption = {0, DEFAULT_KEEP_LEN, 0};
+    constexpr uint32_t defaultKeepLen = 45;
+    constexpr uint32_t maxKeepLen = 300;
+    static RequestOption defaultOption = {0, defaultKeepLen, 0};
     if (option == nullptr) {
         option = &defaultOption;
     }
-    if (option->timeout > MAX_KEEP_LEN) {
+    if (option->timeout > maxKeepLen) {
         HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo input error, timeout too len.");
         return ERR_INVALID_PARA;
     }
