@@ -49,8 +49,7 @@
                 "samgr",
                 "openssl",
                 "access_token"
-            ],
-            "third_party": [ "openssl" ]
+            ]
         },
         "build": {
             "group_type": {

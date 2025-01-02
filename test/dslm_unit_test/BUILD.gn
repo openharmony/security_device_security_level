@@ -99,7 +99,6 @@ if (os_level == "standard") {
       "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
       "../../services/common:service_common_obj",
       "../../services/dslm:service_dslm_test_obj",
-      "//third_party/googletest:gmock",
     ]
 
     external_deps = [
@@ -108,6 +107,7 @@ if (os_level == "standard") {
       "c_utils:utils",
       "device_security_level:dslm_sdk",
       "dsoftbus:softbus_client",
+      "googletest:gmock",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
