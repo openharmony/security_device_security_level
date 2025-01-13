@@ -1103,6 +1103,7 @@ HWTEST_F(DslmTest, OhosDslmCred_case1, TestSize.Level0)
     ret = DefaultVerifyDslmCred(&identify, object.challenge, cred, &info);
 
     DestroyDslmCred(cred);
+    EXPECT_EQ(false, GetPeerDeviceOnlineStatus(nullptr, nullptr));
 }
 
 HWTEST_F(DslmTest, OhosDslmCred_case2, TestSize.Level0)
@@ -1948,6 +1949,7 @@ HWTEST_F(DslmTest, ForEachDeviceDump_case1, TestSize.Level0)
     ForEachDeviceDump(dummyDump, 0);
     InitDslmStateMachine(nullptr);
     ScheduleDslmStateMachine(nullptr, 0, nullptr);
+    EXPECT_EQ(false, GetPeerDeviceOnlineStatus(nullptr, nullptr));
 }
 
 /**
