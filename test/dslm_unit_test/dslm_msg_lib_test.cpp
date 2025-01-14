@@ -20,6 +20,7 @@
 #include "messenger.h"
 #include "messenger_utils.h"
 #include "securec.h"
+#include "utils_log.h"
 #include "utils_mem.h"
 
 #include "device_manager_mock.h"
@@ -39,6 +40,13 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Security {
 namespace DslmUnitTest {
+
+std::string g_errLog;
+
+void LogCallback(const LogType, const LogLevel level, const unsigned int domain, const char *tag, const char *msg)
+{
+    g_errLog = msg;
+}
 
 void DslmMsgLibTest::SetUpTestCase()
 {
@@ -407,12 +415,14 @@ HWTEST_F(DslmMsgLibTest, MessengerForEachDeviceProcessTest, TestSize.Level0)
 
 HWTEST_F(DslmMsgLibTest, UtTimerProcessWaitingTimeOutTest, TestSize.Level0)
 {
+    LOG_SetCallback(LogCallback);
     {
         UtTimerProcessWaitingTimeOut(nullptr);
     }
     {
         char id[UINT8_MAX] = {0};
         UtTimerProcessWaitingTimeOut(id);
+        EXPECT_TRUE(g_errLog.find("SocketClosed") != std::string::npos);
     }
 }
 
