@@ -1718,6 +1718,23 @@ HWTEST_F(DslmTest, OnPeerStatusReceiver_case1, TestSize.Level0)
     EXPECT_EQ(SUCCESS, ret);
 }
 
+HWTEST_F(DslmTest, DslmDumper_case2, TestSize.Level0)
+{
+    DslmDumper(-1);
+
+    ReportAppInvokeEvent(nullptr);
+    ReportSecurityInfoSyncEvent(nullptr);
+    auto handle = DslmUtilsStartPeriodicTimerTask(100, [](const void *context) { return; }, nullptr);
+    ASSERT_NE(handle, static_cast<uint32_t>(0));
+    DslmUtilsStopTimerTask(handle);
+}
+
+HWTEST_F(DslmTest, JudgeListDeviceType_case1, TestSize.Level0)
+{
+    bool ret = JudgeListDeviceType();
+    EXPECT_EQ(ret, false);
+}
+
 HWTEST_F(DslmTest, InitDslmProcess_case1, TestSize.Level0)
 {
     EXPECT_EQ(false, InitDslmProcess());
@@ -2100,6 +2117,12 @@ HWTEST_F(DslmTest, DestroyAllDslmDeviceInfo_case1, TestSize.Level0)
 
     DestroyAllDslmDeviceInfo();
     EXPECT_EQ(GetDeviceListSize(), 0U);
+}
+
+HWTEST_F(DslmTest, JudgeListDeviceType_case2, TestSize.Level0)
+{
+    bool ret = JudgeListDeviceType();
+    EXPECT_EQ(ret, true);
 }
 } // namespace DslmUnitTest
 } // namespace Security
