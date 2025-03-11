@@ -86,6 +86,9 @@ HWTEST_F(DslmOemPropertyTest, VerifyDslmCredential_case1, TestSize.Level0)
 
     ret = VerifyDslmCredential(cred, &info, &list);
     EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
+
+    ret = VerifyDslmCredential(nullptr, &info, &list);
+    EXPECT_EQ(ERR_PARSE_CLOUD_CRED_DATA, ret);
 }
 
 /**
@@ -689,6 +692,12 @@ HWTEST_F(DslmOemPropertyTest, EcdsaVerify_case1, TestSize.Level0)
     uint32_t algorithm = TYPE_ECDSA_SHA_256;
 
     int32_t ret = EcdsaVerify(&srcData, &sigData, pbkData, algorithm);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = EcdsaVerify(nullptr, &sigData, pbkData, algorithm);
+    EXPECT_EQ(ERR_INVALID_PARA, ret);
+
+    ret = EcdsaVerify(&srcData, nullptr, pbkData, algorithm);
     EXPECT_EQ(ERR_INVALID_PARA, ret);
 }
 
