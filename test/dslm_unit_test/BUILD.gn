@@ -47,7 +47,7 @@ if (os_level == "standard") {
     testonly = true
     part_name = "device_security_level"
     subsystem_name = "security"
-    module_out_path = "${part_name}/${target_name}"
+    module_out_path = "device_security_level/device_security_level"
 
     defines = [ "UT_ENABLE=1" ]
 
@@ -133,7 +133,7 @@ if (os_level == "standard") {
     testonly = true
     part_name = "device_security_level"
     subsystem_name = "security"
-    module_out_path = "${part_name}/${target_name}"
+    module_out_path = "device_security_level/device_security_level"
 
     defines = [ "UT_ENABLE=1" ]
 
