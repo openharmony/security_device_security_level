@@ -23,7 +23,7 @@ extern "C" {
 
 void DslmStartProcessTrace(const char *value)
 {
-    StartTrace(HITRACE_TAG_DLSM, std::string(value));
+    StartTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM, value, "");
 }
 
 void DslmStartStateMachineTrace(uint32_t machineId, uint32_t event)
@@ -31,29 +31,29 @@ void DslmStartStateMachineTrace(uint32_t machineId, uint32_t event)
     std::string traceValue =
         std::string("StartStateMachine_") + std::to_string(machineId) + "_" + std::to_string(event);
 
-    StartTrace(HITRACE_TAG_DLSM, traceValue);
+    StartTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM, traceValue.c_str(), "");
 }
 
 void DslmFinishProcessTrace(void)
 {
-    FinishTrace(HITRACE_TAG_DLSM);
+    FinishTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM);
 }
 
 void DslmStartProcessTraceAsync(const char *value, uint32_t owner, uint32_t cookie)
 {
     std::string traceValue = std::string(value) + "_" + std::to_string(owner) + "_" + std::to_string(cookie);
-    StartAsyncTrace(HITRACE_TAG_DLSM, traceValue, cookie);
+    StartAsyncTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM, traceValue.c_str(), cookie, "", "");
 }
 
 void DslmFinishProcessTraceAsync(const char *value, uint32_t owner, uint32_t cookie)
 {
     std::string traceValue = std::string(value) + "_" + std::to_string(owner) + "_" + std::to_string(cookie);
-    FinishAsyncTrace(HITRACE_TAG_DLSM, traceValue, cookie);
+    FinishAsyncTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM, traceValue.c_str(), cookie);
 }
 
 void DslmCountTrace(const char *name, int64_t count)
 {
-    CountTrace(HITRACE_TAG_DLSM, std::string(name), count);
+    CountTraceEx(HITRACE_LEVEL_INFO, HITRACE_TAG_DLSM, name, count);
 }
 
 #ifdef __cplusplus
