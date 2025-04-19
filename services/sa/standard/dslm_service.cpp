@@ -55,6 +55,7 @@ void DslmService::OnStart()
 void DslmService::OnStop()
 {
     UnInitService();
+    ProcessUnloadPlugin();
     SECURITY_LOG_INFO("stop service");
 }
 
@@ -90,9 +91,19 @@ int32_t DslmService::ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageP
 void DslmService::ProcessLoadPlugin(void)
 {
 #ifdef PLUGIN_SO_PATH
-    auto *handle = dlopen(PLUGIN_SO_PATH, RTLD_NOW);
-    if (!handle) {
+    handle_ = dlopen(PLUGIN_SO_PATH, RTLD_NOW);
+    if (!handle_) {
         SECURITY_LOG_ERROR("load %{public}s failed for %{public}s", PLUGIN_SO_PATH, dlerror());
+    }
+#endif
+}
+
+void DslmService::ProcessUnloadPlugin(void)
+{
+#ifdef PLUGIN_SO_PATH
+    if (handle_) {
+        dlclose(handle_);
+        SECURITY_LOG_INFO("unload %{public}s", PLUGIN_SO_PATH);
     }
 #endif
 }
