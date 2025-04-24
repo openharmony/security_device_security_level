@@ -58,7 +58,7 @@ class DslmMsgInterfaceMock : public DslmMsgInterface {
 public:
     DslmMsgInterfaceMock();
     ~DslmMsgInterfaceMock() override;
-     MOCK_METHOD1(IsMessengerReady, bool(const Messenger *messenger));
+    MOCK_METHOD1(IsMessengerReady, bool(const Messenger *messenger));
     MOCK_METHOD5(SendMsgTo, uint64_t(const Messenger *messenger, uint64_t transNo, const DeviceIdentify *devId,
                                 const uint8_t *msg, uint32_t msgLen));
     MOCK_METHOD3(GetDeviceOnlineStatus,
