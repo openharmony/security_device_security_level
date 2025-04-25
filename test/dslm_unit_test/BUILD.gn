@@ -115,6 +115,7 @@ if (os_level == "standard") {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
       "huks:libhukssdk",
+      "selinux_adapter:librestorecon",
     ]
   }
 
