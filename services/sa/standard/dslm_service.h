@@ -45,8 +45,12 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
-    static void ProcessLoadPlugin(void);
+    void ProcessLoadPlugin(void);
+    void ProcessUnloadPlugin(void);
     int32_t ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
+#ifdef PLUGIN_SO_PATH
+    void *handle_;
+#endif
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security
