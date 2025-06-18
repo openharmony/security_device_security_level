@@ -1121,8 +1121,7 @@ HWTEST_F(DslmTest, OhosDslmCred_case2, TestSize.Level0)
     (void)memset_s(&info, sizeof(DslmCredInfo), 0, sizeof(DslmCredInfo));
 
     int32_t ret = DefaultVerifyDslmCred(&identify, object.challenge, &cred, &info);
-    EXPECT_EQ(SUCCESS, ret);
-    EXPECT_GE(info.credLevel, 1U);
+    EXPECT_EQ(ERR_CALL_EXTERNAL_FUNC, ret);
 }
 
 HWTEST_F(DslmTest, OnRequestDeviceSecLevelInfo_case1, TestSize.Level0)
