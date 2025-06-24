@@ -23,6 +23,7 @@
 #endif
 
 #include "messenger_device_socket_manager.h"
+#include "socket.h"
 
 #ifdef __cplusplus
 extern "C" {
