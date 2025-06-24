@@ -105,7 +105,7 @@ if (os_level == "standard") {
     ]
 
     external_deps = [
-      "access_token:libnativetoken",
+      "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
       "c_utils:utils",
       "device_security_level:dslm_sdk",
@@ -115,7 +115,6 @@ if (os_level == "standard") {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
       "huks:libhukssdk",
-      "selinux_adapter:librestorecon",
     ]
   }
 
@@ -188,7 +187,7 @@ if (os_level == "standard") {
     ]
 
     external_deps = [
-      "access_token:libnativetoken",
+      "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
       "c_utils:utils",
       "device_security_level:dslm_sdk",
