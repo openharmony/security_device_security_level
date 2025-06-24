@@ -25,22 +25,34 @@ if (os_level == "standard") {
       "-fno-omit-frame-pointer",
     ]
 
+    defines = [
+      "MAX_SEND_TIMES=5",
+      "SEND_MSG_TIMEOUT_LEN=40000",
+      "L2_STANDARD",
+    ]
+
+    defines += [ "UT_ENABLE=1" ]
+
     include_dirs = [
       "../../../baselib/utils/include",
       "../../../baselib/msglib/include",
       "../../../baselib/msglib/src/utils",
       "../../../baselib/msglib/src/common",
       "../../../baselib/msglib/src/standard",
+      "../../../baselib/msglib/src/utils",
+      "../../../baselib/utils/include",
       "../../../common/include",
       "../../../interfaces/inner_api/src/standard",
       "../../../oem_property/include",
       "../../../oem_property/ohos/common",
       "../../../oem_property/ohos/standard",
       "../../../oem_property/ohos/standard/impl",
+      "../../../services/dslm",
       "../../../services/sa/common",
       "../../../services/sa/standard",
       "../../../services/include",
       "../../../services/dslm",
+      "../../../test/dslm_unit_test",
       "../mock",
     ]
 
@@ -49,33 +61,66 @@ if (os_level == "standard") {
       "../../../baselib/msglib/src/standard/messenger_device_socket_manager.c",
       "../../../baselib/msglib/src/standard/messenger_device_status_manager.cpp",
       "../../../baselib/msglib/src/standard/messenger_impl.c",
+      "../../../baselib/msglib/src/utils/messenger_utils.c",
+      "../../../baselib/utils/src/utils_base64.c",
+      "../../../baselib/utils/src/utils_datetime.c",
+      "../../../baselib/utils/src/utils_hexstring.c",
+      "../../../baselib/utils/src/utils_json.c",
+      "../../../baselib/utils/src/utils_mem.c",
+      "../../../baselib/utils/src/utils_state_machine.c",
+      "../../../baselib/utils/src/utils_timer.cpp",
+      "../../../baselib/utils/src/utils_tlv.c",
+      "../../../baselib/utils/src/utils_work_queue.c",
+      "../../../oem_property/common/dslm_credential_utils.c",
+      "../../../oem_property/common/dslm_credential.c",
+      "../../../oem_property/ohos/common/dslm_ohos_request.c",
+      "../../../oem_property/ohos/common/dslm_ohos_verify.c",
+      "../../../oem_property/ohos/common/external_interface_adapter.c",
+      "../../../oem_property/ohos/common/hks_adapter.c",
+      "../../../oem_property/ohos/standard/impl/dslm_ohos_init.c",
+      "../../../oem_property/ohos/standard/dslm_ohos_credential.c",
+    ]
+
+    sources += [
+      "../../../services/common/dslm_crypto.c",
+      "../../../services/common/dslm_msg_serialize.c",
+      "../../../services/dfx/dslm_bigdata.cpp",
+      "../../../services/dfx/dslm_hidumper.c",
+      "../../../services/dfx/dslm_hitrace.cpp",
+      "../../../services/dslm/dslm_core_process.c",
+      "../../../services/dslm/dslm_device_list.c",
+      "../../../services/dslm/dslm_dfx_default.c",
+      "../../../services/dslm/dslm_fsm_process.c",
+      "../../../services/dslm/dslm_hievent.c",
+      "../../../services/dslm/dslm_inner_process.c",
+      "../../../services/dslm/dslm_msg_utils.c",
+      "../../../services/msg/dslm_messenger_wrapper.c",
       "../../../services/sa/common/dslm_rpc_process.c",
       "../../../services/sa/standard/dslm_callback_proxy.cpp",
       "../../../services/sa/standard/dslm_ipc_process.cpp",
       "../../../services/sa/standard/dslm_service.cpp",
-      "../mock/mock.cpp",
+      "../../../test/dslm_unit_test/device_manager.cpp",
+      "../../../test/dslm_unit_test/device_manager_mock.cpp",
+      "../mock/mock.c",
       "dslm_fuzzer.cpp",
     ]
 
-    deps = [
-      "../../../baselib/utils:utils_static",
-      "../../../oem_property:dslm_oem_ext",
-      "../../../services/common:service_common_obj",
-      "../../../services/dfx:dslm_extension_dfx",
-      "../../../services/dslm:service_dslm_obj",
-      "../../../services/msg:service_msg_obj",
-    ]
 
     external_deps = [
       "c_utils:utils",
-      "device_manager:devicemanagersdk",
       "device_security_level:dslm_sdk",
-      "dsoftbus:softbus_client",
       "hilog:libhilog",
       "huks:libhukssdk",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "cJSON:cjson",
+      "openssl:libcrypto_shared",
+      "device_auth:deviceauth_sdk",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
+      "googletest:gmock",
+      "googletest:gtest",
     ]
   }
 }

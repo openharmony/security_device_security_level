@@ -38,6 +38,11 @@
 #include "utils_base64.h"
 #include "utils_mem.h"
 #include "utils_tlv.h"
+#include "hks_param.h"
+#include "hks_type.h"
+#include "external_interface_adapter.h"
+#include "hks_adapter.h"
+#include "dslm_test_link.h"
 
 #define CNT 1000
 #define ITEMSTATE 4
@@ -314,12 +319,64 @@ void ReportHiEventTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
     info = nullptr;
 }
 
+void ConstructHksCertChainTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    struct HksCertChain *chain = nullptr;
+
+    {
+        (void)ConstructHksCertChain(&chain, nullptr);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = false;
+        param.certCountValid = true;
+        param.certDataExist = true;
+
+        (void)ConstructHksCertChain(&chain, &param);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = true;
+        param.certCountValid = false;
+        param.certDataExist = true;
+
+        (void)ConstructHksCertChain(&chain, &param);
+    }
+
+    {
+        struct HksCertChainInitParams param;
+        param.certChainExist = true;
+        param.certCountValid = true;
+        param.certDataExist = false;
+
+        (void)ConstructHksCertChain(&chain, &param);
+    }
+}
+
+void FillHksParamSetTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam *param = nullptr;
+    int32_t paramNums = 0;
+    (void)FillHksParamSet(&paramSet, param, paramNums);
+}
+
+void HksGenerateKeyAdapterTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
+{
+    const HksBlob *keyAlias1 = nullptr;
+
+    (void)HksGenerateKeyAdapter(keyAlias1);
+}
+
 DslmFuzzerTable g_fuzzerTable[] = {{0, OnPeerMsgReceivedTest1}, {1, OnPeerMsgReceivedTest2},
     {2, OnPeerMsgReceivedTest3}, {3, ServiceTest}, {4, OnSendResultNotifierTest}, {5, VerifyDslmCredentialTest},
     {6, MessengerSendMsgToTest}, {7, OnPeerStatusReceiverTest}, {8, DslmDumperTest}, {9, VerifyOhosDslmCredTest},
     {10, RequestDeviceSecurityInfoTest}, {11, GetPeerDeviceOnlineStatusTest}, {12, Base64EncodeAppTest},
     {13, SerializeTest}, {14, BufferToHksCertChainTest}, {15, DestroyHksCertChainTest}, {16, DefaultInitDslmCredTest},
-    {17, BuildDeviceSecInfoResponseTest}, {18, ReportHiEventTest}};
+    {17, BuildDeviceSecInfoResponseTest}, {18, ReportHiEventTest}, {19, FillHksParamSetTest},
+    {20, HksGenerateKeyAdapterTest}, {21, ConstructHksCertChainTest}};
 
 void OnPeerMsgReceivedFuzzer(Parcel &parcel)
 {
@@ -340,7 +397,7 @@ void OnPeerMsgReceivedFuzzer(Parcel &parcel)
         }
     }
 
-    uint32_t a = parcel.ReadUint32() % 19;
+    uint32_t a = parcel.ReadUint32() % 22;
     for (uint32_t i = 0; i < sizeof(g_fuzzerTable) / sizeof(DslmFuzzerTable); ++i) {
         if (g_fuzzerTable[i].code == a) {
             g_fuzzerTable[i].process(&deviceIdentify, parcel);
@@ -387,6 +444,22 @@ void OnRemoteRequestFuzzer(Parcel &parcel)
     SECURITY_LOG_INFO("end");
 }
 
+void UtServerOnShutdownFuzz()
+{
+    DeviceIdentify idt {.length = 1, .identity = {'a'}};
+
+    char dummy[] = {'a', 0};
+    PeerSocketInfo peer = {.name = dummy, .networkId = dummy};
+    UtServerOnBind(1, peer);
+    UtClientOnBind(1, &idt);
+
+    UtCreateOrRestartSocketCloseTimerWithLock(0);
+    UtCreateOrRestartSocketCloseTimerWithLock(1);
+
+    UtServerOnBytes(1, dummy, 1);
+    UtClientOnBytes(1, dummy, 1);
+}
+
 void DslmFuzzTest(const uint8_t *data, size_t size)
 {
     Parcel parcel;
@@ -397,6 +470,7 @@ void DslmFuzzTest(const uint8_t *data, size_t size)
     } else {
         OnRemoteRequestFuzzer(parcel);
     }
+    UtServerOnShutdownFuzz();
 }
 } // namespace
 } // namespace DeviceSecurityLevel
