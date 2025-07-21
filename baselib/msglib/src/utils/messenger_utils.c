@@ -21,10 +21,12 @@
 #include "utils_log.h"
 #include "utils_mem.h"
 
+#define MSG_BUFF_MAX_LENGTH (81920 * 4)
+
 QueueMsgData *CreateQueueMsgData(const DeviceIdentify *devId, const uint8_t *msg, uint32_t msgLen,
     uint32_t *queueDataLen)
 {
-    if (devId == NULL || msg == NULL || msgLen == 0 || queueDataLen == NULL) {
+    if (devId == NULL || msg == NULL || msgLen == 0 || queueDataLen == NULL || msgLen > MSG_BUFF_MAX_LENGTH) {
         return NULL;
     }
 
