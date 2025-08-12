@@ -30,7 +30,7 @@ class DslmRequestCallback {
 public:
     DslmRequestCallback() = default;
     virtual ~DslmRequestCallback() = default;
-    virtual void  RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info) = 0;
+    virtual void RequestCallback(uint32_t cookie, uint32_t result, const DslmCallbackInfo *info) = 0;
 };
 
 class DslmRequestCallbackMock : public DslmRequestCallback {
