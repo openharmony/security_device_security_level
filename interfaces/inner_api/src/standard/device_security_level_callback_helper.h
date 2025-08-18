@@ -64,7 +64,6 @@ private:
         std::map<uint32_t, CallbackInfo> map_;
         uint32_t generate_ {0};
         std::mutex mutex_;
-        OHOS::Utils::Timer timer_;
     };
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
