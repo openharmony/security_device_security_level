@@ -34,8 +34,6 @@ namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS::HiviewDFX;
 
-constexpr char TIMER_NAME[] = "DSLM_CALL_TIMER";
-constexpr uint32_t KEEP_COMPENSATION_LEN = 5;
 constexpr uint32_t MAX_CALLBACKS_NUM = 128;
 
 DeviceSecurityLevelCallbackHelper::DeviceSecurityLevelCallbackHelper()
@@ -96,14 +94,12 @@ int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, Messag
     return SUCCESS;
 }
 
-DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::CallbackInfoHolder() : timer_(TIMER_NAME)
+DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::CallbackInfoHolder()
 {
-    timer_.Setup();
 }
 
 DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::~CallbackInfoHolder()
 {
-    timer_.Shutdown();
 }
 
 bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const DeviceIdentify &identity,
@@ -118,11 +114,6 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const D
     cookie = ++generate_;
     CallbackInfo info = {.identity = identity, .callback = callback, .cookie = cookie};
     auto result = map_.emplace(generate_, info);
-    if (result.second) {
-        auto deleter = [cookie, this]() { PopCallback(cookie, ERR_TIMEOUT, 0); };
-        keep += KEEP_COMPENSATION_LEN;
-        timer_.Register(deleter, keep * 1000, true); // 1000 millisec
-    }
     return result.second;
 }
 
@@ -154,6 +145,7 @@ bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t
 
     return true;
 }
+
 bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PopCallback(uint32_t cookie)
 {
     std::lock_guard<std::mutex> lock(mutex_);
