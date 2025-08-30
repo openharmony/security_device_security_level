@@ -25,6 +25,8 @@
 #include "device_security_level_loader.h"
 #include "device_security_level_proxy.h"
 
+constexpr uint32_t MAX_TIMEOUT = 50;
+
 using namespace OHOS::HiviewDFX;
 using namespace OHOS::Security::DeviceSecurityLevel;
 
@@ -86,7 +88,15 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
         HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl RequestDeviceSecurityLevel error.");
         return result;
     }
-    *info = promise.get_future().get();
+
+    std::future<DeviceSecurityInfo *> future = promise.get_future();
+    if (future.wait_for(std::chrono::seconds(MAX_TIMEOUT)) == std::future_status::timeout) {
+        HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl timeout error.");
+        *info = nullptr;
+        return ERR_TIMEOUT;
+    }
+
+    *info = future.get();
     return SUCCESS;
 }
 
