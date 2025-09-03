@@ -14,9 +14,7 @@
     "component": {
         "name": "device_security_level",
         "subsystem": "security",
-        "syscap": [
-            "SystemCapability.Security.DeviceSecurityLevel"
-        ],
+        "syscap": [],
         "features": [
             "device_security_level_feature_cred_level",
             "device_security_level_feature_plugin_path",
