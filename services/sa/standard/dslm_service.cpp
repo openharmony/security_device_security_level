@@ -21,6 +21,7 @@
 #include "iremote_object.h"
 #include "singleton.h"
 #include "utils_log.h"
+#include "string_ex.h"
 
 #include "device_security_defines.h"
 #include "dslm_hidumper.h"
@@ -61,7 +62,22 @@ void DslmService::OnStop()
 
 int32_t DslmService::Dump(int fd, const std::vector<std::u16string> &args)
 {
-    DslmDumper(fd);
+    dprintf(fd, "Dslm Dump:\n");
+    if (args.size() == 0) {
+        dprintf(fd, "please use hidumper -s said -a -h command help\n");
+        return 0;
+    }
+    std::string arg0 = Str16ToStr8(args.at(0));
+    if (arg0.compare("-h") == 0) {
+        dprintf(fd, "Usage:\n");
+        dprintf(fd, "       -h: command help\n");
+        dprintf(fd, "       -l: dump all device\n");
+    } else if (arg0.compare("-l") == 0) {
+        DslmDumper(fd);
+    } else {
+        dprintf(fd, "please use hidumper -s said -a -h command help\n");
+    }
+
     return 0;
 }
 
