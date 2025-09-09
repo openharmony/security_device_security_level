@@ -17,6 +17,7 @@
 
 #include "parcel.h"
 #include "securec.h"
+#include "string_ex.h"
 
 #include "device_security_defines.h"
 #include "device_security_info.h"
@@ -51,6 +52,7 @@
 #define INIT_MAX 3
 #define PTR_LEN 4
 #define BLOB_SIZE 5
+#define DUMP_NUM 2
 
 extern "C" int32_t OnPeerMsgReceived(const DeviceIdentify *devId, const uint8_t *msg, uint32_t len);
 extern "C" int32_t OnSendResultNotifier(const DeviceIdentify *devId, uint64_t transNo, uint32_t result);
@@ -188,6 +190,19 @@ void OnPeerStatusReceiverTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 
 void DslmDumperTest(DeviceIdentify *deviceIdentify, Parcel &parcel)
 {
+    int fd = 3511;
+    uint32_t status = parcel.ReadUint32() % PTR_LEN;
+    std::vector<std::u16string> args;
+    if (status == 0) {
+        g_dslmService.Dump(0, args);
+    } else if (status == 1) {
+        args.emplace_back(Str8ToStr16("-h"));
+    } else if (status == DUMP_NUM) {
+        args.emplace_back(Str8ToStr16("-l"));
+    } else {
+        args.emplace_back(Str8ToStr16("-t"));
+    }
+    g_dslmService.Dump(fd, args);
     DslmDumper(-1);
 }
 
