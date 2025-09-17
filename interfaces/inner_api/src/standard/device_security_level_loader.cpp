@@ -26,6 +26,8 @@
 #include "device_security_level_defines.h"
 #include "idevice_security_level.h"
 
+constexpr uint32_t MAX_LOAD_TIMEOUT = 10;
+
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
@@ -70,7 +72,13 @@ void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t si
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
 {
-    return promise_.get_future().get();
+    std::future<sptr<IRemoteObject>> future = promise_.get_future();
+    if (future.wait_for(std::chrono::seconds(MAX_LOAD_TIMEOUT)) == std::future_status::timeout) {
+        HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelLoader loadCallback timeout error.");
+        return nullptr;
+    }
+
+    return future.get();
 }
 } // namespace DeviceSecurityLevel
 } // namespace Security
