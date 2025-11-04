@@ -24,6 +24,7 @@
 #include "iremote_object.h"
 #include "singleton.h"
 #include "system_ability_load_callback_stub.h"
+#include "device_security_level_once_promise.h"
 
 namespace OHOS {
 namespace Security {
@@ -43,7 +44,7 @@ private:
         sptr<IRemoteObject> Promise();
 
     private:
-        std::promise<sptr<IRemoteObject>> promise_;
+        OncePromise<sptr<IRemoteObject>> promise_;
     };
 };
 } // namespace DeviceSecurityLevel

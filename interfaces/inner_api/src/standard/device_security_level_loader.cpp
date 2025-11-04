@@ -61,18 +61,18 @@ sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadDslmService()
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilitySuccess(int32_t sid, const sptr<IRemoteObject> &object)
 {
     HILOG_INFO(LOG_CORE, "OnLoadSystemAbilitySuccess = %{public}d.", sid);
-    promise_.set_value(object);
+    promise_.SetValue(object);
 }
 
 void DeviceSecurityLevelLoader::LoadCallback::OnLoadSystemAbilityFail(int32_t sid)
 {
     HILOG_ERROR(LOG_CORE, "OnLoadSystemAbilityFail = %{public}d.", sid);
-    promise_.set_value(nullptr);
+    promise_.SetValue(nullptr);
 }
 
 sptr<IRemoteObject> DeviceSecurityLevelLoader::LoadCallback::Promise()
 {
-    std::future<sptr<IRemoteObject>> future = promise_.get_future();
+    std::future<sptr<IRemoteObject>> future = promise_.GetFuture();
     if (future.wait_for(std::chrono::seconds(MAX_LOAD_TIMEOUT)) == std::future_status::timeout) {
         HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelLoader loadCallback timeout error.");
         return nullptr;
