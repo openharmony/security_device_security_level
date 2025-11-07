@@ -24,6 +24,7 @@
 #include "device_security_level_defines.h"
 #include "device_security_level_loader.h"
 #include "device_security_level_proxy.h"
+#include "device_security_level_once_promise.h"
 
 constexpr uint32_t MAX_TIMEOUT = 50;
 
@@ -77,10 +78,10 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
 static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info)
 {
-    std::promise<DeviceSecurityInfo *> promise;
+    OncePromise<DeviceSecurityInfo *> promise;
 
     auto callback = [&promise](const DeviceIdentify *identify, struct DeviceSecurityInfo *info) {
-        promise.set_value(info);
+        promise.SetValue(info);
         return;
     };
     auto result = RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
@@ -89,7 +90,7 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
         return result;
     }
 
-    std::future<DeviceSecurityInfo *> future = promise.get_future();
+    std::future<DeviceSecurityInfo *> future = promise.GetFuture();
     if (future.wait_for(std::chrono::seconds(MAX_TIMEOUT)) == std::future_status::timeout) {
         HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl timeout error.");
         *info = nullptr;
