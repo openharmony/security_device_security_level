@@ -50,7 +50,7 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
         return ERR_INVALID_PARA;
     }
     auto object = DeviceSecurityLevelLoader::GetInstance().LoadDslmService();
-    auto proxy = iface_cast<DeviceSecurityLevelProxy>(object);
+    auto proxy = iface_cast<IDeviceSecurityLevel>(object);
     if (proxy == nullptr) {
         HILOG_ERROR(LOG_CORE, "GetDeviceSecurityInfo iface_cast error.");
         return ERR_IPC_REMOTE_OBJ_ERR;
