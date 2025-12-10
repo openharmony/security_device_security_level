@@ -28,8 +28,8 @@ namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
 using namespace OHOS::HiviewDFX;
-DeviceSecurityLevelCallbackStub::DeviceSecurityLevelCallbackStub(RemoteRequest request)
-    : remoteRequest_(std::move(request))
+DeviceSecurityLevelCallbackStub::DeviceSecurityLevelCallbackStub(RemoteRequest request, RemoteResponse response)
+    : remoteRequest_(std::move(request)), remoteResponse_(std::move(response))
 {
 }
 
@@ -41,9 +41,31 @@ int32_t DeviceSecurityLevelCallbackStub::OnRemoteRequest(uint32_t code, MessageP
         return SUCCESS;
     }
 
-    if (remoteRequest_ != nullptr) {
-        return remoteRequest_(code, data, reply, option);
+    uint32_t cookie;
+    uint32_t result;
+    uint32_t level;
+
+    if (remoteRequest_ == nullptr) {
+        return SUCCESS;
     }
+    int32_t ret = remoteRequest_(code, data, cookie, result, level);
+    if (ret != SUCCESS) {
+        return ret;
+    }
+
+    ResponseInfo info = {
+        .result = result,
+        .level = level,
+    };
+    return ResponseDeviceSecurityLevel(cookie, info);
+}
+
+int32_t DeviceSecurityLevelCallbackStub::ResponseDeviceSecurityLevel(uint32_t cookie, const ResponseInfo &response)
+{
+    if (remoteResponse_ != nullptr) {
+        return remoteResponse_(cookie, response.result, response.level);
+    }
+
     return SUCCESS;
 }
 } // namespace DeviceSecurityLevel

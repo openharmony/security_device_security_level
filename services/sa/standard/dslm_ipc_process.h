@@ -28,6 +28,7 @@
 #include "singleton.h"
 
 #include "device_security_defines.h"
+#include "dslm_callback_info.h"
 #include "utils_timer.h"
 
 namespace OHOS {
@@ -35,7 +36,11 @@ namespace Security {
 namespace DeviceSecurityLevel {
 class DslmIpcProcess : public Singleton<DslmIpcProcess> {
 public:
-    int32_t DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply);
+    int32_t DslmProcessGetDeviceSecurityLevel(const DeviceIdentify *identify, const RequestOption *option,
+        uint32_t cookie, const sptr<IRemoteObject> &callback);
+    int32_t DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
+        sptr<IRemoteObject> &object, uint32_t &cookie);
+    int32_t DslmSetResponseToParcel(MessageParcel &reply, uint32_t status);
     class RemoteHolder : public Singleton<RemoteHolder> {
     public:
         bool Push(uint32_t owner, uint32_t cookie, const sptr<IRemoteObject> &object);
@@ -48,10 +53,6 @@ public:
 
 private:
     TimerHandle unloadTimerHandle_ {0};
-    int32_t DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
-        sptr<IRemoteObject> &object, uint32_t &cookie);
-
-    int32_t DslmSetResponseToParcel(MessageParcel &reply, uint32_t status);
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security

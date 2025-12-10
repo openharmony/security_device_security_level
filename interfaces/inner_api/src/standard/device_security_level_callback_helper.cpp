@@ -38,10 +38,13 @@ constexpr uint32_t MAX_CALLBACKS_NUM = 128;
 
 DeviceSecurityLevelCallbackHelper::DeviceSecurityLevelCallbackHelper()
 {
-    auto request = [this](uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) {
-        return this->OnRemoteRequest(code, data, reply, option);
+    auto request = [this](uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result, uint32_t &level) {
+        return this->OnRemoteRequest(code, data, cookie, result, level);
     };
-    stub_ = new (std::nothrow) DeviceSecurityLevelCallbackStub(request);
+    auto response = [this](uint32_t cookie, uint32_t result, uint32_t level) {
+        return this->ResponseDeviceSecurityLevel(cookie, result, level);
+    };
+    stub_ = new (std::nothrow) DeviceSecurityLevelCallbackStub(request, response);
 }
 
 DeviceSecurityLevelCallbackHelper::~DeviceSecurityLevelCallbackHelper()
@@ -80,16 +83,26 @@ bool DeviceSecurityLevelCallbackHelper::Withdraw(uint32_t cookie)
     return true;
 }
 
-int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
-    MessageOption &option)
+int32_t DeviceSecurityLevelCallbackHelper::OnRemoteRequest(uint32_t code, MessageParcel &data, uint32_t &cookie,
+    uint32_t &result, uint32_t &level)
 {
     if (code == DeviceSecurityLevelCallbackStub::CMD_SET_DEVICE_SECURITY_LEVEL) {
-        auto cookie = data.ReadUint32();
-        auto result = data.ReadUint32();
-        auto level = data.ReadUint32();
-        HILOG_INFO(LOG_CORE, "callback cookie %{public}u, result %{public}u, level %{public}u", cookie, result, level);
-        holder_.PopCallback(cookie, result, level);
+        cookie = data.ReadUint32();
+        result = data.ReadUint32();
+        level = data.ReadUint32();
+        HILOG_INFO(LOG_CORE, "OnRemoteRequest cookie %{public}u, result %{public}u, level %{public}u", cookie,
+            result, level);
     }
+
+    return SUCCESS;
+}
+
+int32_t DeviceSecurityLevelCallbackHelper::ResponseDeviceSecurityLevel(uint32_t cookie, uint32_t result,
+    uint32_t level)
+{
+    HILOG_INFO(LOG_CORE, "ResponseDeviceSecurityLevel cookie %{public}u, result %{public}u, level %{public}u",
+        cookie, result, level);
+    holder_.PopCallback(cookie, result, level);
 
     return SUCCESS;
 }
