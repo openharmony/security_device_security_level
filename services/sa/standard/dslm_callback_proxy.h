@@ -36,14 +36,7 @@ public:
     explicit DslmCallbackProxy(const sptr<IRemoteObject> &impl);
     ~DslmCallbackProxy() override = default;
 
-    struct ResponseInfo {
-        uint32_t result {0};
-        uint32_t level {0};
-        const uint8_t *extraBuff {nullptr};
-        uint32_t extraLen {0};
-    };
-
-    int32_t ResponseDeviceSecurityLevel(uint32_t cookie, const ResponseInfo &response);
+    int32_t ResponseDeviceSecurityLevel(uint32_t cookie, const ResponseInfo &response) override;
 
 private:
     static inline BrokerDelegator<DslmCallbackProxy> delegator_;

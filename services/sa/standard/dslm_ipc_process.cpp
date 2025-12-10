@@ -22,7 +22,6 @@
 #include "iremote_broker.h"
 #include "securec.h"
 
-#include "dslm_callback_info.h"
 #include "dslm_callback_proxy.h"
 #include "dslm_core_process.h"
 #include "dslm_device_list.h"
@@ -40,6 +39,9 @@ constexpr uint32_t UNLOAD_TIMEOUT = 10000;
 namespace OHOS {
 namespace Security {
 namespace DeviceSecurityLevel {
+static void TimerProcessUnloadSystemAbility(const void *context);
+static void SetSystemAbilityUnloadSchedule(TimerHandle &handle);
+
 static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, const DslmCallbackInfo *info)
 {
     if ((cookie == 0) || (info == nullptr)) {
@@ -51,7 +53,7 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
         return;
     }
 
-    auto proxy = iface_cast<DslmCallbackProxy>(object);
+    auto proxy = iface_cast<IDeviceSecurityLevelCallback>(object);
     if (proxy == nullptr) {
         SECURITY_LOG_ERROR("iface_cast failed");
         return;
@@ -63,6 +65,8 @@ static void ProcessCallback(uint32_t owner, uint32_t cookie, uint32_t result, co
 int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIdentify &identify, RequestOption &option,
     sptr<IRemoteObject> &object, uint32_t &cookie)
 {
+    SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
+
     uint32_t expected = sizeof(DeviceIdentify) + sizeof(RequestOption) + sizeof(uint32_t);
     uint32_t actual = data.GetReadableBytes();
     if (expected >= actual) {
@@ -106,8 +110,10 @@ int32_t DslmIpcProcess::DslmGetRequestFromParcel(MessageParcel &data, DeviceIden
 
 int32_t DslmIpcProcess::DslmSetResponseToParcel(MessageParcel &reply, uint32_t status)
 {
+    auto owner = IPCSkeleton::GetCallingPid();
     auto success = reply.WriteUint32(status);
     if (!success) {
+        Singleton<RemoteHolder>::GetInstance().Pop(owner, status);
         return ERR_IPC_RET_PARCEL_ERR;
     }
     return SUCCESS;
@@ -148,37 +154,19 @@ static void SetSystemAbilityUnloadSchedule(TimerHandle &handle)
     handle = DslmUtilsStartOnceTimerTask(UNLOAD_TIMEOUT, TimerProcessUnloadSystemAbility, nullptr);
 }
 
-int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply)
+int32_t DslmIpcProcess::DslmProcessGetDeviceSecurityLevel(const DeviceIdentify *identify, const RequestOption *option,
+    uint32_t cookie, const sptr<IRemoteObject> &callback)
 {
-    DeviceIdentify identity;
-    RequestOption option;
-    sptr<IRemoteObject> callback;
-    uint32_t cookie;
-
-    SetSystemAbilityUnloadSchedule(unloadTimerHandle_);
-
-    int32_t ret = DslmGetRequestFromParcel(data, identity, option, callback, cookie);
-    if (ret != SUCCESS) {
-        SECURITY_LOG_ERROR("DslmGetRequestFromParcel failed, ret = %{public}d", ret);
-        return ret;
-    }
-
     auto owner = IPCSkeleton::GetCallingPid();
     Singleton<RemoteHolder>::GetInstance().Push(owner, cookie, callback);
 
-    ret = OnRequestDeviceSecLevelInfo(&identity, &option, owner, cookie, ProcessCallback);
+    int32_t ret = OnRequestDeviceSecLevelInfo(identify, option, owner, cookie, ProcessCallback);
     if (ret != SUCCESS) {
         Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
         SECURITY_LOG_ERROR("OnRequestDeviceSecLevelInfo failed, ret = %{public}d", ret);
         return ret;
     }
 
-    ret = DslmSetResponseToParcel(reply, cookie);
-    if (ret != SUCCESS) {
-        Singleton<RemoteHolder>::GetInstance().Pop(owner, cookie);
-        SECURITY_LOG_ERROR("DslmSetResponseToParcel failed, ret = %{public}d", ret);
-        return ret;
-    }
     return SUCCESS;
 }
 

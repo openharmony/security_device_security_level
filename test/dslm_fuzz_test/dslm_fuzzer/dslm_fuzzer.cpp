@@ -446,7 +446,11 @@ void OnRemoteRequestFuzzer(Parcel &parcel)
     data.WriteUint32(parcel.ReadUint32());
 
     sptr<IRemoteObject> callback = new (std::nothrow) DeviceSecurityLevelCallbackStub(
-        [](uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) {
+        [](uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result, uint32_t &level) {
+            SECURITY_LOG_INFO("DeviceSecurityLevelCallbackStub called");
+            return 0;
+        },
+        [](uint32_t cookie, uint32_t result, uint32_t level) {
             SECURITY_LOG_INFO("DeviceSecurityLevelCallbackStub called");
             return 0;
         });

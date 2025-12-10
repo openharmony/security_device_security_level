@@ -43,6 +43,8 @@ public:
     void OnStop() override;
     int32_t Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
+        const sptr<IRemoteObject> &callback, uint64_t cookie) override;
 
 private:
     void ProcessLoadPlugin(void);

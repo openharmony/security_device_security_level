@@ -34,16 +34,21 @@ namespace DeviceSecurityLevel {
 using namespace OHOS;
 class DeviceSecurityLevelCallbackStub : public IRemoteStub<IDeviceSecurityLevelCallback>, public NoCopyable {
     using RemoteRequest =
-        std::function<int32_t(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)>;
+        std::function<int32_t(uint32_t code, MessageParcel &data, uint32_t &cookie, uint32_t &result,
+            uint32_t &level)>;
+    using RemoteResponse =
+        std::function<int32_t(uint32_t cookie, uint32_t result, uint32_t level)>;
 
 public:
-    explicit DeviceSecurityLevelCallbackStub(RemoteRequest request);
+    explicit DeviceSecurityLevelCallbackStub(RemoteRequest request, RemoteResponse response);
     ~DeviceSecurityLevelCallbackStub() override = default;
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int32_t ResponseDeviceSecurityLevel(uint32_t cookie, const ResponseInfo &response) override;
 
 private:
     RemoteRequest remoteRequest_;
+    RemoteResponse remoteResponse_;
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security
