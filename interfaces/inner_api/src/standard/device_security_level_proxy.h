@@ -38,7 +38,7 @@ public:
     explicit DeviceSecurityLevelProxy(const sptr<IRemoteObject> &impl);
     ~DeviceSecurityLevelProxy() override = default;
     int32_t RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
-        const sptr<IRemoteObject> &callback, uint64_t cookie);
+        const sptr<IRemoteObject> &callback, uint64_t cookie) override;
 
 private:
     static inline BrokerDelegator<DeviceSecurityLevelProxy> delegator_;

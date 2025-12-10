@@ -99,9 +99,39 @@ int32_t DslmService::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
     return ERR_REQUEST_CODE_ERR;
 }
 
+int32_t DslmService::RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
+    const sptr<IRemoteObject> &callback, uint64_t cookie)
+    {
+        return Singleton<DslmIpcProcess>::GetInstance().DslmProcessGetDeviceSecurityLevel(&identify, &option,
+            cookie, callback);
+    }
+
 int32_t DslmService::ProcessGetDeviceSecurityLevel(MessageParcel &data, MessageParcel &reply)
 {
-    return Singleton<DslmIpcProcess>::GetInstance().DslmProcessGetDeviceSecurityLevel(data, reply);
+    DeviceIdentify identify;
+    RequestOption option;
+    sptr<IRemoteObject> callback;
+    uint32_t cookie;
+    int32_t ret = Singleton<DslmIpcProcess>::GetInstance().DslmGetRequestFromParcel(data, identify, option,
+        callback, cookie);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("DslmGetRequestFromParcel failed, ret is %{public}d", ret);
+        return ret;
+    }
+
+    ret = RequestDeviceSecurityLevel(identify, option, callback, cookie);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("RequestDeviceSecurityLevel failed, ret is %{public}d", ret);
+        return ret;
+    }
+
+    ret = Singleton<DslmIpcProcess>::GetInstance().DslmSetResponseToParcel(reply, cookie);
+    if (ret != SUCCESS) {
+        SECURITY_LOG_ERROR("DslmSetResponseToParcel failed, ret is %{public}d", ret);
+        return ret;
+    }
+
+    return SUCCESS;
 }
 
 void DslmService::ProcessLoadPlugin(void)

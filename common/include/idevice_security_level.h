@@ -22,6 +22,7 @@
 #include "dslm_service_ipc_interface_code.h"
 #include "iremote_broker.h"
 #include "message_parcel.h"
+#include "device_security_defines.h"
 
 namespace OHOS {
 namespace Security {
@@ -35,6 +36,8 @@ public:
     enum {
         CMD_GET_DEVICE_SECURITY_LEVEL = static_cast<uint32_t>(InterfaceCode::CMD_GET_DEVICE_SECURITY_LEVEL),
     };
+    virtual int32_t RequestDeviceSecurityLevel(const DeviceIdentify &identify, const RequestOption &option,
+        const sptr<IRemoteObject> &callback, uint64_t cookie) = 0;
 };
 
 class IDeviceSecurityLevelCallback : public IRemoteBroker {
@@ -44,6 +47,15 @@ public:
     enum {
         CMD_SET_DEVICE_SECURITY_LEVEL = static_cast<uint32_t>(InterfaceCode::CMD_SET_DEVICE_SECURITY_LEVEL),
     };
+
+    struct ResponseInfo {
+        uint32_t result {0};
+        uint32_t level {0};
+        const uint8_t *extraBuff {nullptr};
+        uint32_t extraLen {0};
+    };
+
+    virtual int32_t ResponseDeviceSecurityLevel(uint32_t cookie, const ResponseInfo &response) = 0;
 };
 } // namespace DeviceSecurityLevel
 } // namespace Security
