@@ -99,6 +99,7 @@ if (os_level == "standard") {
 
     deps = [
       "../../baselib/utils:utils_static",
+      "../../interfaces/inner_api:dslm_sdk",
       "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
       "../../services/common:service_common_obj",
       "../../services/dslm:service_dslm_test_obj",
@@ -108,7 +109,6 @@ if (os_level == "standard") {
       "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "device_security_level:dslm_sdk",
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",
@@ -181,6 +181,7 @@ if (os_level == "standard") {
 
     deps = [
       "../../baselib/utils:utils_static",
+      "../../interfaces/inner_api:dslm_sdk",
       "../../oem_property/ohos/standard:dslm_ohos_cred_obj",
       "../../services/common:service_common_obj",
       "../../services/dslm:service_dslm_test_obj",
@@ -190,7 +191,6 @@ if (os_level == "standard") {
       "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
       "c_utils:utils",
-      "device_security_level:dslm_sdk",
       "dsoftbus:softbus_client",
       "googletest:gmock",
       "hilog:libhilog",

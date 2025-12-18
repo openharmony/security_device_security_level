@@ -105,10 +105,10 @@ if (os_level == "standard") {
       "dslm_fuzzer.cpp",
     ]
 
+    deps = [ "../../../interfaces/inner_api:dslm_sdk" ]
 
     external_deps = [
       "c_utils:utils",
-      "device_security_level:dslm_sdk",
       "hilog:libhilog",
       "huks:libhukssdk",
       "ipc:ipc_core",
