@@ -78,10 +78,16 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
 static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info)
 {
-    OncePromise<DeviceSecurityInfo *> promise;
+    auto promise = std::make_shared<OncePromise<DeviceSecurityInfo *>>();
 
-    auto callback = [&promise](const DeviceIdentify *identify, struct DeviceSecurityInfo *info) {
-        promise.SetValue(info);
+    auto callback = [weakPromise = std::weak_ptr<OncePromise<DeviceSecurityInfo *>>(promise)](
+        const DeviceIdentify *identify, struct DeviceSecurityInfo *info) {
+        auto sharePromise = weakPromise.lock();
+        if (!sharePromise) {
+            HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl promise is nullptr.");
+            return;
+        }
+        sharePromise->SetValue(info);
         return;
     };
     auto result = RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
@@ -90,7 +96,7 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
         return result;
     }
 
-    std::future<DeviceSecurityInfo *> future = promise.GetFuture();
+    std::future<DeviceSecurityInfo *> future = promise->GetFuture();
     if (future.wait_for(std::chrono::seconds(MAX_TIMEOUT)) == std::future_status::timeout) {
         HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl timeout error.");
         *info = nullptr;
