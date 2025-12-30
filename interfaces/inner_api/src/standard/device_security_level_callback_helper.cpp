@@ -118,6 +118,7 @@ DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::~CallbackInfoHolder()
 bool DeviceSecurityLevelCallbackHelper::CallbackInfoHolder::PushCallback(const DeviceIdentify &identity,
     const ResultCallback &callback, uint32_t keep, uint32_t &cookie)
 {
+    (void)keep;
     std::lock_guard<std::mutex> lock(mutex_);
     if (map_.size() > MAX_CALLBACKS_NUM) {
         HILOG_ERROR(LOG_CORE, "DeviceSecurityLevelCallbackHelper::PushCallback reached max");
