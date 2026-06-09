@@ -629,7 +629,7 @@ void DslmTest::SetUpTestCase()
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 2,
+        .permsNum = 4,
         .aclsNum = 1,
         .dcaps = nullptr,
         .perms = perms,
