@@ -384,12 +384,12 @@ static int32_t ProcessCreateServer(const char *session, const char *pkg, int32_t
 
     char sessionName[SOCKET_NAME_LEN + 1] = {0};
     char pkgName[PKG_NAME_LEN + 1] = {0};
-    int32_t ret = memcpy_s(sessionName, SOCKET_NAME_LEN, session, SOCKET_NAME_LEN);
+    int32_t ret = memcpy_s(sessionName, SOCKET_NAME_LEN, session, strlen(session));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy sessionName failed");
         return ret;
     }
-    ret = memcpy_s(pkgName, PKG_NAME_LEN, pkg, PKG_NAME_LEN);
+    ret = memcpy_s(pkgName, PKG_NAME_LEN, pkg, strlen(pkg));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy pkgName failed");
         return ret;
@@ -615,7 +615,7 @@ static int32_t GetClientName(char *clientName, const char *name, uint32_t maskId
         return -1;
     }
 
-    int32_t ret = memcpy_s(clientName, SOCKET_NAME_LEN, name, SOCKET_NAME_LEN);
+    int32_t ret = memcpy_s(clientName, SOCKET_NAME_LEN, name, strlen(name));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy name failed");
         return ret;
@@ -647,7 +647,7 @@ static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, 
     }
     uint32_t maskId = MaskDeviceIdentity((const char *)&devId->identity, DEVICE_ID_MAX_LEN);
     char name[SOCKET_NAME_LEN + 1] = {0};
-    int32_t ret = memcpy_s(name, SOCKET_NAME_LEN, socketName, SOCKET_NAME_LEN);
+    int32_t ret = memcpy_s(name, SOCKET_NAME_LEN, socketName, strlen(socketName));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy name failed");
         return ret;
@@ -660,7 +660,7 @@ static int32_t PrepareBindSocket(const char *socketName, DeviceIdentify *devId, 
     }
 
     char pkgName[PKG_NAME_LEN + 1] = {0};
-    ret = memcpy_s(pkgName, PKG_NAME_LEN, inst->pkgName, PKG_NAME_LEN);
+    ret = memcpy_s(pkgName, PKG_NAME_LEN, inst->pkgName, strlen(inst->pkgName));
     if (ret != EOK) {
         SECURITY_LOG_ERROR("memcpy pkgName failed");
         return ret;
