@@ -71,14 +71,14 @@ if (os_level == "standard") {
       "../../../baselib/utils/src/utils_timer.cpp",
       "../../../baselib/utils/src/utils_tlv.c",
       "../../../baselib/utils/src/utils_work_queue.c",
-      "../../../oem_property/common/dslm_credential_utils.c",
       "../../../oem_property/common/dslm_credential.c",
+      "../../../oem_property/common/dslm_credential_utils.c",
       "../../../oem_property/ohos/common/dslm_ohos_request.c",
       "../../../oem_property/ohos/common/dslm_ohos_verify.c",
       "../../../oem_property/ohos/common/external_interface_adapter.c",
       "../../../oem_property/ohos/common/hks_adapter.c",
-      "../../../oem_property/ohos/standard/impl/dslm_ohos_init.c",
       "../../../oem_property/ohos/standard/dslm_ohos_credential.c",
+      "../../../oem_property/ohos/standard/impl/dslm_ohos_init.c",
     ]
 
     sources += [
@@ -108,19 +108,20 @@ if (os_level == "standard") {
     deps = [ "../../../interfaces/inner_api:dslm_sdk" ]
 
     external_deps = [
-      "c_utils:utils",
-      "hilog:libhilog",
-      "huks:libhukssdk",
-      "ipc:ipc_core",
-      "safwk:system_ability_fwk",
-      "samgr:samgr_proxy",
+      "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
-      "openssl:libcrypto_shared",
+      "c_utils:utils",
       "device_auth:deviceauth_sdk",
-      "hisysevent:libhisysevent",
-      "hitrace:hitrace_meter",
       "googletest:gmock",
       "googletest:gtest",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
+      "huks:libhukssdk",
+      "ipc:ipc_core",
+      "openssl:libcrypto_shared",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
     ]
   }
 }
