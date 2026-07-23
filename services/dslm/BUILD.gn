@@ -44,6 +44,8 @@ ohos_source_set("service_dslm_obj") {
     } else {
       deps += [ "$dslm_hilog_path/featured:hilog_shared" ]
     }
+
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
   } else {
     sanitize = {
       integer_overflow = true
@@ -56,6 +58,7 @@ ohos_source_set("service_dslm_obj") {
     branch_protector_ret = "pac_ret"
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]
@@ -88,6 +91,8 @@ ohos_source_set("service_dslm_test_obj") {
     } else {
       deps += [ "$dslm_hilog_path/featured:hilog_shared" ]
     }
+
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
   } else {
     sanitize = {
       integer_overflow = true
@@ -100,6 +105,7 @@ ohos_source_set("service_dslm_test_obj") {
     branch_protector_ret = "pac_ret"
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
     ]
