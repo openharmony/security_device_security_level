@@ -69,7 +69,6 @@ int32_t SendDeviceInfoRequest(DslmDeviceInfo *device)
     // mini devices are not support yet
     SendMsgToDevice(device->transNum, &device->identity, buff->buff, buff->length);
 #endif
-    SECURITY_LOG_DEBUG("buff is %s", (char *)buff->buff);
     SECURITY_LOG_INFO("challenge is %{public}x***, transNum is %{public}u",
         (uint32_t)device->nonce, (uint32_t)device->transNum);
     FreeMessageBuff(buff);
