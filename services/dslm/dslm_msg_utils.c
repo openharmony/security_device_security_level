@@ -158,7 +158,7 @@ int32_t ParseDeviceSecInfoRequest(const MessageBuff *msg, RequestObject *obj)
     }
 
     int32_t ret = DslmHexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&obj->challenge, sizeof(obj->challenge));
-    if (ret != 0) {
+    if (ret != 0 || obj->challenge == 0) {
         DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
@@ -214,7 +214,7 @@ int32_t ParseDeviceSecInfoResponse(const MessageBuff *msg, uint64_t *challenge, 
     }
     uint64_t nonceNum = 0;
     int32_t ret = DslmHexStringToByte(nonceStr, strlen(nonceStr), (uint8_t *)&nonceNum, sizeof(uint64_t));
-    if (ret != 0) {
+    if (ret != 0 || nonceNum == 0) {
         DslmDestroyJson(handle);
         return ERR_NO_CHALLENGE;
     }
