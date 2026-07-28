@@ -63,6 +63,8 @@ ohos_static_library("utils_static") {
         "$dslm_lite_component_path/cJSON:cjson_static",
       ]
     }
+
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
   } else {
     sanitize = {
       integer_overflow = true
@@ -77,6 +79,7 @@ ohos_static_library("utils_static") {
     sources += [ "src/utils_timer.cpp" ]
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "cJSON:cjson",
       "c_utils:utils",
       "hilog:libhilog",

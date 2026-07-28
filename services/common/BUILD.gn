@@ -31,9 +31,14 @@ ohos_source_set("service_common_obj") {
   if (defined(ohos_lite)) {
     if (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a") {
       deps += [ "$dslm_ipc_path/interfaces/innerkits/c/ipc:ipc_single" ]
-      external_deps = [ "hilog_lite:hilog_shared" ]
+      external_deps = [
+        "bounds_checking_function:libsec_shared",
+        "hilog_lite:hilog_shared",
+      ]
     } else if (ohos_kernel_type == "liteos_m") {
       deps += [ "$dslm_hilog_path/featured:hilog_static" ]
+
+      external_deps = [ "bounds_checking_function:libsec_shared" ]
     }
   } else {
     sanitize = {
@@ -47,6 +52,7 @@ ohos_source_set("service_common_obj") {
     branch_protector_ret = "pac_ret"
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "hilog:libhilog",
       "ipc:ipc_core",
