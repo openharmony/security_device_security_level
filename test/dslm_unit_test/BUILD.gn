@@ -108,6 +108,7 @@ if (os_level == "standard") {
     external_deps = [
       "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "dsoftbus:softbus_client",
       "googletest:gmock",
@@ -190,6 +191,7 @@ if (os_level == "standard") {
     external_deps = [
       "access_token:libnativetoken_shared",
       "access_token:libtoken_setproc",
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "dsoftbus:softbus_client",
       "googletest:gmock",

@@ -45,7 +45,8 @@
                 "safwk",
                 "samgr",
                 "openssl",
-                "access_token"
+                "access_token",
+                "bounds_checking_function"
             ]
         },
         "build": {

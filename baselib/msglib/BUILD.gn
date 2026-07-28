@@ -50,6 +50,8 @@ ohos_static_library("messenger_static") {
         "$dslm_hilog_path/featured:hilog_static",
       ]
     }
+
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
   } else {
     sources += [
       "src/standard/messenger_device_socket_manager.c",
@@ -67,6 +69,7 @@ ohos_static_library("messenger_static") {
     branch_protector_ret = "pac_ret"
 
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "c_utils:utils",
       "device_manager:devicemanagersdk",
       "dsoftbus:softbus_client",
