@@ -174,6 +174,7 @@ public:
             auto processor = DeviceStatusControlBlock::GetInstance().GetStateReceiver();
             if (processor == nullptr) {
                 SECURITY_LOG_ERROR("ProcessDeviceStatusReceiver, invalid queue");
+                delete queueData;
                 return;
             }
             processor(&queueData->srcIdentity, queueData->status, queueData->level);
