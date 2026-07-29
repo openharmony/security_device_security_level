@@ -74,6 +74,7 @@ static void ProcessDeviceStatusReceived(const uint8_t *data, uint32_t len)
     DeviceStatusReceiver deviceStatusReceiver = instance->deviceStatusReceiver;
     if (deviceStatusReceiver == NULL) {
         SECURITY_LOG_ERROR("ProcessSessionMessageReceived, messageReceiver is null");
+        FREE(queueData);
         return;
     }
     deviceStatusReceiver(&queueData->srcIdentity, queueData->status, queueData->level);
@@ -138,6 +139,7 @@ static void MessengerOnNodeStateChange(NodeBasicInfo *info, uint32_t state)
     identity.length = UDID_BUF_LEN - 1;
     if (memcpy_s(identity.identity, DEVICE_ID_MAX_LEN, udid, UDID_BUF_LEN - 1) != EOK) {
         SECURITY_LOG_ERROR("MessengerOnNodeStateChange copy device error");
+        return;
     }
     uint32_t maskId = MaskDeviceIdentity(udid, UDID_BUF_LEN);
     SECURITY_LOG_INFO("MessengerOnNodeStateChange device(%{public}x*** change to %{public}s)", maskId,
@@ -171,7 +173,7 @@ static int32_t InitDeviceOnlineProcessor(const DeviceIdentify *devId, int32_t le
 
 bool InitDeviceStatusManager(WorkQueue *queue, const char *pkgName, DeviceStatusReceiver deviceStatusReceiver)
 {
-    if (deviceStatusReceiver == NULL) {
+    if (deviceStatusReceiver == NULL || pkgName == NULL || deviceStatusReceiver == NULL) {
         return false;
     }
 
