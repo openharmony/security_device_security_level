@@ -15,7 +15,9 @@
 
 #include "device_security_info.h"
 
+#include <chrono>
 #include <future>
+#include <thread>
 
 #include "hilog/log.h"
 
@@ -27,6 +29,7 @@
 #include "device_security_level_once_promise.h"
 
 constexpr uint32_t MAX_TIMEOUT = 50;
+constexpr uint32_t RETRY_DELAY_MS = 100;
 
 using namespace OHOS::HiviewDFX;
 using namespace OHOS::Security::DeviceSecurityLevel;
@@ -75,6 +78,17 @@ static int32_t RequestDeviceSecurityInfoAsyncImpl(const DeviceIdentify *identify
     return SUCCESS;
 }
 
+static int32_t RequestDeviceSecurityInfoAsyncWithRetry(const DeviceIdentify *identify, const RequestOption *option,
+    const ResultCallback &callback)
+{
+    int32_t result = RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
+    if (result != SUCCESS) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_DELAY_MS));
+        return RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
+    }
+    return result;
+}
+
 static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfo **info)
 {
@@ -90,7 +104,7 @@ static int32_t RequestDeviceSecurityInfoImpl(const DeviceIdentify *identify, con
         sharePromise->SetValue(info);
         return;
     };
-    auto result = RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
+    auto result = RequestDeviceSecurityInfoAsyncWithRetry(identify, option, callback);
     if (result != SUCCESS) {
         HILOG_ERROR(LOG_CORE, "RequestDeviceSecurityInfoImpl RequestDeviceSecurityLevel error.");
         return result;
@@ -141,7 +155,7 @@ int32_t RequestDeviceSecurityInfo(const DeviceIdentify *identify, const RequestO
 int32_t RequestDeviceSecurityInfoAsync(const DeviceIdentify *identify, const RequestOption *option,
     DeviceSecurityInfoCallback callback)
 {
-    return RequestDeviceSecurityInfoAsyncImpl(identify, option, callback);
+    return RequestDeviceSecurityInfoAsyncWithRetry(identify, option, callback);
 }
 
 void FreeDeviceSecurityInfo(DeviceSecurityInfo *info)
