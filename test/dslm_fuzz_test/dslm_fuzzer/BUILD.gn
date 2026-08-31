@@ -73,6 +73,7 @@ if (os_level == "standard") {
       "../../../baselib/utils/src/utils_work_queue.c",
       "../../../oem_property/common/dslm_credential.c",
       "../../../oem_property/common/dslm_credential_utils.c",
+      "../../../oem_property/common/parse_cred_level.cpp",
       "../../../oem_property/ohos/common/dslm_ohos_request.c",
       "../../../oem_property/ohos/common/dslm_ohos_verify.c",
       "../../../oem_property/ohos/common/external_interface_adapter.c",

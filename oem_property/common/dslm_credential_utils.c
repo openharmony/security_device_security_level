@@ -14,6 +14,7 @@
  */
 
 #include "dslm_credential_utils.h"
+#include "parse_cred_level.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -510,7 +511,7 @@ static void CredentialCbToDslmCredInfo(CredentialCb *credCb, DslmCredInfo *credI
     (void)GetDataFromJson(json, CRED_KEY_SECURITY_LEVEL, credInfo->securityLevel, CRED_INFO_LEVEL_LEN);
 
     if (verified) {
-        if (sscanf_s(credInfo->securityLevel, "SL%u", &credInfo->credLevel) <= 0) {
+        if (!ParseDslmCredLevel(credInfo->securityLevel, &credInfo->credLevel)) {
             SECURITY_LOG_ERROR("formatting securityLevel string failed");
         }
     }

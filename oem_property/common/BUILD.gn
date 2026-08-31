@@ -19,6 +19,7 @@ ohos_source_set("oem_common_obj") {
   sources = [
     "dslm_credential.c",
     "dslm_credential_utils.c",
+    "parse_cred_level.cpp",
   ]
 
   include_dirs = [
